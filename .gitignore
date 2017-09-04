@@ -1,0 +1,5 @@
+*.env
+*.egg-info
+*.pyc
+*.rdb
+data
