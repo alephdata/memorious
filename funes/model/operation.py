@@ -16,22 +16,13 @@ class Operation(Base):
     STATUS_FAILED = 'failed'
     STATUS_SUCCESS = 'success'
 
-    SCOPE_RUN = 'run'
-    SCOPE_EXIT = 'exit'
-    SCOPE_METHOD = 'method'
-
     id = Column(Integer, primary_key=True)
     crawler = Column(String, nullable=False, index=True)
     run_id = Column(String, nullable=False, index=True)
-    scope = Column(String, nullable=False, index=True)
-    operation = Column(String, nullable=True)
+    name = Column(String, nullable=True)
     status = Column(String, nullable=True, default=STATUS_PENDING)
     started_at = Column(DateTime, default=datetime.utcnow)
     ended_at = Column(DateTime, default=None)
-
-    def update(self, status):
-        self.status = status
-        self.ended_at = datetime.utcnow()
 
     @classmethod
     def last_run(cls, crawler):

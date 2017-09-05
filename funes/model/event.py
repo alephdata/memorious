@@ -1,7 +1,7 @@
 import logging
 import traceback
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
 from sqlalchemy.exc import SQLAlchemyError
 
 from funes.core import session
@@ -18,30 +18,23 @@ class Event(Base):
     LEVEL_ERROR = 'error'
 
     id = Column(Integer, primary_key=True)
-    crawler = Column(String, nullable=False, index=True)
-    run_id = Column(String, nullable=False, index=True)
     level = Column(String, nullable=False, index=True)
-    operation = Column(String, nullable=True)
-    operation_id = Column(Integer, nullable=False)
+    operation_id = Column(Integer, ForeignKey("operation.id"), nullable=False)
     error_type = Column(String, nullable=True)
     error_message = Column(String, nullable=True)
     error_details = Column(String, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     @classmethod
-    def emit(cls, crawler, level=None, run_id=None, operation=None,
-             error_type=None, error_message=None, error_details=None, exc=None,
-             operation_id=None, timestamp=None):
+    def emit(cls, operation_id, level, exc=None, error_type=None,
+             error_message=None, error_details=None):
         """Create an event, possibly based on an exception."""
         if isinstance(exc, SQLAlchemyError):
             log.exception(exc)
             return
 
         event = cls()
-        event.crawler = crawler
-        event.run_id = run_id
         event.level = level
-        event.operation = operation
         event.operation_id = operation_id
         event.error_type = error_type
         event.error_message = error_message
@@ -56,5 +49,5 @@ class Event(Base):
         return event
 
     def __repr__(self):
-        return '<Event(%s,%s,%s,%s)>' % \
-            (self.crawler, self.level, self.operation, self.error_type)
+        return '<Event(%s,%s,%s)>' % \
+            (self.operation_id, self.error_type, self.level)

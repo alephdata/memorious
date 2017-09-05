@@ -25,21 +25,18 @@ class Context(object):
         self.description = description
         self.sender = sender
         self.params = params
-        if run_id is None:
-            run_id = uuid.uuid1().hex
-        self.run_id = run_id
+        self.run_id = run_id or uuid.uuid1().hex
         if session is not None:
-            self.session = session
+            self._session = session
 
     @classmethod
     def from_state(cls, state):
-        name = state.get('name')
-        description = state.get('description')
-        run_id = state.get('run_id')
-        sender = state.get('sender')
-        session = pickle.loads(state.get('session'))
-        params = state.get('params')
-        return cls(name, description, run_id, sender, session, params)
+        return cls(state.get('name'),
+                   state.get('description'),
+                   state.get('run_id'),
+                   state.get('sender'),
+                   pickle.loads(state.get('session')),
+                   state.get('params'))
 
     @property
     def session(self):

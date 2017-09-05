@@ -37,7 +37,7 @@ def init():
     from funes.model.event import Event
     from funes.model.result import Result
     from funes.model.result import HTTPResult
-    from funes.model.op import Operation
+    from funes.model.operation import Operation
     engine = create_engine(config['database_uri'])
     Base.metadata.create_all(engine)
     log.info('Database models created for %r', config.get('database_uri'))
@@ -67,13 +67,15 @@ def list():
             is_due = 'yes'
         crawler_list.append([name, crawler.get('description'),
                             schedule, is_due])
-    print(tabulate(crawler_list, headers=['Name', 'Description', 'Schedule', 'Due']))
+    headers = ['Name', 'Description', 'Schedule', 'Due']
+    print(tabulate(crawler_list, headers=headers))
 
 
 @cli.command()
 def scheduled():
     """Run crawlers that are due."""
     run_scheduled()
+
 
 def main():
     cli(obj={})

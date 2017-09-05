@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta, datetime
 
-from funes.model.op import Operation
+from funes.model.operation import Operation
 
 log = logging.getLogger(__name__)
 

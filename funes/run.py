@@ -21,7 +21,8 @@ def run_scheduled():
 
 def run_crawler(name):
     crawler = store.crawlers.get(name)
-    context = Context(name=name, description=crawler.get('description'),
+    context = Context(name=name,
+                      description=crawler.get('description'),
                       params=crawler.get('params'))
     context.log.info('[Initializing]: %s', name)
     context.emit(sender='init')

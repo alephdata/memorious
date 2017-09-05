@@ -9,7 +9,7 @@ from funes.store import CrawlerStore
 
 
 class Config(Mapping):
-    """Configuration seings, derived from the OS environment."""
+    """Configuration settings, derived from the OS environment."""
 
     PREFIX = 'FUNES_'
     ENTRY_POINT = 'funes.crawlers'
@@ -87,6 +87,7 @@ def get_celery():
         )
         Config.celery = app
     return Config.celery
+
 
 def get_storage():
     if not hasattr(Config, 'storage'):
