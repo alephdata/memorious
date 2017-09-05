@@ -3,10 +3,8 @@ import logging
 from tabulate import tabulate
 
 from funes import settings
-from funes.core import store, session
+from funes.core import manager, session
 from funes.model.common import Base
-from funes.run import run_crawler, run_scheduled
-from funes.tools.schedule import Schedule
 
 log = logging.getLogger(__name__)
 
@@ -38,26 +36,23 @@ def init():
 @click.argument('crawler')
 def run(crawler):
     """Run a specified crawler."""
-    if crawler is None:
-        log.info('You must specify a crawler.')
-        return
-    if store.crawlers.get(crawler) is None:
+    crawler_obj = manager.get(crawler)
+    if crawler_obj is None:
         log.info('Crawler [%s] not found.', crawler)
         return
-    run_crawler(crawler)
+    crawler_obj.run()
 
 
 @cli.command()
 def list():
     """List the available crawlers."""
     crawler_list = []
-    for name, crawler in store.crawlers.items():
-        schedule = crawler.get('schedule')
-        is_due = 'no'
-        if Schedule.check_due(name, schedule):
-            is_due = 'yes'
-        crawler_list.append([name, crawler.get('description'),
-                            schedule, is_due])
+    for crawler in manager:
+        is_due = 'yes' if crawler.check_due() else 'no'
+        crawler_list.append([crawler.name,
+                             crawler.description,
+                             crawler.schedule,
+                             is_due])
     headers = ['Name', 'Description', 'Schedule', 'Due']
     print(tabulate(crawler_list, headers=headers))
 
@@ -65,7 +60,7 @@ def list():
 @cli.command()
 def scheduled():
     """Run crawlers that are due."""
-    run_scheduled()
+    manager.run_scheduled()
 
 
 def main():

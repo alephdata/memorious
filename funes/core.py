@@ -1,10 +1,12 @@
 import storagelayer
 from celery import Celery
 from celery.schedules import crontab
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
 
 from funes import settings
-from funes.store import CrawlerStore
+from funes.crawler import CrawlerManager
 
 celery = Celery('funes')
 celery.conf.update(
@@ -26,6 +28,7 @@ celery.conf.update(
     },
 )
 
+# File storage layer for blobs on local file system or S3
 storage = storagelayer.init(settings.ARCHIVE_TYPE,
                             path=settings.ARCHIVE_PATH,
                             aws_key_id=settings.ARCHIVE_AWS_KEY_ID,
@@ -34,15 +37,16 @@ storage = storagelayer.init(settings.ARCHIVE_TYPE,
                             bucket=settings.ARCHIVE_BUCKET)
 
 
-store = CrawlerStore(crawlers_path=settings.CRAWLERS_PATH, # noqa
-                     modules_path=settings.MODULES_PATH)
+# Configure the SQLAlechemy database connection engine
+engine = create_engine(settings.DATABASE_URI)
+session_factory = sessionmaker(bind=engine)
+session = scoped_session(session_factory)
 
 
-def get_session():
-    if not hasattr(settings, '_session'):
-        from funes.model.common import create_session
-        settings._session = create_session()
-    return settings._session
+def load_manager():
+    if not hasattr(settings, '_manager'):
+        settings._manager = CrawlerManager(settings.CRAWLERS_PATH)
+    return settings._manager
 
 
-session = LocalProxy(get_session)
+manager = LocalProxy(load_manager)

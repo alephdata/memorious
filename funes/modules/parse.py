@@ -1,7 +1,7 @@
 from lxml import html
 from urlparse import urljoin
 from funes.operation import operation
-from modules.extras.util import next_path
+from funes.modules.extras.util import next_path
 
 
 @operation()

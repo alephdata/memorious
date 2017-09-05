@@ -2,7 +2,7 @@ import re
 import six
 import urlparse
 
-from modules.extras.groups import GROUPS
+from funes.modules.extras.groups import GROUPS
 
 
 class Rule(object):

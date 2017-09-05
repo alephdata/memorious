@@ -4,13 +4,14 @@ import time
 import pickle
 import logging
 from lxml import html
+from copy import deepcopy
 from datetime import datetime
 from urlparse import urlparse
 from requests import Session, Request
 
 from funes import settings
-from funes.core import store
-from funes.core import celery as app, session
+from funes.core import manager
+from funes.core import celery, session
 from funes.model.result import HTTPResult
 from funes.tools.util import normalize_url
 from funes.tools.results import find_http_results
@@ -20,28 +21,28 @@ from funes.tools.files import save_to_temp, guess_fh_encoding
 class Context(object):
     """Provides state tracking and methods for operation interactions."""
 
-    def __init__(self, name=None, description=None, run_id=None, sender=None,
-                 session=None, params={}):
-        self.name = name
-        self.description = description
-        self.sender = sender
-        self.params = params
-        self.run_id = run_id or uuid.uuid1().hex
-        if session is not None:
-            self._session = session
+    def __init__(self, crawler, stage, state):
+        self.crawler = crawler
+        self.stage = stage
+        self.state = state
+        self.run_id = state.get('run_id') or uuid.uuid1().hex
+        self.operation_id = None
+
+        self._session = state.pop('session', None)
+        if self._session is not None:
+            self._session = pickle.loads(self._session)
 
     @classmethod
-    def from_state(cls, state):
-        return cls(state.get('name'),
-                   state.get('description'),
-                   state.get('run_id'),
-                   state.get('sender'),
-                   pickle.loads(state.get('session')),
-                   state.get('params'))
+    def from_state(cls, state, stage):
+        crawler = manager.get(state.pop('crawler'))
+        stage = crawler.get(stage)
+        if stage is None:
+            raise RuntimeError('[%r] has no stage: %s' % (crawler, stage))
+        return cls(crawler, stage, state)
 
     @property
     def session(self):
-        if not hasattr(self, '_session'):
+        if self._session is None:
             self.new_session()
         return self._session
 
@@ -50,34 +51,32 @@ class Context(object):
         self._session = s
 
     def new_session(self):
-        self.session = Session()
+        self._session = Session()
 
     @property
     def log(self):
         if not hasattr(self, '_log'):
-            log_name = '[%s] %s' % (self.run_id, self.name)
+            log_name = '[%s] %s' % (self.run_id, self.crawler.name)
             self._log = logging.getLogger(log_name)
         return self._log
 
     def dump_state(self):
-        state = {}
-        state['name'] = self.name
-        state['description'] = self.description
+        state = deepcopy(self.state)
+        state['crawler'] = self.crawler.name
         state['run_id'] = self.run_id
-        state['sender'] = self.sender
-        state['session'] = pickle.dumps(self.session)
-        state['params'] = self.params
+        if self._session is not None:
+            state['session'] = pickle.dumps(self._session)
         return state
 
-    def emit(self, rule='pass', data={}, sender=None):
-        if rule is None:
-            return
+    def emit(self, stage='pass', data={}, sender=None):
+        if stage is None or stage not in self.crawler.stages:
+            raise TypeError("Invalid stage: %s" % stage)
         state = self.dump_state()
-        if sender is not None:
-            state['sender'] = sender
-        state = json.dumps(state)
-        time.sleep(self.params.get('delay'))
-        handle(state, rule, data)
+        time.sleep(self.crawler.delay)
+        handle(state, stage, data)
+
+    def execute(self, data):
+        self.stage.method(self, data)
 
     def request(self, url, cache=None, method='GET', headers=None,
                 http_session=None, auth=None, cookies=None, foreign_id=None,
@@ -145,15 +144,11 @@ class Context(object):
         q = find_http_results(self.name, q, url, foreign_id)
         return q.count() > 0
 
+    def __repr__(self):
+        return '<Context(%r, %r)>' % (self.crawler, self.stage)
 
-@app.task
-def handle(state, rule, data):
-    context = Context.from_state(json.loads(state))
-    crawler = context.name
-    sender = context.sender
-    rule_target = store.rule_target(crawler, sender, rule)
-    if rule_target is None:
-        context.log.info('No target for %s rule %s', sender, rule)
-        return
-    context.sender = None
-    rule_target(context, data)
+
+@celery.task
+def handle(state, stage, data):
+    context = Context.from_state(state, stage)
+    context.execute(data)

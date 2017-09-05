@@ -22,7 +22,6 @@ DATABASE_URI = env('DATABASE_URI', required=True)
 
 # Directory which contains crawler pipeline YAML specs
 CRAWLERS_PATH = env('CRAWLERS_PATH', required=True)
-MODULES_PATH = env('MODULES_PATH', 'modules')
 
 # Try and run scrapers in a way that only acquires new data
 INCREMENTAL = env_bool('INCREMENTAL', default=True)
@@ -59,3 +58,8 @@ ARCHIVE_PATH = env('ARCHIVE_PATH')
 # Aleph module
 ALEPH_HOST = env('ALEPH_HOST')
 ALEPH_API_KEY = env('ALEPH_API_KEY')
+
+
+###############################################################################
+# Operational data store (ODS) database
+ODS_DATABASE_URI = env('ODS_DATABASE_URI')

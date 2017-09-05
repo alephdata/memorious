@@ -1,5 +1,5 @@
 from funes.operation import operation
-from modules.extras.rule import Rule
+from funes.modules.extras.rule import Rule
 
 
 @operation()

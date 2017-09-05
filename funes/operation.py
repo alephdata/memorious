@@ -13,15 +13,14 @@ def operation(name=None):
         @wraps(func)
         def func_wrapper(context, data, *a, **kw):
             op = Operation()
-            op.crawler = context.name
-            op.name = name or func.__name__
+            op.crawler = context.crawler.name
+            op.name = context.stage.name
             op.run_id = context.run_id
             op.status = Operation.STATUS_PENDING
             session.add(op)
             session.commit()
 
             context.operation_id = op.id
-            context.sender = context.sender or op.name
 
             try:
                 context.log.info('Running: %s', op.name)
