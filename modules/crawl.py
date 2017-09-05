@@ -1,4 +1,3 @@
-import time
 from funes.operation import operation
 from modules.extras.rule import Rule
 

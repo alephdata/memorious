@@ -8,8 +8,9 @@ from datetime import datetime
 from urlparse import urlparse
 from requests import Session, Request
 
+from funes import settings
 from funes.core import store
-from funes.core import celery as app, config, session
+from funes.core import celery as app, session
 from funes.model.result import HTTPResult
 from funes.tools.util import normalize_url
 from funes.tools.results import find_http_results
@@ -85,7 +86,7 @@ class Context(object):
             return None
         res = None
         if cache is None:
-            cache = config.get('cache')
+            cache = settings.HTTP_CACHE
         if cache and (method == 'GET' or foreign_id is not None):
             q = session.query(HTTPResult)
             q = find_http_results(self.name, q, url, foreign_id)
@@ -138,8 +139,8 @@ class Context(object):
         return res
 
     def skip_incremental(self, url=None, foreign_id=None):
-        if not config.get('incremental'):
-            return
+        if not settings.INCREMENTAL:
+            return False
         q = session.query(HTTPResult.id)
         q = find_http_results(self.name, q, url, foreign_id)
         return q.count() > 0

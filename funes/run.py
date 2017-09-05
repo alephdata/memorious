@@ -24,5 +24,5 @@ def run_crawler(name):
     context = Context(name=name,
                       description=crawler.get('description'),
                       params=crawler.get('params'))
-    context.log.info('[Initializing]: %s', name)
+    log.info('Initializing: %s', name)
     context.emit(sender='init')

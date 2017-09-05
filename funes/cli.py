@@ -1,9 +1,10 @@
 import click
 import logging
 from tabulate import tabulate
-from sqlalchemy import create_engine
 
-from funes.core import config, store
+from funes import settings
+from funes.core import store, session
+from funes.model.common import Base
 from funes.run import run_crawler, run_scheduled
 from funes.tools.schedule import Schedule
 
@@ -19,28 +20,18 @@ log = logging.getLogger(__name__)
               envvar='FUNES_INCREMENTAL')
 def cli(debug, cache, incremental):
     """Crawler framework for documents and structured scrapers."""
-    config.set('cache', cache)
-    config.set('incremental', incremental)
-    config.set('debug', debug)
-    if config.get_bool('debug'):
+    settings.HTTP_CACHE = cache
+    settings.INCREMENTAL = incremental
+    settings.DEBUG = debug
+    if settings.DEBUG:
         logging.basicConfig(level=logging.DEBUG)
-    if config.get('crawlers_path') is None:
-        raise NoPathException('You need to set a path to your crawlers directory.') # noqa
 
 
 @cli.command()
 def init():
     """Connect to the database and create the tables."""
-    if config.get('database_uri') is None:
-        raise RuntimeError("No $FUNES_DATABASE_URI is set, aborting.")
-    from funes.model.common import Base
-    from funes.model.event import Event
-    from funes.model.result import Result
-    from funes.model.result import HTTPResult
-    from funes.model.operation import Operation
-    engine = create_engine(config['database_uri'])
-    Base.metadata.create_all(engine)
-    log.info('Database models created for %r', config.get('database_uri'))
+    Base.metadata.create_all(session.engine)
+    log.info('Database models created: %s', session.engine)
 
 
 @cli.command()

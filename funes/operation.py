@@ -29,10 +29,11 @@ def operation(name=None):
                 op.status = Operation.STATUS_SUCCESS
                 return res
             except Exception as exc:
-                op.status = Operation.STATUS_FAILED
                 Event.emit(op.id, Event.LEVEL_ERROR, exc=exc)
                 context.log.exception(exc)
             finally:
+                if op.status == Operation.STATUS_PENDING:
+                    op.status = Operation.STATUS_FAILED
                 op.ended_at = datetime.utcnow()
                 session.commit()
         return func_wrapper

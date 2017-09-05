@@ -50,8 +50,7 @@ class CrawlerStore(object):
         mod_path, method = method_path.split(':')
         try:
             module = __import__(mod_path, globals(), locals(), [''], -1) # noqa
+            return getattr(module, method)
         except ImportError:
             log.exception('Method path %s is not valid', method)
             raise
-        finally:
-            return getattr(module, method)

@@ -7,7 +7,7 @@ from urlparse import urlparse, unquote
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Column, String, Integer, DateTime
 
-from funes.core import config
+from funes.core import storage
 from funes.exc import StorageNotFound
 from funes.model.common import Base
 from funes.core import session
@@ -38,13 +38,14 @@ class Result(Base):
         """Return a minimal fileobj for the given artifact path."""
         if self.content_hash is None:
             raise StorageNotFound("No hash for artifact: %r" % self)
-        return config.storage.load_file(self.content_hash)
+        # FIXME: need to get rid of the file after using it
+        return storage.load_file(self.content_hash)
 
     def put(self, file_path=None):
         """Store a stream at the given path if it does not already exist."""
         if file_path is None:
             raise StorageNotFound("No path for artifact: %r" % self)
-        self.content_hash = config.storage.archive_file(file_path)
+        self.content_hash = storage.archive_file(file_path)
         return self.content_hash
 
     @classmethod

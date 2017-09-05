@@ -2,22 +2,26 @@ import json
 import requests
 from urlparse import urljoin
 
-from funes.core import config
+from funes import settings
 from funes.operation import operation
 
 
 @operation()
 def aleph_emit(context, data):
+    if not settings.ALEPH_HOST:
+        context.log.warning("No $FUNES_ALEPH_HOST is set, skipping upload...")
+        return
+
     res = data.get('res')
     meta = data.get('meta')
     if res is None or meta is None:
         return
     files = data.get('files')
+
     collection_id = aleph_collection_id(context)
     url = aleph_resource('collections/%s/ingest' % collection_id)
-
-    context.log.info("Sending %r to %s/collections/%s", res, aleph_host(),
-                     collection_id)
+    context.log.info("Sending %r to %s/collections/%s", res,
+                     settings.ALEPH_HOST, collection_id)
 
     if files is None:
         files = {'file': (meta.get('file_name'),
@@ -61,20 +65,13 @@ def aleph_collection_id(context):
     return context._aleph_collection_id
 
 
-def aleph_host():
-    host = config['aleph_host']
-    if host is None:
-        raise Exception("$FUNES_ALEPH_HOST not set.")
-    return host
-
-
 def aleph_resource(path):
-        return urljoin(aleph_host(), '/api/1/%s' % path)
+    return urljoin(settings.ALEPH_HOST, '/api/1/%s' % path)
 
 
 def aleph_session(context):
     if not hasattr(context, '_aleph_session'):
-        api_key = config['aleph_api_key']
+        api_key = settings.ALEPH_API_KEY
         if api_key is None:
             raise Exception("No $FUNES_ALEPH_API_KEY is set.")
         context._aleph_session = requests.Session()
