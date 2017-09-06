@@ -25,6 +25,7 @@ class Context(object):
         self.crawler = crawler
         self.stage = stage
         self.state = state
+        self.params = stage.params
         self.run_id = state.get('run_id') or uuid.uuid1().hex
         self.operation_id = None
 
@@ -68,7 +69,9 @@ class Context(object):
             state['session'] = pickle.dumps(self._session)
         return state
 
-    def emit(self, stage='pass', data={}, sender=None):
+    def emit(self, rule='pass', stage=None, data={}):
+        if stage is None:
+            stage = self.stage.handlers.get(rule, rule)
         if stage is None or stage not in self.crawler.stages:
             raise TypeError("Invalid stage: %s" % stage)
         state = self.dump_state()
@@ -88,7 +91,7 @@ class Context(object):
             cache = settings.HTTP_CACHE
         if cache and (method == 'GET' or foreign_id is not None):
             q = session.query(HTTPResult)
-            q = find_http_results(self.name, q, url, foreign_id)
+            q = find_http_results(self.crawler.name, q, url, foreign_id)
             res = q.first()
 
         if res is None:
@@ -126,7 +129,7 @@ class Context(object):
         path = save_to_temp(content)
         res.put(path)
         res.foreign_id = foreign_id
-        res.crawler = self.name
+        res.crawler = self.crawler.name
         res.run_id = self.run_id
         res.size = size
         res.encoding = guess_fh_encoding(path)
@@ -141,7 +144,7 @@ class Context(object):
         if not settings.INCREMENTAL:
             return False
         q = session.query(HTTPResult.id)
-        q = find_http_results(self.name, q, url, foreign_id)
+        q = find_http_results(self.crawler.name, q, url, foreign_id)
         return q.count() > 0
 
     def __repr__(self):

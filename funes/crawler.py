@@ -18,6 +18,8 @@ class CrawlerStage(object):
         if isinstance(config, six.string_types):
             config = {'method': config}
         self.config = config
+        self.params = config.get('params', {})
+        self.handlers = config.get('handle', {})
 
         method = config.get('method')
         package = 'funes.modules'
@@ -25,9 +27,6 @@ class CrawlerStage(object):
             package, method = method.rsplit(':', 1)
         module = import_module(package)
         self.method = getattr(module, method)
-
-    def execute(self, context, data):
-        print context, data
 
     def __repr__(self):
         return '<CrawlerStage(%r, %s)>' % (self.crawler, self.name)

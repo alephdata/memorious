@@ -4,12 +4,12 @@ from funes.model.result import HTTPResult
 
 
 @operation()
-def meta(context, data):
+def retain(context, data):
     res, doc = _drop_paths(context, data.get('res'))
     if res is None or doc is None:
         return
     meta = data.get('meta') or {}
-    meta['crawler'] = context.name
+    meta['crawler'] = context.crawler.name
     if 'html' in res.content_type:
         title = doc.findtext('.//title')
         if title is not None:
