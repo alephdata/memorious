@@ -26,7 +26,7 @@ class Event(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     @classmethod
-    def emit(cls, operation_id, level, exc=None, error_type=None,
+    def save(cls, operation_id, level, exc=None, error_type=None,
              error_message=None, error_details=None):
         """Create an event, possibly based on an exception."""
         if isinstance(exc, SQLAlchemyError):

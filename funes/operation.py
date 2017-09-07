@@ -28,12 +28,16 @@ def operation(name=None):
                 op.status = Operation.STATUS_SUCCESS
                 return res
             except Exception as exc:
-                Event.emit(op.id, Event.LEVEL_ERROR, exc=exc)
+                # this should clear results and tags created by this op
+                session.rollback()
+                Event.save(op.id, Event.LEVEL_ERROR, exc=exc)
                 context.log.exception(exc)
             finally:
                 if op.status == Operation.STATUS_PENDING:
                     op.status = Operation.STATUS_FAILED
                 op.ended_at = datetime.utcnow()
+                session.add(op)
                 session.commit()
+
         return func_wrapper
     return op_decorator
