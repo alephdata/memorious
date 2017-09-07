@@ -39,7 +39,7 @@ BROKER_URI = 'amqp://guest:guest@localhost:5672//'
 BROKER_URI = env('BROKER_URI', BROKER_URI)
 
 # Enable delayed processing via queue
-ALWAYS_EAGER = not env_bool('QUEUE', True)
+EAGER = env_bool('EAGER', False)
 
 
 ###############################################################################

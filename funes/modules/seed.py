@@ -2,7 +2,7 @@ from funes.operation import operation
 
 
 @operation()
-def webcrawler(context, data):
+def seed(context, data):
     context.emit(data={
-        'url': context.params.get('seed_url')
+        'url': context.params.get('url')
     })

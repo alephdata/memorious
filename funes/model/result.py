@@ -4,14 +4,13 @@ import logging
 from datetime import datetime
 from normality import stringify
 from urlparse import urlparse, unquote
+from contextlib import contextmanager
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Column, String, Integer, DateTime
 
 from funes.core import storage
 from funes.exc import StorageNotFound
 from funes.model.common import Base
-from funes.core import session
-from funes.tools.files import save_to_temp
 
 log = logging.getLogger(__name__)
 
@@ -34,12 +33,17 @@ class Result(Base):
         if operation_id is not None:
             self.operation_id = operation_id
 
-    def get(self):
+    @contextmanager
+    def load(self):
         """Return a minimal fileobj for the given artifact path."""
         if self.content_hash is None:
             raise StorageNotFound("No hash for artifact: %r" % self)
-        # FIXME: need to get rid of the file after using it
-        return storage.load_file(self.content_hash)
+        file_path = storage.load_file(self.content_hash)
+        try:
+            with open(file_path, 'rb') as fh:
+                yield fh
+        finally:
+            storage.cleanup_file(self.content_hash)
 
     def put(self, file_path=None):
         """Store a stream at the given path if it does not already exist."""
@@ -47,22 +51,6 @@ class Result(Base):
             raise StorageNotFound("No path for artifact: %r" % self)
         self.content_hash = storage.archive_file(file_path)
         return self.content_hash
-
-    @classmethod
-    def from_res(cls, res, content=None, foreign_id=None):
-        if type(res).__name__ != cls.__name__:
-            log.debug('Class %s cannot be copied to class %s', res.__name__,
-                      cls.__name__)
-            return
-        new_res = cls()
-        new_res.__dict__.update(res.__dict__)
-        new_res.foreign_id = foreign_id
-        if content is not None:
-            path = save_to_temp(content)
-            new_res.put(path)
-        session.add(new_res)
-        session.commit()
-        return new_res
 
     def __repr__(self):
         return '<Result(%s,%s,%s)>' % \

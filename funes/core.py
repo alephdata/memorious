@@ -13,7 +13,7 @@ celery.conf.update(
     imports=('funes.tasks'),
     broker_url=settings.BROKER_URI,
     broker_transport_options={'fanout_prefix': True},
-    task_always_eager=settings.ALWAYS_EAGER,
+    task_always_eager=settings.EAGER,
     task_eager_propagates=True,
     # task_ignore_result=True,
     result_persistent=False,
@@ -22,7 +22,7 @@ celery.conf.update(
     worker_hijack_root_logger=False,
     beat_schedule={
         'scheduled-crawlers': {
-            'task': 'funes.task.process_schedule',
+            'task': 'funes.tasks.process_schedule',
             'schedule': crontab(minute='*/1')
         },
     },

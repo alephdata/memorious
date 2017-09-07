@@ -1,5 +1,4 @@
 import os
-import six
 import yaml
 import logging
 from fnmatch import fnmatch
@@ -15,11 +14,9 @@ class CrawlerStage(object):
     def __init__(self, crawler, name, config):
         self.crawler = crawler
         self.name = name
-        if isinstance(config, six.string_types):
-            config = {'method': config}
         self.config = config
-        self.params = config.get('params', {})
-        self.handlers = config.get('handle', {})
+        self.params = config.get('params') or {}
+        self.handlers = config.get('handle') or {}
 
         method = config.get('method')
         package = 'funes.modules'
@@ -70,10 +67,10 @@ class Crawler(object):
         return False
 
     def run(self):
-        from funes.context import Context
+        from funes.context import handle
+        state = {'crawler': self.name}
         stage = self.get(self.init_stage)
-        context = Context(self, stage, {})
-        context.emit(stage=stage.name)
+        handle.delay(state, stage.name, {})
 
     def get(self, name):
         return self.stages.get(name)

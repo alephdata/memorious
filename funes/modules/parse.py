@@ -1,34 +1,47 @@
 from lxml import html
 from urlparse import urljoin
 from funes.operation import operation
-from funes.modules.extras.util import next_path
+from funes.modules.extras.rule import Rule
 
-
-@operation()
-def parse(context, data):
-    tags = [('a', 'href'),
+URL_TAGS = [('a', 'href'),
             ('img', 'src'),
             ('link', 'href'),
             ('iframe', 'src')]
-    res = data.get('res')
-    with open(res.get(), 'r') as fh:
-        doc = html.fromstring(fh.read())
+
+
+def parse_html(context, data, res):
+    with res.load() as fh:
+        doc = html.parse(fh)
+
     context.log.info('[Parsing]: %r', res.url)
 
+    title = doc.findtext('.//title')
+    if title is not None:
+        data['title'] = title
+
     urls = set([])
-    for tag_name, attr_name in tags:
+    for tag_name, attr_name in URL_TAGS:
         for tag in doc.findall('.//%s' % tag_name):
             attr = tag.get(attr_name)
             if attr is None:
                 continue
             url = urljoin(res.url, attr)
-            if url is not None:
+            if url is not None and url not in urls:
                 urls.add(url)
+                context.emit(rule='crawl', data={
+                    'url': url,
+                    'crawl_path': data.get('crawl_path', [])
+                })
 
-    for url in urls:
-        url_data = {}
-        url_data['url'] = url
-        url_data['path'] = next_path(data)
-        url_data['crawl_rules'] = data.get('crawl_rules')
-        url_data['retain_rules'] = data.get('retain_rules')
-        context.emit(rule='retain', data=url_data)
+    return data
+
+
+@operation()
+def parse(context, data):
+    res = data.get('res')
+    if 'html' in res.content_type:
+        data = parse_html(context, data, res)
+
+    rules = context.params.get('rules', {'match_all': {}})
+    if Rule.get_rule(rules).apply(res):
+        context.emit(data=data)

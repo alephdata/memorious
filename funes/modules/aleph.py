@@ -13,26 +13,31 @@ def aleph_emit(context, data):
         return
 
     res = data.get('res')
-    meta = data.get('meta')
-    if res is None or meta is None:
+    if res is None:
         return
-    files = data.get('files')
+
+    meta = {
+        'crawler': context.crawler.name,
+        'source_url': res.url,
+        'title': data.get('title'),
+        'foreign_id': res.foreign_id,
+        'mime_type': res.content_type,
+        'headers': res.headers
+    }
 
     collection_id = aleph_collection_id(context)
     url = aleph_resource('collections/%s/ingest' % collection_id)
     context.log.info("Sending %r to %s/collections/%s", res,
                      settings.ALEPH_HOST, collection_id)
 
-    if files is None:
-        files = {'file': (meta.get('file_name'),
-                          res.get(),
-                          meta.get('content_type'))}
+    files = {'file': (meta.get('file_name'),
+                      res.load(),
+                      meta.get('content_type'))}
     data = {'meta': json.dumps(meta)}
     res = aleph_session(context).post(url, data=data, files=files)
     if res.status_code != 200:
         context.log.error("Could not ingest %s: %r", res, res.json())
         return
-    context.params['count'] -= 1
 
 
 def aleph_collection_id(context):

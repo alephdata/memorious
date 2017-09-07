@@ -69,14 +69,13 @@ class Context(object):
             state['session'] = pickle.dumps(self._session)
         return state
 
-    def emit(self, rule='pass', stage=None, data={}):
-        if stage is None:
-            stage = self.stage.handlers.get(rule, rule)
+    def emit(self, rule='pass', data={}):
+        stage = self.stage.handlers.get(rule)
         if stage is None or stage not in self.crawler.stages:
             raise TypeError("Invalid stage: %s" % stage)
         state = self.dump_state()
         time.sleep(self.crawler.delay)
-        handle(state, stage, data)
+        handle.delay(state, stage, data)
 
     def execute(self, data):
         self.stage.method(self, data)
