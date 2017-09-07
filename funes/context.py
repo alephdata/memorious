@@ -1,6 +1,5 @@
 import uuid
 import time
-import pickle
 import logging
 from copy import deepcopy
 from contextlib import contextmanager
@@ -27,8 +26,6 @@ class Context(object):
         state = deepcopy(self.state)
         state['crawler'] = self.crawler.name
         state['run_id'] = self.run_id
-        if self._session is not None:
-            state['session'] = pickle.dumps(self._session)
         return state
 
     def emit(self, rule='pass', data={}):
@@ -37,7 +34,7 @@ class Context(object):
             raise TypeError("Invalid stage: %s" % stage)
         state = self.dump_state()
         Result.save(self.crawler, self.operation_id,
-                    self.stage.name, stage.name, data)
+                    self.stage.name, stage, data)
         time.sleep(self.crawler.delay)
         handle.delay(state, stage, data)
 
@@ -47,11 +44,24 @@ class Context(object):
     def set_tag(self, key, value):
         return Tag.save(self.crawler, key, value)
 
+    def set_run_tag(self, key, value):
+        return Tag.save(self.crawler, key, value, run_id=self.run_id)
+
     def get_tag(self, key):
-        return Tag.find(self.crawler, key)
+        tag = Tag.find(self.crawler, key)
+        if tag is not None:
+            return tag.value
+
+    def get_run_tag(self, key):
+        tag = Tag.find(self.crawler, key, run_id=self.run_id)
+        if tag is not None:
+            return tag.value
 
     def check_tag(self, key):
         return Tag.exists(self.crawler, key)
+
+    def check_run_tag(self, key):
+        return Tag.exists(self.crawler, key, run_id=self.run_id)
 
     def store_file(self, file_path, content_hash=None):
         return storage.archive_file(file_path, content_hash=content_hash)

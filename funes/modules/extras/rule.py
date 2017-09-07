@@ -1,6 +1,6 @@
 import re
 import six
-import urlparse
+from urlparse import urlparse
 
 from funes.modules.extras.groups import GROUPS
 

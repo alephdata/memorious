@@ -1,34 +1,29 @@
 from funes.operation import operation
 from funes.modules.extras.rule import Rule
+from funes.util import normalize_url
 
 
 @operation()
 def crawl(context, data):
-    url = data.get('url')
-    crawl_path = data.get('crawl_path', [])
-    if url in crawl_path:
-        context.log.info('[Skip]: %r', url)
+    url = normalize_url(data.get('url'))
+    if context.check_run_tag(url):
+        context.log.info('Skip: %r', url)
         return
 
-    res = context.request(url)
-    if res is None:
+    result = context.http.get(url)
+    if not result.ok:
+        context.log.warning("Failure [%s]: %s", result.status_code, result.url)
         return
 
     rules = context.params.get('rules', {'match_all': {}})
-    if not Rule.get_rule(rules).apply(res):
-        context.log.info('[Crawl rule skip]: %r', res.url)
+    if not Rule.get_rule(rules).apply(result):
+        context.log.info('Skip: %r', result.url)
         return
 
-    data['crawl_path'] = crawl_path + [res.url]
-    if res.url in crawl_path:
-        context.log.info('[Skip]: %r', url)
-        return
-    context.log.info("[Crawling]: %r", res.url)
-
-    if res.status_code > 300:
-        context.log.warning("[Failure]: %r, [status]: %r", res.url,
-                            res.status_code)
-        return
-
-    data['res'] = res
+    context.set_run_tag(url, None)
+    context.set_run_tag(result.url, None)
+    context.log.info("Crawling: %r", result.url)
+    data.update(result.serialize())
+    from pprint import pprint
+    pprint(data)
     context.emit(data=data)

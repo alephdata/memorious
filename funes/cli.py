@@ -28,8 +28,8 @@ def cli(debug, cache, incremental):
 @cli.command()
 def init():
     """Connect to the database and create the tables."""
-    Base.metadata.create_all(session.engine)
-    log.info('Database models created: %s', session.engine)
+    Base.metadata.create_all(session.bind)
+    log.info('Database models created: %s', session.bind)
 
 
 @cli.command()

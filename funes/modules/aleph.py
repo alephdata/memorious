@@ -12,32 +12,30 @@ def aleph_emit(context, data):
         context.log.warning("No $FUNES_ALEPH_HOST is set, skipping upload...")
         return
 
-    res = data.get('res')
-    if res is None:
-        return
+    with context.http.rehash(data) as result:
+        meta = {
+            'crawler': context.crawler.name,
+            'source_url': result.url,
+            'title': data.get('title'),
+            'foreign_id': result.request_id,
+            'mime_type': result.content_type,
+            'headers': result.headers
+        }
+        collection_id = aleph_collection_id(context)
+        url = aleph_resource('collections/%s/ingest' % collection_id)
+        context.log.info("Sending %r to %s/collections/%s", result,
+                         settings.ALEPH_HOST, collection_id)
 
-    meta = {
-        'crawler': context.crawler.name,
-        'source_url': res.url,
-        'title': data.get('title'),
-        'foreign_id': res.foreign_id,
-        'mime_type': res.content_type,
-        'headers': res.headers
-    }
-
-    collection_id = aleph_collection_id(context)
-    url = aleph_resource('collections/%s/ingest' % collection_id)
-    context.log.info("Sending %r to %s/collections/%s", res,
-                     settings.ALEPH_HOST, collection_id)
-
-    files = {'file': (meta.get('file_name'),
-                      res.load(),
-                      meta.get('content_type'))}
-    data = {'meta': json.dumps(meta)}
-    res = aleph_session(context).post(url, data=data, files=files)
-    if res.status_code != 200:
-        context.log.error("Could not ingest %s: %r", res, res.json())
-        return
+        files = {
+            'file': (meta.get('file_name'),
+                     result.file_path,
+                     result.content_type)
+        }
+        data = {'meta': json.dumps(meta)}
+        res = aleph_session(context).post(url, data=data, files=files)
+        if not res.ok:
+            context.log.error("Could not ingest %s: %r", res, res.json())
+            return
 
 
 def aleph_collection_id(context):
