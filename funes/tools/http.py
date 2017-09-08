@@ -33,34 +33,9 @@ class ContextHttp(object):
     def request(self, url, method='GET', headers=None, auth=None, data=None,
                 params=None):
         url = normalize_url(url)
-        headers = headers or {}
-        request_id = hash_data((url, method, params, data, auth))
-
-        existing = self.context.get_tag(request_id) if self.cache else None
-        if existing is not None:
-            existing = ContextHttpResponse.deserialize(self.context, existing)
-            if existing.last_modified and 'If-Modified-Since' not in headers:
-                headers['If-Modified-Since'] = existing.last_modified
-            if existing.etag and 'If-None-Match' not in headers:
-                headers['If-None-Match'] = existing.etag
-
         request = Request(method, url, data=data, headers=headers,
                           params=params, auth=auth)
-        prepared = self.session.prepare_request(request)
-        response = self.session.send(prepared, stream=True)
-
-        if existing and response.status_code == 304:
-            return existing
-
-        # update the serialised session with cookies etc.
-        self.context.state[self.STATE_SESSION] = pickle.dumps(self.session)
-        response = ContextHttpResponse.from_response(self.context,
-                                                     request_id,
-                                                     response)
-        if self.cache:
-            # TODO: this actually does a full fetch.
-            self.context.set_tag(request_id, response.serialize())
-        return response
+        return ContextHttpResponse.from_request(self, request)
 
     def get(self, url, **kwargs):
         return self.request(url, method='GET', **kwargs)
@@ -74,24 +49,49 @@ class ContextHttp(object):
 
 class ContextHttpResponse(object):
 
-    def __init__(self, context, request_id, response=None, status_code=None,
-                 url=None, headers=None, encoding=None, content_hash=None):
-        self.context = context
+    def __init__(self, http, request=None, request_id=None):
+        self.http = http
+        self.context = http.context
+        self.request = request
         self.request_id = request_id
-        self.response = response
-        self.status_code = status_code
-        self.url = url
-        self.headers = CaseInsensitiveDict(headers)
-        self.encoding = encoding
-        self._content_hash = content_hash
+        self._response = None
+        self._status_code = None
+        self._url = None
+        self._headers = None
+        self._encoding = None
+        self._content_hash = None
         self._file_path = None
         self._remove_file = False
 
-    def __enter__(self):
-        return self
+    @property
+    def response(self):
+        if self._response is None and self.request is not None:
+            request = self.request
+            existing = None
+            if self.http.cache:
+                existing = self.context.get_tag(self.request_id)
+            if existing is not None:
+                headers = CaseInsensitiveDict(existing.get('headers'))
+                last_modified = headers.get('last-modified')
+                if last_modified:
+                    request.headers['If-Modified-Since'] = last_modified
 
-    def __exit__(self, *args):
-        self.close()
+                etag = headers.get('etag')
+                if etag:
+                    request.headers['If-None-Match'] = etag
+
+            prepared = self.http.session.prepare_request(request)
+            response = self.http.session.send(prepared, stream=True)
+
+            if existing is not None and response.status_code == 304:
+                self.apply_data(existing)
+            else:
+                self._response = response
+
+            # update the serialised session with cookies etc.
+            session = pickle.dumps(self.http.session)
+            self.context.state[self.http.STATE_SESSION] = session
+        return self._response
 
     def _stream_content(self):
         """Lazily trigger download of the data when requested."""
@@ -102,14 +102,43 @@ class ContextHttpResponse(object):
             os.close(fd)
             content_hash = sha1()
             with open(self._file_path, 'wb') as fh:
-                for chunk in self.response.iter_content(chunk_size=None):
+                for chunk in self.response.iter_content(chunk_size=8192):
                     content_hash.update(chunk)
                     fh.write(chunk)
             self._remove_file = True
             chash = content_hash.hexdigest()
             self._content_hash = storage.archive_file(self._file_path,
                                                       content_hash=chash)
+
+            if self.http.cache:
+                self.context.set_tag(self.request_id, self.serialize())
         return self._file_path
+
+    @property
+    def url(self):
+        if self._response is not None:
+            return self._response.url
+        if self.request is not None:
+            return self.request.url
+        return self._url
+
+    @property
+    def status_code(self):
+        if self._status_code is None and self.response:
+            self._status_code = self.response.status_code
+        return self._status_code
+
+    @property
+    def headers(self):
+        if self._headers is None and self.response:
+            self._headers = self.response.headers
+        return self._headers or CaseInsensitiveDict()
+
+    @property
+    def encoding(self):
+        if self._encoding is None and self.response:
+            self._encoding = self.response.encoding
+        return self._encoding
 
     @property
     def file_path(self):
@@ -129,14 +158,6 @@ class ContextHttpResponse(object):
         if content_type is not None:
             content_type, options = cgi.parse_header(content_type)
         return content_type or 'application/octet-stream'
-
-    @property
-    def last_modified(self):
-        return self.headers.get('last-modified')
-
-    @property
-    def etag(self):
-        return self.headers.get('etag')
 
     @property
     def ok(self):
@@ -169,6 +190,20 @@ class ContextHttpResponse(object):
                 self._json = json.load(fh)
         return self._json
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
+    def close(self):
+        if self._response is not None:
+            self._response.close()
+        if self._remove_file and os.path.isfile(self._file_path):
+            os.unlink(self._file_path)
+        if self._content_hash is not None:
+            storage.cleanup_file(self._content_hash)
+
     def serialize(self):
         return {
             'request_id': self.request_id,
@@ -179,32 +214,25 @@ class ContextHttpResponse(object):
             'headers': dict(self.headers)
         }
 
-    def close(self):
-        if self.response:
-            self.response.close()
-        if self._remove_file and os.path.isfile(self._file_path):
-            os.unlink(self._file_path)
-        if self._content_hash is not None:
-            storage.cleanup_file(self._content_hash)
+    def apply_data(self, data):
+        self._status_code = data.get('status_code')
+        self._url = data.get('url')
+        self._headers = CaseInsensitiveDict(data.get('headers'))
+        self._encoding = data.get('encoding')
+        self._content_hash = data.get('content_hash')
 
     @classmethod
-    def deserialize(cls, context, data):
-        return cls(context, data.get('request_id'),
-                   status_code=data.get('status_code'),
-                   url=data.get('url'),
-                   headers=data.get('headers'),
-                   encoding=data.get('encoding'),
-                   content_hash=data.get('content_hash'))
+    def deserialize(cls, http, data):
+        obj = cls(http, request_id=data.get('request_id'))
+        obj.apply_data(data)
+        return obj
 
     @classmethod
-    def from_response(cls, context, request_id, response):
-        return cls(context, request_id,
-                   response=response,
-                   status_code=response.status_code,
-                   url=response.url,
-                   headers=response.headers,
-                   encoding=response.encoding)
+    def from_request(cls, http, request):
+        request_id = hash_data((request.url, request.method,
+                                request.params, request.data))
+        return cls(http, request=request, request_id=request_id)
 
     def __repr__(self):
-        return '<ContextHttpResponse(%s,%s)>' % (self.status_code,
+        return '<ContextHttpResponse(%s,%s)>' % (self.url,
                                                  self._content_hash)

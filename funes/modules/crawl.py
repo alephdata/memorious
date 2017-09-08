@@ -11,19 +11,17 @@ def crawl(context, data):
         return
 
     result = context.http.get(url)
-    if not result.ok:
-        context.log.warning("Failure [%s]: %s", result.status_code, result.url)
-        return
-
     rules = context.params.get('rules', {'match_all': {}})
     if not Rule.get_rule(rules).apply(result):
         context.log.info('Skip: %r', result.url)
         return
 
+    if not result.ok:
+        context.log.warning("Failure [%s]: %s", result.status_code, result.url)
+        return
+
+    context.log.info("Crawling [%s]: %r", result.status_code, result.url)
+    data.update(result.serialize())
     context.set_run_tag(url, None)
     context.set_run_tag(result.url, None)
-    context.log.info("Crawling: %r", result.url)
-    data.update(result.serialize())
-    from pprint import pprint
-    pprint(data)
     context.emit(data=data)
