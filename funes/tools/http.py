@@ -6,6 +6,7 @@ import tempfile
 from lxml import html
 from hashlib import sha1
 from normality import guess_encoding
+from fake_useragent import UserAgent
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
 
@@ -30,9 +31,15 @@ class ContextHttp(object):
         else:
             self.session = Session()
 
-    def request(self, url, method='GET', headers=None, auth=None, data=None,
-                params=None):
+    @property
+    def ua(self):
+        return UserAgent().random
+
+    def request(self, url, method='GET', headers={}, auth=None, data=None,
+                params=None, random_ua=False):
         url = normalize_url(url)
+        if random_ua:
+            headers.update({'User-Agent': self.ua})
         request = Request(method, url, data=data, headers=headers,
                           params=params, auth=auth)
         return ContextHttpResponse.from_request(self, request)
@@ -172,9 +179,10 @@ class ContextHttpResponse(object):
 
     @property
     def text(self):
-        if self.encoding is None:
-            self.encoding = guess_encoding(self.raw)
-        return self.raw.decode(self.encoding)
+        encoding = self.encoding
+        if encoding is None:
+            encoding = guess_encoding(self.raw)
+        return self.raw.decode(encoding)
 
     @property
     def html(self):

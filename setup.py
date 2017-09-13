@@ -34,7 +34,9 @@ setup(
         'six',
         'storagelayer',
         'psycopg2',
-        'urlnorm'
+        'urlnorm',
+        'werkzeug',
+        'fake-useragent'
     ],
     entry_points={
         'console_scripts': [
