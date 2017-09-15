@@ -1,6 +1,8 @@
 import click
 import logging
 from tabulate import tabulate
+from alembic.config import Config
+from alembic import command
 
 from funes import settings
 from funes.core import manager, session
@@ -26,10 +28,13 @@ def cli(debug, cache, incremental):
 
 
 @cli.command()
-def init():
-    """Connect to the database and create the tables."""
-    Base.metadata.create_all(session.bind)
-    log.info('Database models created: %s', session.bind)
+def upgrade():
+    """Connect to the database and create or upgrade the tables."""
+    alembic_cfg = Config()
+    alembic_cfg.set_main_option("script_location", "funes:migrate")
+    with session.bind.begin() as connection:
+        alembic_cfg.attributes['connection'] = connection
+        command.upgrade(alembic_cfg, "head")
 
 
 @cli.command()
