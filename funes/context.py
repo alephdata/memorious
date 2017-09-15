@@ -35,8 +35,8 @@ class Context(object):
         state = self.dump_state()
         Result.save(self.crawler, self.operation_id,
                     self.stage.name, stage, data)
-        time.sleep(self.crawler.delay)
-        handle.delay(state, stage, data)
+        handle.apply_async((state, stage, data),
+                           countdown=self.crawler.delay)
 
     def execute(self, data):
         self.stage.method(self, data)
