@@ -6,7 +6,6 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
 
 from funes import settings
-from funes.crawler import CrawlerManager
 
 celery = Celery('funes')
 celery.conf.update(
@@ -45,6 +44,7 @@ session = scoped_session(session_factory)
 
 def load_manager():
     if not hasattr(settings, '_manager'):
+        from funes.crawler import CrawlerManager
         settings._manager = CrawlerManager(settings.CRAWLERS_PATH)
     return settings._manager
 

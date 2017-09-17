@@ -5,6 +5,9 @@ from fnmatch import fnmatch
 from importlib import import_module
 from datetime import timedelta, datetime
 
+from funes.core import session
+from funes.model import Tag, Operation
+
 log = logging.getLogger(__name__)
 
 
@@ -55,7 +58,6 @@ class Crawler(object):
             self.stages[name] = CrawlerStage(self, name, stage)
 
     def check_due(self):
-        from funes.model import Operation
         if self.delta is None:
             return False
         last_run = Operation.last_run(self.name)
@@ -65,6 +67,11 @@ class Crawler(object):
         if now > last_run + self.delta:
             return True
         return False
+
+    def flush(self):
+        Tag.delete(self.name)
+        Operation.delete(self.name)
+        session.commit()
 
     def run(self):
         from funes.context import handle

@@ -48,6 +48,16 @@ class Event(Base):
         session.flush()
         return event
 
+    @classmethod
+    def delete(cls, crawler):
+        from funes.model.operation import Operation
+        op_ids = session.query(Operation.id)
+        op_ids = op_ids.filter(Operation.crawler == crawler)
+        pq = session.query(cls)
+        pq = pq.filter(cls.operation_id.in_(op_ids.subquery()))
+        pq.delete(synchronize_session=False)
+        session.flush()
+    
     def __repr__(self):
         return '<Event(%s,%s,%s)>' % \
             (self.operation_id, self.error_type, self.level)

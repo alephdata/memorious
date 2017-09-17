@@ -50,6 +50,17 @@ class Operation(Base):
         q = q.filter_by(**kwargs)
         return q.all()
 
+    @classmethod
+    def delete(cls, crawler):
+        from funes.model.event import Event
+        from funes.model.result import Result
+        Event.delete(crawler)
+        Result.delete(crawler)
+        pq = session.query(cls)
+        pq = pq.filter(cls.crawler == crawler)
+        pq.delete(synchronize_session=False)
+        session.flush()
+
     def __repr__(self):
         return '<Operation(%s,%s,%s)>' % \
             (self.crawler, self.operation, self.status)

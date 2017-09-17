@@ -56,7 +56,7 @@ funes list
 Force an immediate run of a specific crawler:
 
 ```sh
-funes list
+funes run my_crawler
 ```
 
 Check which crawlers are due for scheduled execution and execute the ones that
@@ -64,6 +64,12 @@ need to be updated:
 
 ```sh
 funes scheduled
+```
+
+Clear all the run status and cached information associated with a crawler:
+
+```sh
+funes flush my_crawler
 ```
 
 ## Writing a crawler

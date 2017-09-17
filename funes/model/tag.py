@@ -50,5 +50,12 @@ class Tag(Base):
         q = q.filter(cls.key == key)
         return q.count() > 0
 
+    @classmethod
+    def delete(cls, crawler):
+        pq = session.query(cls)
+        pq = pq.filter(cls.crawler == crawler)
+        pq.delete(synchronize_session=False)
+        session.flush()
+
     def __repr__(self):
         return '<Tag(%s,%s)>' % (self.crawler, self.key)
