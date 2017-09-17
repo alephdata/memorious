@@ -6,7 +6,6 @@ from alembic import command
 
 from funes import settings
 from funes.core import manager, session
-from funes.model.common import Base
 
 log = logging.getLogger(__name__)
 

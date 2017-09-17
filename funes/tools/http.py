@@ -5,6 +5,7 @@ import pickle
 import tempfile
 from lxml import html
 from hashlib import sha1
+from banal import hash_data
 from normality import guess_encoding
 from fake_useragent import UserAgent
 from requests import Session, Request
@@ -12,7 +13,7 @@ from requests.structures import CaseInsensitiveDict
 
 from funes import settings
 from funes.core import storage
-from funes.util import normalize_url, hash_data
+from funes.util import normalize_url
 
 
 class ContextHttp(object):

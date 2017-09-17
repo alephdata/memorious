@@ -21,6 +21,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'banal',
         'requests >= 2.5',
         'click',
         'lxml >= 3',
@@ -29,7 +30,6 @@ setup(
         'celery',
         'tabulate',
         'sqlalchemy',
-        'requests-cache',
         'dataset',
         'six',
         'storagelayer',
