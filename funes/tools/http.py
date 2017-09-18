@@ -92,6 +92,8 @@ class ContextHttpResponse(object):
             response = self.http.session.send(prepared, stream=True)
 
             if existing is not None and response.status_code == 304:
+                self.context.log.info("Using cached HTTP response: %s",
+                                      response.url)
                 self.apply_data(existing)
             else:
                 self._response = response

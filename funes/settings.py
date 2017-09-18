@@ -33,6 +33,12 @@ DEBUG = env_bool('DEBUG', default=False)
 
 
 ###############################################################################
+# Datastore: operational data store (ODS) database connection
+
+DATASTORE_URI = env('DATASTORE_URI')
+
+
+###############################################################################
 # Queue processing
 
 BROKER_URI = 'amqp://guest:guest@localhost:5672//'
@@ -58,8 +64,3 @@ ARCHIVE_PATH = env('ARCHIVE_PATH')
 # Aleph module
 ALEPH_HOST = env('ALEPH_HOST')
 ALEPH_API_KEY = env('ALEPH_API_KEY')
-
-
-###############################################################################
-# Operational data store (ODS) database
-ODS_DATABASE_URI = env('ODS_DATABASE_URI')

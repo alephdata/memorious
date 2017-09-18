@@ -49,7 +49,7 @@ class Crawler(object):
         self.name = self.config.get('name')
         self.description = self.config.get('description')
         self.schedule = self.config.get('schedule')
-        self.init_stage = self.config.get('init')
+        self.init_stage = self.config.get('init', 'init')
         self.delta = Crawler.SCHEDULES.get(self.schedule)
         self.delay = int(self.config.get('delay', 0))
 
@@ -95,7 +95,7 @@ class CrawlerManager(object):
         self.crawlers = {}
         for root, _, file_names in os.walk(self.path):
             for file_name in file_names:
-                if not fnmatch(file_name, '*.yaml'):
+                if not (fnmatch(file_name, '*.yaml') or fnmatch(file_name, '*.yml')):
                     continue
                 source_file = os.path.join(root, file_name)
                 crawler = Crawler(self, source_file)

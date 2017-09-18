@@ -1,5 +1,6 @@
 import json
 import requests
+from banal import clean_dict
 from urlparse import urljoin
 
 from funes import settings
@@ -15,12 +16,17 @@ def aleph_emit(context, data):
     with context.http.rehash(data) as result:
         meta = {
             'crawler': context.crawler.name,
-            'source_url': result.url,
+            'source_url': data.get('source_url', result.url),
+            'file_name': data.get('file_name'),
             'title': data.get('title'),
-            'foreign_id': result.request_id,
-            'mime_type': result.content_type,
+            'author': data.get('author'),
+            'foreign_id': data.get('foreign_id', result.request_id),
+            'mime_type': data.get('mime_type', result.content_type),
+            'countries': data.get('countries'),
+            'languages': data.get('languages'),
             'headers': result.headers
         }
+        meta = clean_dict(meta)
         collection_id = aleph_collection_id(context)
         url = aleph_resource('collections/%s/ingest' % collection_id)
         context.log.info("Sending %r to %s/collections/%s", result,
@@ -41,9 +47,9 @@ def aleph_emit(context, data):
 def aleph_collection_id(context):
     if hasattr(context, '_aleph_collection_id'):
         return context._aleph_collection_id
-    foreign_id = context.name
 
     url = aleph_resource('collections')
+    foreign_id = context.params.get('collection', context.name)
     collection_id = None
     while collection_id is None:
         res = aleph_session(context).get(url, params={'limit': 100})

@@ -36,7 +36,9 @@ setup(
         'psycopg2',
         'urlnorm',
         'werkzeug',
-        'fake-useragent'
+        'fake-useragent',
+        'pycountry',
+        'countrynames'
     ],
     entry_points={
         'console_scripts': [
