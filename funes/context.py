@@ -28,8 +28,12 @@ class Context(object):
         state['run_id'] = self.run_id
         return state
 
-    def emit(self, rule='pass', data={}):
-        stage = self.stage.handlers.get(rule)
+    def recurse(self, data={}):
+        return self.emit(stage=self.stage.name, data=data)
+
+    def emit(self, rule='pass', stage=None, data={}):
+        if stage is None:
+            stage = self.stage.handlers.get(rule)
         if stage is None or stage not in self.crawler.stages:
             raise TypeError("Invalid stage: %s" % stage)
         state = self.dump_state()
