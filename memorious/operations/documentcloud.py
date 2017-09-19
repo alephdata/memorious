@@ -3,13 +3,10 @@ from urlparse import urljoin
 from itertools import count
 from pycountry import languages
 
-from memorious.operation import operation
-
 DEFAULT_HOST = 'https://documentcloud.org/'
 DEFAULT_INSTANCE = 'documentcloud'
 
 
-@operation()
 def documentcloud_query(context, data):
     host = context.params.get('host', DEFAULT_HOST)
     instance = context.params.get('instance', DEFAULT_INSTANCE)

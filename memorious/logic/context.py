@@ -1,12 +1,15 @@
 import uuid
 import logging
+import traceback
 from copy import deepcopy
+from datetime import datetime
 from contextlib import contextmanager
 
-from memorious.core import manager, storage, celery
+from memorious.core import manager, storage, celery, session
+from memorious.core import datastore
+from memorious.model import Result, Tag, Operation, Event
 from memorious.exc import StorageFileMissing
-from memorious.tools.http import ContextHttp
-from memorious.model import Result, Tag
+from memorious.logic.http import ContextHttp
 
 
 class Context(object):
@@ -21,6 +24,7 @@ class Context(object):
         self.operation_id = None
         self.log = logging.getLogger(crawler.name)
         self.http = ContextHttp(self)
+        self.datastore = datastore
 
     def dump_state(self):
         state = deepcopy(self.state)
@@ -43,7 +47,43 @@ class Context(object):
                            countdown=self.crawler.delay)
 
     def execute(self, data):
-        self.stage.method(self, data)
+        op = Operation()
+        op.crawler = self.crawler.name
+        op.name = self.stage.name
+        op.run_id = self.run_id
+        op.status = Operation.STATUS_PENDING
+        session.add(op)
+        session.commit()
+        self.operation_id = op.id
+
+        try:
+            self.log.info('Running: %s', op.name)
+            res = self.stage.method(self, data)
+            op.status = Operation.STATUS_SUCCESS
+            return res
+        except Exception as exc:
+            # this should clear results and tags created by this op
+            session.rollback()
+            self.emit_exception(exc)
+        finally:
+            if op.status == Operation.STATUS_PENDING:
+                op.status = Operation.STATUS_FAILED
+            op.ended_at = datetime.utcnow()
+            session.add(op)
+            session.commit()
+    
+    def emit_warning(self, message, type=None, details=None):
+        return Event.save(self.operation_id, Event.LEVEL_WARNING,
+                          error_type=type,
+                          error_message=message,
+                          error_details=details)
+    
+    def emit_exception(self, exc):
+        self.log.exception(exc)
+        return Event.save(self.operation_id, Event.LEVEL_ERROR,
+                          error_type=exc.__class__.__name__,
+                          error_message=unicode(exc),
+                          error_details=traceback.format_exc())
 
     def set_tag(self, key, value, run_id=None):
         return Tag.save(self.crawler, key, value, run_id=run_id)

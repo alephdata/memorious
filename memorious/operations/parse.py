@@ -1,6 +1,5 @@
 from urlparse import urljoin
-from memorious.operation import operation
-from memorious.modules.extras.rule import Rule
+from memorious.helpers.rule import Rule
 
 URL_TAGS = [('a', 'href'),
             ('img', 'src'),
@@ -29,7 +28,6 @@ def parse_html(context, data, result):
                 })
 
 
-@operation()
 def parse(context, data):
     with context.http.rehash(data) as result:
         if result.html is not None:

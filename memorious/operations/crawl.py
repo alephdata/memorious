@@ -1,9 +1,7 @@
-from memorious.operation import operation
-from memorious.modules.extras.rule import Rule
+from memorious.helpers.rule import Rule
 from memorious.util import normalize_url
 
 
-@operation()
 def crawl(context, data):
     url = normalize_url(data.get('url'))
     if context.check_run_tag(url):

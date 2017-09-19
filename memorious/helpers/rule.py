@@ -2,7 +2,7 @@ import re
 import six
 from urlparse import urlparse
 
-from memorious.modules.extras.groups import GROUPS
+from memorious.helpers.mime import GROUPS
 
 
 class Rule(object):

@@ -3,10 +3,9 @@ import requests
 from banal import clean_dict
 from urlparse import urljoin
 
-from memorious import settings, operation
+from memorious import settings
 
 
-@operation()
 def aleph_emit(context, data):
     if not settings.ALEPH_HOST:
         context.log.warning("No $MEMORIOUS_ALEPH_HOST is set, skipping upload...")

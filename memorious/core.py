@@ -1,3 +1,4 @@
+import dataset
 import storagelayer
 from celery import Celery
 from celery.schedules import crontab
@@ -44,9 +45,18 @@ session = scoped_session(session_factory)
 
 def load_manager():
     if not hasattr(settings, '_manager'):
-        from memorious.crawler import CrawlerManager
+        from memorious.logic.manager import CrawlerManager
         settings._manager = CrawlerManager(settings.CONFIG_PATH)
     return settings._manager
 
 
+def load_datastore():
+    if not hasattr(settings, '_datastore'):
+        if not settings.DATASTORE_URI:
+            raise RuntimeError("No $MEMORIOUS_DATASTORE_URI.")
+        settings._datastore = dataset.connect(settings.DATASTORE_URI)
+    return settings._datastore
+
+
 manager = LocalProxy(load_manager)
+datastore = LocalProxy(load_datastore)
