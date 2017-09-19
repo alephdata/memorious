@@ -36,12 +36,12 @@ $ pip install -e .
 $ memorious upgrade
 ```
 
-## Configuraton
+## Configuration
 
-There are two principal components to the configuration of ``memorious``: a
+There are two principal components to the configuration of ``memorious``. A
 set of environment variables that control database connectivity and general
-principles of how the sytem operates, and a set of YAML configuration files
-are used to specify the operation of each individual crawler.
+principles of how the sytem operates. A recursive folder of YAML configuration
+files are used to specify the operation of each individual crawler.
 
 ### Environment variables
 
