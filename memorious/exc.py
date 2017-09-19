@@ -1,18 +1,18 @@
-class FunesException(Exception):
+class MemoriousException(Exception):
     """Base exception class."""
     pass
 
 
-class ConfigurationError(FunesException):
+class ConfigurationError(MemoriousException):
     """A configuration option is not set."""
 
 
-class RuleParsingException(FunesException):
+class RuleParsingException(MemoriousException):
     """A rule encounters something it can't parse."""
     pass
 
 
-class StorageFileMissing(FunesException):
+class StorageFileMissing(MemoriousException):
     """A file could not be found in the blob storage."""
 
     def __init__(self, content_hash, file_name=None):
@@ -22,6 +22,6 @@ class StorageFileMissing(FunesException):
         super(StorageFileMissing, self).__init__(msg)
 
 
-class ParseError(FunesException):
+class ParseError(MemoriousException):
     """An error while parsing a structured HTTP response."""
     pass

@@ -3,14 +3,13 @@ import requests
 from banal import clean_dict
 from urlparse import urljoin
 
-from memorious import settings
-from memorious.operation import operation
+from memorious import settings, operation
 
 
 @operation()
 def aleph_emit(context, data):
     if not settings.ALEPH_HOST:
-        context.log.warning("No $FUNES_ALEPH_HOST is set, skipping upload...")
+        context.log.warning("No $MEMORIOUS_ALEPH_HOST is set, skipping upload...")
         return
 
     with context.http.rehash(data) as result:
@@ -82,7 +81,7 @@ def aleph_session(context):
     if not hasattr(context, '_aleph_session'):
         api_key = settings.ALEPH_API_KEY
         if api_key is None:
-            raise Exception("No $FUNES_ALEPH_API_KEY is set.")
+            raise Exception("No $MEMORIOUS_ALEPH_API_KEY is set.")
         context._aleph_session = requests.Session()
         context._aleph_session.headers = {
             'Authorization': 'apikey %s' % api_key

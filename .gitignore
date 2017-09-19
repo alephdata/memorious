@@ -4,3 +4,5 @@
 *.rdb
 data
 .vscode/*
+dist/*
+build/*

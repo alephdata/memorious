@@ -1,10 +1,13 @@
 
-all: clean test dists clean
+all: clean test dists
 
-test:
-	nosetests
+install: clean
+	pip install -e .
 
-dists:
+test: install
+	# nosetests
+
+dists: install
 	python setup.py sdist
 	python setup.py bdist_wheel
 

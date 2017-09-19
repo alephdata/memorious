@@ -22,7 +22,7 @@ class CrawlerStage(object):
         self.handlers = config.get('handle') or {}
 
         method = config.get('method')
-        package = 'memorious.modules'
+        package = 'memorious.operations'
         if ':' in method:
             package, method = method.rsplit(':', 1)
         module = import_module(package)

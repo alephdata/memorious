@@ -4,6 +4,6 @@ from memorious.operation import operation
 
 
 @operation()
-def output(context, data):
+def inspect(context, data):
     context.log.info(pformat(data))
     context.emit(rule='pass', data=data)
