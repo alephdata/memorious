@@ -3,4 +3,4 @@ from pprint import pformat
 
 def inspect(context, data):
     context.log.info(pformat(data))
-    context.emit(rule='pass', data=data)
+    context.emit(data=data)

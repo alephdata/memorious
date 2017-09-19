@@ -1,31 +1,40 @@
+import random
 from urlparse import urljoin
 from memorious.helpers.rule import Rule
+from memorious.util import normalize_url
 
-URL_TAGS = [('a', 'href'),
-            ('img', 'src'),
-            ('link', 'href'),
-            ('iframe', 'src')]
+
+URL_TAGS = [('.//a', 'href'),
+            ('.//img', 'src'),
+            ('.//link', 'href'),
+            ('.//iframe', 'src')]
 
 
 def parse_html(context, data, result):
     context.log.info('Parse: %r', result.url)
 
     title = result.html.findtext('.//title')
-    if title is not None:
+    if title is not None and 'title' not in data:
         data['title'] = title
 
-    urls = set([])
-    for tag_name, attr_name in URL_TAGS:
-        for tag in result.html.findall('.//%s' % tag_name):
+    urls = []
+    for tag_query, attr_name in URL_TAGS:
+        for tag in result.html.findall(tag_query):
             attr = tag.get(attr_name)
             if attr is None:
                 continue
-            url = urljoin(result.url, attr)
-            if url is not None and url not in urls:
-                urls.add(url)
-                context.emit(rule='crawl', data={
-                    'url': url
-                })
+            url = normalize_url(urljoin(result.url, attr))
+            if url not in urls:
+                urls.append(url)
+
+    random.shuffle(urls)
+    for url in urls:
+        if context.check_run_tag(url):
+            continue
+        context.set_run_tag(url, None)
+        context.emit(rule='fetch', data={
+            'url': url
+        })
 
 
 def parse(context, data):
@@ -33,6 +42,6 @@ def parse(context, data):
         if result.html is not None:
             parse_html(context, data, result)
 
-        rules = context.params.get('rules') or {'match_all': {}}
+        rules = context.params.get('store') or {'match_all': {}}
         if Rule.get_rule(rules).apply(result):
-            context.emit(data=data)
+            context.emit(rule='store', data=data)

@@ -2,14 +2,55 @@ from banal import ensure_list
 
 
 def seed(context, data):
+    """Initialize a crawler with a set of seed URLs.
+
+    The URLs are given as a list or single value to the ``urls`` parameter.
+
+    If this is called as a second stage in a crawler, the URL will be formatted
+    against the supplied ``data`` values, e.g.:
+
+        https://crawl.site/entries/%(number)s.html
+    """
     for key in ('url', 'urls'):
         for url in ensure_list(context.params.get(key)):
+            url = url % data
             context.emit(data={'url': url})
 
 
 def sequence(context, data):
-    start = context.params.get('start') or 1
+    """Generate a sequence of numbers.
+
+    It is the memorious equivalent of the xrange function, accepting the
+    ``start``, ``stop`` and ``step`` parameters.
+
+    This can run in two ways:
+    * As a single function generating all numbers in the given range.
+    * Recursively, generating numbers one by one with an optional ``delay``.
+
+    The latter mode is useful in order to generate very large sequences
+    without completely clogging up the user queue.
+
+    If an optional ``tag`` is given, each number will be emitted only once
+    across multiple runs of the crawler.
+    """
+    number = data.get('number', context.params.get('start', 1))
     stop = context.params.get('stop')
-    step = context.params.get('step') or 1
-    for number in xrange(start, stop, step):
-        context.emit(data={'number': number})
+    step = context.params.get('step', 1)
+    delay = context.params.get('delay')
+    prefix = context.params.get('tag')
+    while True:
+        tag = None if prefix is None else '%s:%s' % (prefix, number)
+
+        if tag is None or not context.check_tag(tag):
+            context.emit(data={'number': number})
+
+        if tag is not None:
+            context.set_tag(tag, True)
+
+        number = number + step
+        if number >= stop:
+            break
+
+        if delay is not None:
+            context.recurse(data={'number': number}, delay=delay)
+            break

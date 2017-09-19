@@ -32,19 +32,21 @@ class Context(object):
         state['run_id'] = self.run_id
         return state
 
-    def recurse(self, data={}):
-        return self.emit(stage=self.stage.name, data=data)
+    def recurse(self, data={}, delay=None):
+        return self.emit(stage=self.stage.name,
+                         data=data,
+                         delay=delay)
 
-    def emit(self, rule='pass', stage=None, data={}):
+    def emit(self, rule='pass', stage=None, data={}, delay=None):
         if stage is None:
             stage = self.stage.handlers.get(rule)
         if stage is None or stage not in self.crawler.stages:
             raise TypeError("Invalid stage: %s" % stage)
         state = self.dump_state()
+        delay = delay or self.crawler.delay
         Result.save(self.crawler, self.operation_id,
                     self.stage.name, stage, data)
-        handle.apply_async((state, stage, data),
-                           countdown=self.crawler.delay)
+        handle.apply_async((state, stage, data), countdown=delay)
 
     def execute(self, data):
         op = Operation()
@@ -57,12 +59,13 @@ class Context(object):
         self.operation_id = op.id
 
         try:
-            self.log.info('Running: %s', op.name)
+            self.log.debug('Running: %s', op.name)
             res = self.stage.method(self, data)
             op.status = Operation.STATUS_SUCCESS
             return res
         except Exception as exc:
             # this should clear results and tags created by this op
+            # TODO: should we also use transactions on the datastore?
             session.rollback()
             self.emit_exception(exc)
         finally:

@@ -37,6 +37,9 @@ class ContextHttp(object):
     def ua(self):
         return UserAgent().random
 
+    def reset(self):
+        self.session = Session()
+
     def request(self, url, method='GET', headers={}, auth=None, data=None,
                 params=None, random_ua=False):
         url = normalize_url(url)
@@ -130,7 +133,7 @@ class ContextHttpResponse(object):
             self._content_hash = storage.archive_file(self._file_path,
                                                       content_hash=chash)
 
-            if self.http.cache:
+            if self.http.cache and self.ok:
                 self.context.set_tag(self.request_id, self.serialize())
         return self._file_path
 
