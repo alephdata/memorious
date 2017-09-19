@@ -45,7 +45,7 @@ session = scoped_session(session_factory)
 def load_manager():
     if not hasattr(settings, '_manager'):
         from memorious.crawler import CrawlerManager
-        settings._manager = CrawlerManager(settings.CRAWLERS_PATH)
+        settings._manager = CrawlerManager(settings.CONFIG_PATH)
     return settings._manager
 
 

@@ -6,7 +6,7 @@ from memorious.model.event import Event
 from memorious.model.operation import Operation
 
 
-def operation(name=None):
+def operation():
     """Wrap a method on a crawler to track the outcome of its execution."""
     def op_decorator(func):
 

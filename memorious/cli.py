@@ -12,11 +12,11 @@ log = logging.getLogger(__name__)
 
 @click.group()
 @click.option('--debug/--no-debug', default=False,
-              envvar='FUNES_DEBUG')
+              envvar='MEMORIOUS_DEBUG')
 @click.option('--cache/--no-cache', default=True,
-              envvar='FUNES_REQUESTS_CACHE')
+              envvar='MEMORIOUS_HTTP_CACHE')
 @click.option('--incremental/--non-incremental', default=True,
-              envvar='FUNES_INCREMENTAL')
+              envvar='MEMORIOUS_INCREMENTAL')
 def cli(debug, cache, incremental):
     """Crawler framework for documents and structured scrapers."""
     settings.HTTP_CACHE = cache

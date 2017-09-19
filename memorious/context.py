@@ -4,6 +4,7 @@ from copy import deepcopy
 from contextlib import contextmanager
 
 from memorious.core import manager, storage, celery
+from memorious.exc import StorageFileMissing
 from memorious.tools.http import ContextHttp
 from memorious.model import Result, Tag
 
@@ -44,27 +45,25 @@ class Context(object):
     def execute(self, data):
         self.stage.method(self, data)
 
-    def set_tag(self, key, value):
-        return Tag.save(self.crawler, key, value)
+    def set_tag(self, key, value, run_id=None):
+        return Tag.save(self.crawler, key, value, run_id=run_id)
 
     def set_run_tag(self, key, value):
-        return Tag.save(self.crawler, key, value, run_id=self.run_id)
+        return self.set_tag(key, value, run_id=self.run_id)
 
-    def get_tag(self, key):
-        tag = Tag.find(self.crawler, key)
+    def get_tag(self, key, run_id=None):
+        tag = Tag.find(self.crawler, key, run_id=run_id)
         if tag is not None:
             return tag.value
 
     def get_run_tag(self, key):
-        tag = Tag.find(self.crawler, key, run_id=self.run_id)
-        if tag is not None:
-            return tag.value
-
-    def check_tag(self, key):
-        return Tag.exists(self.crawler, key)
+        return self.get_tag(key, run_id=self.run_id)
+    
+    def check_tag(self, key, run_id=None):
+        return Tag.exists(self.crawler, key, run_id=run_id)
 
     def check_run_tag(self, key):
-        return Tag.exists(self.crawler, key, run_id=self.run_id)
+        return self.check_tag(key, run_id=self.run_id)
 
     def store_file(self, file_path, content_hash=None):
         return storage.archive_file(file_path, content_hash=content_hash)
@@ -72,6 +71,9 @@ class Context(object):
     @contextmanager
     def load_file(self, content_hash, file_name=None):
         file_path = storage.load_file(content_hash, file_name=file_name)
+        if file_path is None:
+            raise StorageFileMissing(content_hash, file_name=file_name)
+
         try:
             with open(file_path, 'r') as fh:
                 yield fh

@@ -14,6 +14,7 @@ from requests.structures import CaseInsensitiveDict
 from memorious import settings
 from memorious.core import storage
 from memorious.util import normalize_url
+from memorious.exc import ParseError
 
 
 class ContextHttp(object):
@@ -56,6 +57,15 @@ class ContextHttp(object):
 
 
 class ContextHttpResponse(object):
+    """Handle a cached and managed HTTP response.
+
+    This is a wrapper for ``requests`` HTTP response which adds several
+    aspects:
+
+    * Uses HTTP caching against the database when configured to do so.
+    * Will evaluate lazily in order to allow fast web crawling.
+    * Allow responses to be serialized between crawler operations.
+    """
 
     def __init__(self, http, request=None, request_id=None):
         self.http = http
@@ -176,6 +186,8 @@ class ContextHttpResponse(object):
     @property
     def raw(self):
         if not hasattr(self, '_raw'):
+            if self.file_path is None:
+                raise ParseError("Cannot parse failed download.")
             with open(self.file_path, 'r') as fh:
                 self._raw = fh.read()
         return self._raw
@@ -190,6 +202,8 @@ class ContextHttpResponse(object):
     @property
     def html(self):
         if not hasattr(self, '_html'):
+            if self.file_path is None:
+                raise ParseError("Cannot parse failed download.")
             with open(self.file_path, 'r') as fh:
                 self._html = html.parse(fh)
         return self._html
@@ -197,6 +211,8 @@ class ContextHttpResponse(object):
     @property
     def json(self):
         if not hasattr(self, '_json'):
+            if self.file_path is None:
+                raise ParseError("Cannot parse failed download.")
             with open(self.file_path, 'r') as fh:
                 self._json = json.load(fh)
         return self._json
@@ -212,8 +228,7 @@ class ContextHttpResponse(object):
             self._response.close()
         if self._remove_file and os.path.isfile(self._file_path):
             os.unlink(self._file_path)
-        if self._content_hash is not None:
-            storage.cleanup_file(self._content_hash)
+        storage.cleanup_file(self._content_hash)
 
     def serialize(self):
         return {
