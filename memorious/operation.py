@@ -1,9 +1,9 @@
 from datetime import datetime
 from functools import wraps
 
-from funes.core import session
-from funes.model.event import Event
-from funes.model.operation import Operation
+from memorious.core import session
+from memorious.model.event import Event
+from memorious.model.operation import Operation
 
 
 def operation(name=None):

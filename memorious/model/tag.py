@@ -3,8 +3,8 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Column, String, Integer, DateTime
 
-from funes.core import session
-from funes.model.common import Base
+from memorious.core import session
+from memorious.model.common import Base
 
 log = logging.getLogger(__name__)
 

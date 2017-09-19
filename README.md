@@ -1,6 +1,6 @@
-# Funes
+# memorious
 
-``funes`` is a distributed web scraping toolkit. It is a light-weight tool that
+``memorious`` is a distributed web scraping toolkit. It is a light-weight tool that
 schedules, monitors and supports scrapers that collect structured or
 un-structured data. This includes the following use cases:
 
@@ -17,23 +17,23 @@ When writing a scraper, you often need to paginate through through an index
 page, then download an HTML page for each result and finally parse that page
 and insert or update a record in a database.
 
-``funes`` handles this by managing a set of ``crawlers``, each of which can
+``memorious`` handles this by managing a set of ``crawlers``, each of which can
 be composed of multiple ``stages``. Each ``stage`` is implemented using a
 Python function, which can be re-used across different ``crawlers``.
 
 ## Installation
 
-see https://github.com/alephdata/funes/issues/1 for Docker. For now:
+see https://github.com/alephdata/memorious/issues/1 for Docker. For now:
 
 ```sh
-$ git clone git@github.com:alephdata/funes.git funes
-$ cd funes
+$ git clone git@github.com:alephdata/memorious.git memorious
+$ cd memorious
 $ virtualenv env
 $ source env/bin/activate
 $ pip install -e .
 # configure all needed environment variables, including database
 # connection strings.
-$ funes upgrade
+$ memorious upgrade
 ```
 
 ## Configuraton
@@ -42,34 +42,34 @@ TODO
 
 ## Usage
 
-``funes`` is controlled via a command-line tool, which can be used to monitor
+``memorious`` is controlled via a command-line tool, which can be used to monitor
 or invoke a crawler interactively. Most of the actual work, however, is handled
 by a daemon service running in the background. Communication between different
 components is handled via a central message queue.
 
-See the status of all crawlers managed by funes:
+See the status of all crawlers managed by memorious:
 
 ```sh
-funes list
+memorious list
 ```
 
 Force an immediate run of a specific crawler:
 
 ```sh
-funes run my_crawler
+memorious run my_crawler
 ```
 
 Check which crawlers are due for scheduled execution and execute the ones that
 need to be updated:
 
 ```sh
-funes scheduled
+memorious scheduled
 ```
 
 Clear all the run status and cached information associated with a crawler:
 
 ```sh
-funes flush my_crawler
+memorious flush my_crawler
 ```
 
 ## Writing a crawler
@@ -88,7 +88,7 @@ TODO
 To autogenerate a migration:
 
 ```sh
-$ cd funes/migration
+$ cd memorious/migration
 $ alembic revision --autogenerate -m 'message'
 ```
 

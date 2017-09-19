@@ -1,5 +1,5 @@
-from funes.core import manager, celery as app
-from funes.context import handle  # noqa
+from memorious.core import manager, celery as app
+from memorious.context import handle  # noqa
 
 
 @app.task

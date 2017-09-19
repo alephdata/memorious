@@ -1,12 +1,11 @@
 import uuid
-import time
 import logging
 from copy import deepcopy
 from contextlib import contextmanager
 
-from funes.core import manager, storage, celery
-from funes.tools.http import ContextHttp
-from funes.model import Result, Tag
+from memorious.core import manager, storage, celery
+from memorious.tools.http import ContextHttp
+from memorious.model import Result, Tag
 
 
 class Context(object):

@@ -3,8 +3,8 @@ import requests
 from banal import clean_dict
 from urlparse import urljoin
 
-from funes import settings
-from funes.operation import operation
+from memorious import settings
+from memorious.operation import operation
 
 
 @operation()

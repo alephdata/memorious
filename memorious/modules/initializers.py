@@ -1,6 +1,6 @@
 from banal import ensure_list
 
-from funes.operation import operation
+from memorious.operation import operation
 
 
 @operation()

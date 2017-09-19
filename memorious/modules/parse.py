@@ -1,6 +1,6 @@
 from urlparse import urljoin
-from funes.operation import operation
-from funes.modules.extras.rule import Rule
+from memorious.operation import operation
+from memorious.modules.extras.rule import Rule
 
 URL_TAGS = [('a', 'href'),
             ('img', 'src'),

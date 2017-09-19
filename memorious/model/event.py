@@ -4,8 +4,8 @@ from datetime import datetime
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
 from sqlalchemy.exc import SQLAlchemyError
 
-from funes.core import session
-from funes.model.common import Base
+from memorious.core import session
+from memorious.model.common import Base
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class Event(Base):
 
     @classmethod
     def delete(cls, crawler):
-        from funes.model.operation import Operation
+        from memorious.model.operation import Operation
         op_ids = session.query(Operation.id)
         op_ids = op_ids.filter(Operation.crawler == crawler)
         pq = session.query(cls)

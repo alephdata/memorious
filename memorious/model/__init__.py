@@ -1,5 +1,5 @@
-from funes.model.event import Event  # noqa
-from funes.model.operation import Operation  # noqa
-from funes.model.result import Result  # noqa
-from funes.model.tag import Tag  # noqa
-from funes.model.common import Base  # noqa
+from memorious.model.event import Event  # noqa
+from memorious.model.operation import Operation  # noqa
+from memorious.model.result import Result  # noqa
+from memorious.model.tag import Tag  # noqa
+from memorious.model.common import Base  # noqa

@@ -1,6 +1,6 @@
-from funes.operation import operation
-from funes.modules.extras.rule import Rule
-from funes.util import normalize_url
+from memorious.operation import operation
+from memorious.modules.extras.rule import Rule
+from memorious.util import normalize_url
 
 
 @operation()

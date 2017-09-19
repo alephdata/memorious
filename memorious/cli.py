@@ -4,8 +4,8 @@ from tabulate import tabulate
 from alembic.config import Config
 from alembic import command
 
-from funes import settings
-from funes.core import manager, session
+from memorious import settings
+from memorious.core import manager, session
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def cli(debug, cache, incremental):
 def upgrade():
     """Connect to the database and create or upgrade the tables."""
     alembic_cfg = Config()
-    alembic_cfg.set_main_option("script_location", "funes:migrate")
+    alembic_cfg.set_main_option("script_location", "memorious:migrate")
     with session.bind.begin() as connection:
         alembic_cfg.attributes['connection'] = connection
         command.upgrade(alembic_cfg, "head")

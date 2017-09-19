@@ -1,6 +1,6 @@
 from pprint import pformat
 
-from funes.operation import operation
+from memorious.operation import operation
 
 
 @operation()

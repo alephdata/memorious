@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='funes',
-    version='0.0.1',
+    name='memorious',
+    version='0.3.0',
     description="A minimalistic, recursive web crawling library for Python.",
     long_description="",
     classifiers=[
@@ -14,7 +14,7 @@ setup(
     keywords='',
     author='Lion Summerbell',
     author_email='lion@occrp.org',
-    url='http://github.com/alephdata/funes',
+    url='http://github.com/alephdata/memorious',
     license='MIT',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     namespace_packages=[],
@@ -27,6 +27,7 @@ setup(
         'lxml >= 3',
         'PyYAML >= 3.10',
         'normality',
+        'pyicu',
         'celery',
         'tabulate',
         'sqlalchemy',
@@ -42,7 +43,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'funes = funes.cli:main'
+            'memorious = memorious.cli:main'
         ],
     },
     tests_require=[]

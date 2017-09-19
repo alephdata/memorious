@@ -1,5 +1,5 @@
 import dataset
-from funes import settings
+from memorious import settings
 
 
 def db_connect():

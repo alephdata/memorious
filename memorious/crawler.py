@@ -1,12 +1,12 @@
-import os
+simport os
 import yaml
 import logging
 from fnmatch import fnmatch
 from importlib import import_module
 from datetime import timedelta, datetime
 
-from funes.core import session
-from funes.model import Tag, Operation
+from memorious.core import session
+from memorious.model import Tag, Operation
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class CrawlerStage(object):
         self.handlers = config.get('handle') or {}
 
         method = config.get('method')
-        package = 'funes.modules'
+        package = 'memorious.modules'
         if ':' in method:
             package, method = method.rsplit(':', 1)
         module = import_module(package)
@@ -74,7 +74,7 @@ class Crawler(object):
         session.commit()
 
     def run(self):
-        from funes.context import handle
+        from memorious.context import handle
         state = {'crawler': self.name}
         stage = self.get(self.init_stage)
         handle.delay(state, stage.name, {})

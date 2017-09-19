@@ -1,9 +1,8 @@
 from __future__ import with_statement
 from alembic import context
-from sqlalchemy import engine_from_config, pool
 
-from funes.core import session
-from funes.model import Base
+from memorious.core import session
+from memorious.model import Base
 
 config = context.config
 config.set_main_option('script_location', '.')
@@ -27,11 +26,6 @@ def run_migrations_offline():
 
 
 def run_migrations_online():
-    # engine = engine_from_config(
-    #             config.get_section(config.config_ini_section),
-    #             prefix='sqlalchemy.',
-    #             poolclass=pool.NullPool)
-
     connection = session.bind.connect()
     context.configure(connection=connection,
                       target_metadata=target_metadata,
@@ -42,6 +36,7 @@ def run_migrations_online():
             context.run_migrations()
     finally:
         connection.close()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

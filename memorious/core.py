@@ -5,11 +5,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
 
-from funes import settings
+from memorious import settings
 
-celery = Celery('funes')
+celery = Celery('memorious')
 celery.conf.update(
-    imports=('funes.tasks'),
+    imports=('memorious.tasks'),
     broker_url=settings.BROKER_URI,
     broker_transport_options={'fanout_prefix': True},
     task_always_eager=settings.EAGER,
@@ -21,7 +21,7 @@ celery.conf.update(
     worker_hijack_root_logger=False,
     beat_schedule={
         'scheduled-crawlers': {
-            'task': 'funes.tasks.process_schedule',
+            'task': 'memorious.tasks.process_schedule',
             'schedule': crontab(minute='*/1')
         },
     },
@@ -44,7 +44,7 @@ session = scoped_session(session_factory)
 
 def load_manager():
     if not hasattr(settings, '_manager'):
-        from funes.crawler import CrawlerManager
+        from memorious.crawler import CrawlerManager
         settings._manager = CrawlerManager(settings.CRAWLERS_PATH)
     return settings._manager
 

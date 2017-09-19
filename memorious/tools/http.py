@@ -11,9 +11,9 @@ from fake_useragent import UserAgent
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
 
-from funes import settings
-from funes.core import storage
-from funes.util import normalize_url
+from memorious import settings
+from memorious.core import storage
+from memorious.util import normalize_url
 
 
 class ContextHttp(object):

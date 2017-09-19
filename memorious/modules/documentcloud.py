@@ -3,7 +3,7 @@ from urlparse import urljoin
 from itertools import count
 from pycountry import languages
 
-from funes.operation import operation
+from memorious.operation import operation
 
 DEFAULT_HOST = 'https://documentcloud.org/'
 DEFAULT_INSTANCE = 'documentcloud'
