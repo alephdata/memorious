@@ -1,3 +1,4 @@
+
 GROUPS = {
     'web': [
         'text/html', 'text/plain'

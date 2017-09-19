@@ -38,6 +38,35 @@ $ memorious upgrade
 
 ## Configuraton
 
+There are two principal components to the configuration of ``memorious``: a
+set of environment variables that control database connectivity and general
+principles of how the sytem operates, and a set of YAML configuration files
+are used to specify the operation of each individual crawler.
+
+### Environment variables
+
+* ``MEMORIOUS_DATABASE_URI``
+* ``MEMORIOUS_CONFIG_PATH``
+* ``MEMORIOUS_DEBUG``
+* ``MEMORIOUS_INCREMENTAL``
+* ``MEMORIOUS_HTTP_CACHE``
+* ``MEMORIOUS_DATASTORE_URI``
+* ``MEMORIOUS_BROKER_URI``
+* ``MEMORIOUS_EAGER``
+
+* ``MEMORIOUS_ARCHIVE_TYPE``, either ``file`` or ``s3``
+* ``MEMORIOUS_ARCHIVE_PATH``
+* ``MEMORIOUS_ARCHIVE_AWS_KEY_ID``
+* ``MEMORIOUS_ARCHIVE_AWS_SECRET``
+* ``MEMORIOUS_ARCHIVE_AWS_REGION``
+* ``MEMORIOUS_ARCHIVE_BUCKET``
+
+* ``ALEPH_HOST``, default is ``https://data.occrp.org/``, but any instance
+  of Aleph 2.0 or greater should work.
+* ``ALEPH_API_KEY``, a valid API key for use by the upload operation.
+
+### Crawler configuration files
+
 TODO
 
 ## Usage
