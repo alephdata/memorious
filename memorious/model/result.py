@@ -43,5 +43,12 @@ class Result(Base):
         pq.delete(synchronize_session=False)
         session.flush()
 
+    @classmethod
+    def by_crawler_next_stage(cls, crawler, next_stage):
+        q = session.query(cls)
+        q = q.filter(cls.crawler == crawler)
+        q = q.filter(cls.next_stage == next_stage)
+        return q
+
     def __repr__(self):
         return '<Result(%s,%s)>' % (self.crawler, self.next_stage)
