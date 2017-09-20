@@ -1,0 +1,4 @@
+build*
+memorious.env
+docker-compose.*
+.git

@@ -6,3 +6,4 @@ data
 .vscode/*
 dist/*
 build/*
+env

@@ -21,3 +21,14 @@ clean:
 	find . -name '*.egg' -exec rm -f {} +
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
+
+build:
+	docker-compose build --pull
+	docker-compose run --rm app memorious upgrade
+
+rebuild:
+	docker-compose build --pull --no-cache
+	docker-compose run --rm app memorious upgrade
+
+shell:
+	docker-compose run --rm app /bin/bash
