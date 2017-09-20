@@ -22,7 +22,7 @@ class Context(object):
         self.params = stage.params
         self.run_id = state.get('run_id') or uuid.uuid1().hex
         self.operation_id = None
-        self.log = logging.getLogger(crawler.name)
+        self.log = logging.getLogger('%s.%s' % (crawler.name, stage.name))
         self.http = ContextHttp(self)
         self.datastore = datastore
 

@@ -163,6 +163,10 @@ class ContextHttpResponse(object):
             self._encoding = self.response.encoding
         return self._encoding
 
+    @encoding.setter
+    def encoding(self, encoding):
+        self._encoding = encoding
+
     @property
     def file_path(self):
         if self._file_path is None:
@@ -205,10 +209,7 @@ class ContextHttpResponse(object):
     @property
     def html(self):
         if not hasattr(self, '_html'):
-            if self.file_path is None:
-                raise ParseError("Cannot parse failed download.")
-            with open(self.file_path, 'r') as fh:
-                self._html = html.parse(fh)
+            self._html = html.fromstring(self.text)
         return self._html
 
     @property
