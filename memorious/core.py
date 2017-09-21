@@ -15,7 +15,7 @@ celery.conf.update(
     broker_transport_options={'fanout_prefix': True},
     task_always_eager=settings.EAGER,
     task_eager_propagates=True,
-    # task_ignore_result=True,
+    task_ignore_result=True,
     result_persistent=False,
     # ultra-high time limit to shoot hung tasks:
     worker_max_tasks_per_child=200,

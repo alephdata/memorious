@@ -209,7 +209,12 @@ class ContextHttpResponse(object):
     @property
     def html(self):
         if not hasattr(self, '_html'):
-            self._html = html.fromstring(self.text)
+            self._html = None
+            try:
+                self._html = html.fromstring(self.text)
+            except ValueError as ve:
+                if 'encoding declaration' in ve.message:
+                    self._html = html.parse(self.file_path)
         return self._html
 
     @property

@@ -41,7 +41,7 @@ class Context(object):
         if stage is None:
             stage = self.stage.handlers.get(rule)
         if stage is None or stage not in self.crawler.stages:
-            raise TypeError("Invalid stage: %s" % stage)
+            raise TypeError("Invalid stage: %s (%s)" % (stage, rule))
         state = self.dump_state()
         delay = delay or self.crawler.delay
         Result.save(self.crawler, self.operation_id,
@@ -74,13 +74,13 @@ class Context(object):
             op.ended_at = datetime.utcnow()
             session.add(op)
             session.commit()
-    
+
     def emit_warning(self, message, type=None, details=None):
         return Event.save(self.operation_id, Event.LEVEL_WARNING,
                           error_type=type,
                           error_message=message,
                           error_details=details)
-    
+
     def emit_exception(self, exc):
         self.log.exception(exc)
         return Event.save(self.operation_id, Event.LEVEL_ERROR,
@@ -101,7 +101,7 @@ class Context(object):
 
     def get_run_tag(self, key):
         return self.get_tag(key, run_id=self.run_id)
-    
+
     def check_tag(self, key, run_id=None):
         return Tag.exists(self.crawler, key, run_id=run_id)
 

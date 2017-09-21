@@ -69,8 +69,8 @@ class Crawler(object):
         This sort of requires a degree of idempotence for each operation.
         Usually used to re-parse a set of crawled documents.
         """
-        q = Result.by_crawler_next_stage(self.name, stage)
-        for result in q.yield_per(1000):
+        query = Result.by_crawler_next_stage(self.name, stage)
+        for result in query:
             state = {'crawler': self.name}
             handle.delay(state, stage, result.data)
 
