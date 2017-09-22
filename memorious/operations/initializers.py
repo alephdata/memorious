@@ -1,4 +1,5 @@
 from banal import ensure_list
+from datetime import datetime, timedelta
 
 
 def seed(context, data):
@@ -54,3 +55,30 @@ def sequence(context, data):
         if delay is not None:
             context.recurse(data={'number': number}, delay=delay)
             break
+
+
+def dates(context, data):
+    format = context.params.get('format', '%Y-%m-%d')
+    delta = timedelta(days=context.params.get('days', 0),
+                      weeks=context.params.get('weeks', 0))
+
+    if 'end' in context.params:
+        end = context.params.get('end')
+        end = datetime.strptime(end, format)
+    else:
+        end = datetime.utcnow()
+
+    if 'begin' in context.params:
+        begin = context.params.get('begin')
+        begin = datetime.strptime(begin, format)
+    else:
+        steps = context.params.get('steps', 100)
+        begin = end - (delta * steps)
+
+    current = end
+    while current >= begin:
+        context.emit(data={
+            'date': current.strftime(format),
+            'date_iso': current.isoformat()
+        })
+        current = current - delta
