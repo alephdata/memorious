@@ -41,12 +41,12 @@ class ContextHttp(object):
         self.session = Session()
 
     def request(self, url, method='GET', headers={}, auth=None, data=None,
-                params=None, random_ua=False):
+                params=None, json=None, random_ua=False):
         url = normalize_url(url)
         if random_ua:
             headers.update({'User-Agent': self.ua})
         request = Request(method, url, data=data, headers=headers,
-                          params=params, auth=auth)
+                          params=params, json=json, auth=auth)
         return ContextHttpResponse.from_request(self, request)
 
     def get(self, url, **kwargs):
@@ -265,7 +265,8 @@ class ContextHttpResponse(object):
     @classmethod
     def from_request(cls, http, request):
         request_id = hash_data((request.url, request.method,
-                                request.params, request.data))
+                                request.params, request.data,
+                                request.json))
         return cls(http, request=request, request_id=request_id)
 
     def __repr__(self):

@@ -39,7 +39,8 @@ setup(
         'werkzeug',
         'fake-useragent',
         'pycountry',
-        'countrynames'
+        'countrynames',
+        'stringcase'
     ],
     entry_points={
         'console_scripts': [
