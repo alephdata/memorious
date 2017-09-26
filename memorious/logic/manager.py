@@ -13,6 +13,9 @@ class CrawlerManager(object):
     def __init__(self, path):
         self.path = path
 
+        if not os.path.exists(self.path):
+            log.warning('Crawler config path %s not found.', self.path)
+
         self.crawlers = {}
         for root, _, file_names in os.walk(self.path):
             for file_name in file_names:

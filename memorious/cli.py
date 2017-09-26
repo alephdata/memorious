@@ -40,7 +40,7 @@ def get_crawler(name):
     crawler = manager.get(name)
     if crawler is None:
         msg = 'Crawler [%s] not found.' % name
-        raise click.BadParameter(msg, param='crawler')
+        raise click.BadParameter(msg, param=crawler)
     return crawler
 
 
