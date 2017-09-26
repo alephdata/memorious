@@ -23,7 +23,29 @@ Python function, which can be re-used across different ``crawlers``.
 
 ## Installation
 
-see https://github.com/alephdata/memorious/issues/1 for Docker. For now:
+### With Docker
+
+Configure the environment variables in `docker-compose.yml` and `memorious.env`.
+
+```sh
+$ docker-compose up -d
+```
+
+This launches a celery worker and scheduler, as well as containers for PostgreSQL and RabbitMQ.
+
+To access the shell, use:
+
+```sh
+$ make shell
+```
+
+or:
+
+```sh
+$ docker-compose run worker /bin/bash
+```
+
+### Without Docker
 
 ```sh
 $ git clone git@github.com:alephdata/memorious.git memorious
