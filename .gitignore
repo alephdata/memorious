@@ -7,3 +7,4 @@ data
 dist/*
 build/*
 env
+celerybeat-schedule*

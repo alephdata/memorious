@@ -25,7 +25,7 @@ Python function, which can be re-used across different ``crawlers``.
 
 ### With Docker
 
-Configure the environment variables in `docker-compose.yml` and `memorious.env`.
+Configure the environment variables in `docker-compose.yml` and `memorious.env`. Then run:
 
 ```sh
 $ docker-compose up -d
@@ -54,7 +54,7 @@ $ virtualenv env
 $ source env/bin/activate
 $ pip install -e .
 # configure all needed environment variables, including database
-# connection strings.
+# connection strings, in memorious.env.
 $ memorious upgrade
 ```
 
