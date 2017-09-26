@@ -24,11 +24,11 @@ clean:
 
 build:
 	docker-compose build --pull
-	docker-compose run --rm app memorious upgrade
+	docker-compose run --rm worker memorious upgrade
 
 rebuild:
 	docker-compose build --pull --no-cache
-	docker-compose run --rm app memorious upgrade
+	docker-compose run --rm worker memorious upgrade
 
 shell:
-	docker-compose run --rm app /bin/bash
+	docker-compose run --rm worker /bin/bash
