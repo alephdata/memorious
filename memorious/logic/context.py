@@ -125,7 +125,10 @@ class Context(object):
 
     @classmethod
     def from_state(cls, state, stage):
-        crawler = manager.get(state.pop('crawler'))
+        state_crawler = state.pop('crawler')
+        crawler = manager.get(state_crawler)
+        if crawler is None:
+            raise RuntimeError("Missing crawler: [%s]" % state_crawler)
         stage = crawler.get(stage)
         if stage is None:
             raise RuntimeError('[%r] has no stage: %s' % (crawler, stage))

@@ -26,6 +26,7 @@ class CrawlerManager(object):
                 self.crawlers[crawler.name] = crawler
 
     def run_scheduled(self):
+        log.info('%s crawlers found in [%s]' % (len(self.crawlers), self.path))
         for crawler in self:
             if crawler.delta is None:
                 log.info('[%s] has no schedule.', crawler.name)
