@@ -24,13 +24,12 @@ services:
       - postgres
       - rabbitmq
     volumes:
-      - "./:/memorious"
-      - "/:/host"
       - "./build/logs/worker:/var/log"
       - "./build/archive:/data"
       - "./build/tmp/worker:/tmp"
     environment:
       MEMORIOUS_DATABASE_URI: postgresql://funes:funes@postgres/funes
+      MEMORIOUS_CONFIG_PATH: /crawlers
       MEMORIOUS_INCREMENTAL: "true"
       MEMORIOUS_HTTP_CACHE: "true"
       MEMORIOUS_BROKER_URI: amqp://guest:guest@rabbitmq:5672
@@ -44,13 +43,12 @@ services:
       - postgres
       - rabbitmq
     volumes:
-      - "./:/memorious"
-      - "/:/host"
       - "./build/logs/beat:/var/log"
       - "./build/data/beat:/var/lib/"
       - "./build/archive:/data"
     environment:
       MEMORIOUS_DATABASE_URI: postgresql://funes:funes@postgres/funes
+      MEMORIOUS_CONFIG_PATH: /crawlers
       MEMORIOUS_INCREMENTAL: "true"
       MEMORIOUS_HTTP_CACHE: "true"
       MEMORIOUS_BROKER_URI: amqp://guest:guest@rabbitmq:5672

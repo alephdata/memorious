@@ -25,13 +25,18 @@ Python function, which can be re-used across different ``crawlers``.
 
 ### With Docker
 
-Configure the environment variables in `docker-compose.yml` and `memorious.env`. Then run:
+1. Configure the environment variables in `docker-compose.yml` and 
+`memorious.env`. 
+2. Copy your crawlers (yaml and optional python files, see next section) into 
+the `crawlers` directory.
+3. Run:
 
 ```sh
 $ docker-compose up -d
 ```
 
-This launches a celery worker and scheduler, as well as containers for PostgreSQL and RabbitMQ.
+This launches a celery worker and scheduler, as well as containers for 
+PostgreSQL and RabbitMQ.
 
 To access the shell, use:
 
@@ -62,8 +67,10 @@ $ memorious upgrade
 
 There are two principal components to the configuration of ``memorious``. A
 set of environment variables that control database connectivity and general
-principles of how the sytem operates. A recursive folder of YAML configuration
-files are used to specify the operation of each individual crawler.
+principles of how the sytem operates. 
+
+A recursive folder of YAML configuration files are used to specify the 
+operation of each individual crawler.
 
 ### Environment variables
 
@@ -89,7 +96,18 @@ files are used to specify the operation of each individual crawler.
 
 ### Crawler configuration files
 
-TODO
+For simple crawlers which don't need to extend ``memorious``, you just need
+a yaml configuration file.
+
+..TODO..
+
+You can configure more complex crawlers to execute custom python functions. You 
+should package your python module with a `setup.py` and include it in the `crawlers` directory along with your yaml files.
+
+If you're running ``memorious`` with Docker, your module will be installed at
+build time. If not, you'll need to run `pip install` in the `crawlers` directory.
+
+..TODO..
 
 ## Usage
 
