@@ -97,14 +97,20 @@ operation of each individual crawler.
 ### Crawler configuration files
 
 For simple crawlers which don't need to extend ``memorious``, you just need
-a yaml configuration file.
-
-..TODO..
+a yaml configuration file per crawler.
 
 You can configure more complex crawlers to execute custom python functions. You 
-should package your python module with a `setup.py` and include it in the `crawlers` directory along with your yaml files.
+should package your python modules with a `setup.py` and include along them with 
+your yaml files.
 
-If you're running ``memorious`` with Docker, your module will be installed at
+See 'Writing a crawler' below for what these files should contain.
+
+You can arrange the files using any directory structure you like, ``memorious`` will
+find them. You might, for example, like to put your yaml config and python source
+files in different directories. If you have a lot of crawlers, you can organise
+these into different subdirectories or python modules.
+
+If you're running ``memorious`` with Docker, your package will be installed at
 build time. If not, you'll need to run `pip install` in the `crawlers` directory.
 
 ..TODO..
