@@ -1,8 +1,15 @@
 
 all: clean test dists
 
-install: clean
-	pip install -e .
+install: clean 
+	set -e; \
+	. ./env.sh; \
+	pip install -e . ; \
+	memorious upgrade ; \
+	if [ -f $$MEMORIOUS_CONFIG_PATH/setup.py ]; \
+	then \
+		pip install -e $$MEMORIOUS_CONFIG_PATH; \
+	fi
 
 test: install
 	# nosetests

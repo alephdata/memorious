@@ -1,7 +1,7 @@
 # memorious
 
-``memorious`` is a distributed web scraping toolkit. It is a light-weight tool that
-schedules, monitors and supports scrapers that collect structured or
+``memorious`` is a distributed web scraping toolkit. It is a light-weight tool
+that schedules, monitors and supports scrapers that collect structured or
 un-structured data. This includes the following use cases:
 
 * Maintain an overview of a fleet of crawlers
@@ -17,13 +17,15 @@ When writing a scraper, you often need to paginate through through an index
 page, then download an HTML page for each result and finally parse that page
 and insert or update a record in a database.
 
-``memorious`` handles this by managing a set of ``crawlers``, each of which can
-be composed of multiple ``stages``. Each ``stage`` is implemented using a
+``memorious`` handles this by managing a set of ``crawlers``, each of which 
+can be composed of multiple ``stages``. Each ``stage`` is implemented using a
 Python function, which can be re-used across different ``crawlers``.
 
 ## Installation
 
-### With Docker
+Lots of commands you need are in the [Makefile](https://github.com/alephdata/memorious/blob/master/Makefile).
+
+### With Docker (production)
 
 1. Configure the environment variables in `docker-compose.yml` and 
 `memorious.env`. 
@@ -32,7 +34,8 @@ the `crawlers` directory.
 3. Run:
 
 ```sh
-$ docker-compose up -d
+$ make build
+$ docker-compose up -d 
 ```
 
 This launches a celery worker and scheduler, as well as containers for 
@@ -44,24 +47,31 @@ To access the shell, use:
 $ make shell
 ```
 
-or:
+If you add new crawlers, you'll need to rebuild.
 
-```sh
-$ docker-compose run worker /bin/bash
-```
+(TODO: find a way to avoid rebuilding?)
 
-### Without Docker
+### Development mode
+
+To set the ``MEMORIOUS_*`` environment variables, modify `env.sh` (*before* 
+running `make install`). See the next section for configuration options.
+
+Set up Postgres. Either create a database is called `funes`, with username and
+password also `funes`, or updated the `MEMORIOUS_DATABASE_URI` environment
+variable in `env.sh` to match your local database. [TODO: make this run with 
+SQLite](https://github.com/alphedata/memorious/issues/8).
 
 ```sh
 $ git clone git@github.com:alephdata/memorious.git memorious
 $ cd memorious
 $ virtualenv env
 $ source env/bin/activate
-$ pip install -e .
-# configure all needed environment variables, including database
-# connection strings, in memorious.env.
-$ memorious upgrade
+$ make install
 ```
+
+As well as installing ``memorious``, this looks for a setup.py in your 
+`MEMORIOUS_CONFIG_PATH` and runs pip install if it finds one. (This isn't 
+needed if you only have yaml configurations - see the next two sections).
 
 ## Configuration
 

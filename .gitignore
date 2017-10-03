@@ -8,3 +8,4 @@ dist/*
 build/*
 env
 celerybeat-schedule*
+*.sh
