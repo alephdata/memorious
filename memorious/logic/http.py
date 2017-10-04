@@ -3,7 +3,7 @@ import cgi
 import json
 import pickle
 import tempfile
-from lxml import html
+from lxml import html, etree
 from hashlib import sha1
 from banal import hash_data
 from normality import guess_encoding
@@ -216,6 +216,12 @@ class ContextHttpResponse(object):
                 if 'encoding declaration' in ve.message:
                     self._html = html.parse(self.file_path)
         return self._html
+
+    @property
+    def xml(self):
+        if not hasattr(self, '_xml'):
+            self._xml = etree.parse(self.file_path)
+        return self._xml
 
     @property
     def json(self):
