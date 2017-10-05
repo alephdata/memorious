@@ -1,12 +1,18 @@
+import os
+import logging
 import dataset
 import storagelayer
 from celery import Celery
 from celery.schedules import crontab
+from alembic.config import Config
+from alembic import command
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
 
 from memorious import settings
+
+log = logging.getLogger(__name__)
 
 celery = Celery('memorious')
 celery.conf.update(
@@ -60,3 +66,21 @@ def load_datastore():
 
 manager = LocalProxy(load_manager)
 datastore = LocalProxy(load_datastore)
+
+
+def ensure_db():
+    if settings.DATABASE_FILE in settings.DATABASE_URI:
+        try:
+            os.makedirs(os.path.dirname(settings.DATABASE_FILE))
+        except:
+            pass
+        log.info("Built-in database: %s", settings.DATABASE_URI)
+        upgrade_db()
+
+
+def upgrade_db():
+    alembic_cfg = Config()
+    alembic_cfg.set_main_option("script_location", "memorious:migrate")
+    with session.bind.begin() as connection:
+        alembic_cfg.attributes['connection'] = connection
+        command.upgrade(alembic_cfg, "head")

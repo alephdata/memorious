@@ -1,11 +1,11 @@
-from os import environ
+import os
 
 
 def env(name, default=None, required=False):
     name = 'MEMORIOUS_%s' % name.upper().strip()
-    if required and name not in environ:
+    if required and name not in os.environ:
         raise RuntimeError("Missing configuration: $%s" % name)
-    return environ.get(name, default)
+    return os.environ.get(name, default)
 
 
 def env_bool(name, default=False):
@@ -22,8 +22,12 @@ def env_bool(name, default=False):
 
 DEBUG = env_bool('DEBUG', default=False)
 
+# Base operating path
+BASE_PATH = env('BASE_PATH', os.path.join(os.getcwdu(), 'data'))
+
 # Database connection string
-DATABASE_URI = env('DATABASE_URI', required=True)
+DATABASE_FILE = os.path.join(BASE_PATH, 'memorious.sqlite3')
+DATABASE_URI = env('DATABASE_URI', 'sqlite:///%s' % DATABASE_FILE)
 
 # Directory which contains crawler pipeline YAML specs
 CONFIG_PATH = env('CONFIG_PATH', required=True)
@@ -48,7 +52,7 @@ BROKER_URI = 'amqp://guest:guest@localhost:5672//'
 BROKER_URI = env('BROKER_URI', BROKER_URI)
 
 # Enable delayed processing via queue
-EAGER = env_bool('EAGER', False)
+EAGER = env_bool('EAGER', True)
 
 
 ###############################################################################
@@ -56,11 +60,11 @@ EAGER = env_bool('EAGER', False)
 
 # Archive type (either 's3' or 'file', i.e. local file system):
 ARCHIVE_TYPE = env('ARCHIVE_TYPE', 'file')
+ARCHIVE_PATH = env('ARCHIVE_PATH', os.path.join(BASE_PATH, 'archive'))
 ARCHIVE_AWS_KEY_ID = env('AWS_ACCESS_KEY_ID')
 ARCHIVE_AWS_SECRET = env('AWS_SECRET_ACCESS_KEY')
 ARCHIVE_AWS_REGION = env('ARCHIVE_REGION', 'eu-west-1')
 ARCHIVE_BUCKET = env('ARCHIVE_BUCKET')
-ARCHIVE_PATH = env('ARCHIVE_PATH')
 
 
 ###############################################################################

@@ -1,10 +1,9 @@
 import logging
 from datetime import datetime
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
 
 from memorious.core import session
-from memorious.model.common import Base
+from memorious.model.common import Base, JSON
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +17,7 @@ class Result(Base):
     operation_id = Column(Integer, ForeignKey("operation.id"), nullable=True)
     prev_stage = Column(String, nullable=False, index=True)
     next_stage = Column(String, nullable=False, index=True)
-    data = Column(JSONB, nullable=False, default={})
+    data = Column(JSON, nullable=False, default={})
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     @classmethod

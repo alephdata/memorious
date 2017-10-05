@@ -2,10 +2,12 @@
 *.egg-info
 *.pyc
 *.rdb
-data
 .vscode/*
 dist/*
 build/*
+data/*
 env
 celerybeat-schedule*
 *.sh
+.DS_Store
+*.sqlite3

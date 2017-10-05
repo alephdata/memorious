@@ -1,11 +1,9 @@
 import click
 import logging
 from tabulate import tabulate
-from alembic.config import Config
-from alembic import command
 
 from memorious import settings
-from memorious.core import manager, session
+from memorious.core import manager, upgrade_db, ensure_db
 
 log = logging.getLogger(__name__)
 
@@ -24,16 +22,13 @@ def cli(debug, cache, incremental):
     settings.DEBUG = debug
     if settings.DEBUG:
         logging.basicConfig(level=logging.DEBUG)
+    ensure_db()
 
 
 @cli.command()
 def upgrade():
     """Connect to the database and create or upgrade the tables."""
-    alembic_cfg = Config()
-    alembic_cfg.set_main_option("script_location", "memorious:migrate")
-    with session.bind.begin() as connection:
-        alembic_cfg.attributes['connection'] = connection
-        command.upgrade(alembic_cfg, "head")
+    upgrade_db()
 
 
 def get_crawler(name):

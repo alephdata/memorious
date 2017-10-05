@@ -1,10 +1,9 @@
 import logging
 from datetime import datetime
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Column, String, Integer, DateTime
 
 from memorious.core import session
-from memorious.model.common import Base
+from memorious.model.common import Base, JSON
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +16,7 @@ class Tag(Base):
     crawler = Column(String(255), nullable=False, index=True)
     run_id = Column(String(50), nullable=True, index=True)
     key = Column(String, nullable=False, index=True)
-    value = Column(JSONB, nullable=False, default={})
+    value = Column(JSON, nullable=False, default={})
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     @classmethod
