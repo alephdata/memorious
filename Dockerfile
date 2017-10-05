@@ -20,4 +20,6 @@ COPY memorious /memorious/memorious
 WORKDIR /memorious
 RUN pip install -q -e .
 
-ENV MEMORIOUS_BASE_PATH /data
+ENV MEMORIOUS_BASE_PATH=/data \
+    MEMORIOUS_INCREMENTAL=true \
+    MEMORIOUS_EAGER=false
