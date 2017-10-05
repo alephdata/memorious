@@ -1,4 +1,7 @@
 build*
+dist*
+data*
 memorious.env
 docker-compose.*
 .git
+.gitignore
