@@ -29,7 +29,7 @@ celery.conf.update(
     beat_schedule={
         'scheduled-crawlers': {
             'task': 'memorious.tasks.process_schedule',
-            'schedule': crontab(minute='*/1')
+            'schedule': crontab(minute='*/30')
         },
     },
 )

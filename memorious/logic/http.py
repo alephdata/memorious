@@ -102,7 +102,9 @@ class ContextHttpResponse(object):
                     request.headers['If-None-Match'] = etag
 
             prepared = self.http.session.prepare_request(request)
-            response = self.http.session.send(prepared, stream=True)
+            response = self.http.session.send(prepared,
+                                              stream=True,
+                                              verify=False)
 
             if existing is not None and response.status_code == 304:
                 self.context.log.info("Using cached HTTP response: %s",

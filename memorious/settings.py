@@ -61,8 +61,10 @@ EAGER = env_bool('EAGER', True)
 # Archive type (either 's3' or 'file', i.e. local file system):
 ARCHIVE_TYPE = env('ARCHIVE_TYPE', 'file')
 ARCHIVE_PATH = env('ARCHIVE_PATH', os.path.join(BASE_PATH, 'archive'))
-ARCHIVE_AWS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-ARCHIVE_AWS_SECRET = env('AWS_SECRET_ACCESS_KEY')
+ARCHIVE_AWS_KEY_ID = env('AWS_ACCESS_KEY_ID',
+                         os.environ.get('AWS_ACCESS_KEY_ID'))
+ARCHIVE_AWS_SECRET = env('AWS_SECRET_ACCESS_KEY',
+                         os.environ.get('AWS_SECRET_ACCESS_KEY'))
 ARCHIVE_AWS_REGION = env('ARCHIVE_REGION', 'eu-west-1')
 ARCHIVE_BUCKET = env('ARCHIVE_BUCKET')
 

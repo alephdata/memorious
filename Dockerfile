@@ -13,7 +13,7 @@ RUN apt-get -qq -y autoremove && apt-get clean \
 ENV TESSDATA_PREFIX /usr/share/tesseract-ocr
 
 RUN pip install -q --upgrade pip && pip install -q --upgrade setuptools
-RUN pip install -q --upgrade psycopg2 pyicu lxml
+RUN pip install -q --upgrade psycopg2 pyicu lxml requests[security]
 
 COPY setup.py /memorious/
 COPY memorious /memorious/memorious
@@ -22,4 +22,5 @@ RUN pip install -q -e .
 
 ENV MEMORIOUS_BASE_PATH=/data \
     MEMORIOUS_INCREMENTAL=true \
-    MEMORIOUS_EAGER=false
+    MEMORIOUS_EAGER=false \
+    C_FORCE_ROOT=true
