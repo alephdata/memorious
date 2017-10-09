@@ -56,10 +56,10 @@ If you add new crawlers, you'll need to rebuild.
 To set the ``MEMORIOUS_*`` environment variables, modify `env.sh` (*before* 
 running `make install`). See the next section for configuration options.
 
-Set up Postgres. Either create a database is called `funes`, with username and
-password also `funes`, or updated the `MEMORIOUS_DATABASE_URI` environment
-variable in `env.sh` to match your local database. [TODO: make this run with 
-SQLite](https://github.com/alphedata/memorious/issues/8).
+If you leave ``MEMORIOUS_DATABASE_URI`` unset, it will use SQLite.
+
+Otherwise set the `MEMORIOUS_DATABASE_URI` environment
+variable in `env.sh` to match your local Postgres database.
 
 ```sh
 $ git clone git@github.com:alephdata/memorious.git memorious
@@ -67,6 +67,7 @@ $ cd memorious
 $ virtualenv env
 $ source env/bin/activate
 $ make install
+$ source env.sh
 ```
 
 As well as installing ``memorious``, this looks for a setup.py in your 
