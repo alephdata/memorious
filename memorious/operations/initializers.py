@@ -49,7 +49,9 @@ def sequence(context, data):
             context.set_tag(tag, True)
 
         number = number + step
-        if number >= stop:
+        if step > 0 and number >= stop:
+            break
+        if step < 0 and number <= stop: 
             break
 
         if delay is not None:
