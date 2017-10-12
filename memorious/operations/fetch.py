@@ -8,7 +8,7 @@ def fetch(context, data):
     url = data.get('url')
     result = context.http.get(url)
 
-    rules = context.params.get('rules', {'match_all': {}})
+    rules = context.get('rules', {'match_all': {}})
     if not Rule.get_rule(rules).apply(result):
         context.log.info('Fetch skip: %r', result.url)
         return
@@ -26,7 +26,7 @@ def fetch(context, data):
     context.emit(data=data)
 
 
-def davindex(context, data):
+def dav_index(context, data):
     """List files in a WebDAV directory."""
     # This is made to work with ownCloud/nextCloud, but some rumor has
     # it they are "standards compliant" and it should thus work for
@@ -47,3 +47,23 @@ def davindex(context, data):
             context.recurse(data=rdata)
         else:
             context.emit(data=rdata)
+
+
+def session(context, data):
+    """Set some HTTP parameters for all subsequent requests.
+
+    This includes ``user`` and ``password`` for HTTP basic authentication,
+    and ``user_agent`` as a header.
+    """
+    context.http.reset()
+
+    user = context.get('user')
+    password = context.get('password')
+    if user is not None and password is not None:
+        context.http.session.auth = (user, password)
+
+    user_agent = context.get('user_agent')
+    if user_agent is not None:
+        context.http.session.headers['User-Agent'] = user_agent
+
+    context.emit(data=data)

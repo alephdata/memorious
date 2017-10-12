@@ -1,3 +1,5 @@
+import os
+import six
 import uuid
 import logging
 import traceback
@@ -26,18 +28,16 @@ class Context(object):
         self.http = ContextHttp(self)
         self.datastore = datastore
 
-    def dump_state(self):
-        state = deepcopy(self.state)
-        state['crawler'] = self.crawler.name
-        state['run_id'] = self.run_id
-        return state
-
-    def recurse(self, data={}, delay=None):
-        return self.emit(stage=self.stage.name,
-                         data=data,
-                         delay=delay)
+    def get(self, name, default=None):
+        """Get a configuration value and expand environment variables."""
+        value = self.params.get(name, default=None)
+        if isinstance(value, six.string_types):
+            value = os.path.expandvars(value)
+        return value
 
     def emit(self, rule='pass', stage=None, data={}, delay=None):
+        """Invoke the next stage, either based on a handling rule, or by calling
+        the `pass` rule by default."""
         if stage is None:
             stage = self.stage.handlers.get(rule)
         if stage is None or stage not in self.crawler.stages:
@@ -48,7 +48,15 @@ class Context(object):
                     self.stage.name, stage, data)
         handle.apply_async((state, stage, data), countdown=delay)
 
+    def recurse(self, data={}, delay=None):
+        """Have a stage invoke itself with a modified set of arguments."""
+        return self.emit(stage=self.stage.name,
+                         data=data,
+                         delay=delay)
+
     def execute(self, data):
+        """Execute the crawler and create a database record of having done
+        so."""
         op = Operation()
         op.crawler = self.crawler.name
         op.name = self.stage.name
@@ -109,6 +117,8 @@ class Context(object):
         return self.check_tag(key, run_id=self.run_id)
 
     def store_file(self, file_path, content_hash=None):
+        """Put a file into permanent storage so it can be visible to other
+        stages."""
         return storage.archive_file(file_path, content_hash=content_hash)
 
     @contextmanager
@@ -122,6 +132,12 @@ class Context(object):
                 yield fh
         finally:
             storage.cleanup_file(content_hash)
+
+    def dump_state(self):
+        state = deepcopy(self.state)
+        state['crawler'] = self.crawler.name
+        state['run_id'] = self.run_id
+        return state
 
     @classmethod
     def from_state(cls, state, stage):

@@ -8,9 +8,9 @@ DEFAULT_INSTANCE = 'documentcloud'
 
 
 def documentcloud_query(context, data):
-    host = context.params.get('host', DEFAULT_HOST)
-    instance = context.params.get('instance', DEFAULT_INSTANCE)
-    query = context.params.get('query')
+    host = context.get('host', DEFAULT_HOST)
+    instance = context.get('instance', DEFAULT_INSTANCE)
+    query = context.get('query')
 
     search_url = urljoin(host, 'search/documents.json')
     for page in count(1):

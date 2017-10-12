@@ -53,7 +53,7 @@ def submit_result(context, result, data):
 
 def get_collection_id(context, session):
     url = make_url('collections')
-    foreign_id = context.params.get('collection', context.name)
+    foreign_id = context.get('collection', context.name)
     while True:
         res = session.get(url, params={'limit': 100})
         data = res.json()
