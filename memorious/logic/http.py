@@ -31,23 +31,26 @@ class ContextHttp(object):
             session = self.context.state.get(self.STATE_SESSION)
             self.session = pickle.loads(session)
         else:
-            self.session = Session()
-
-    @property
-    def ua(self):
-        return UserAgent().random
+            self.reset()
 
     def reset(self):
         self.session = Session()
+        if self.context.crawler.stealthy:
+            self.session.headers['User-Agent'] = UserAgent().random
+        return self.session
 
     def request(self, url, method='GET', headers={}, auth=None, data=None,
-                params=None, json=None, random_ua=False):
+                params=None, json=None, allow_redirects=True):
         url = normalize_url(url)
-        if random_ua:
-            headers.update({'User-Agent': self.ua})
         request = Request(method, url, data=data, headers=headers,
                           params=params, json=json, auth=auth)
-        return ContextHttpResponse.from_request(self, request)
+        request_id = hash_data((request.url, request.method,
+                                request.params, request.data,
+                                request.json))
+        return ContextHttpResponse(self,
+                                   request=request,
+                                   request_id=request_id,
+                                   allow_redirects=allow_redirects)
 
     def get(self, url, **kwargs):
         return self.request(url, method='GET', **kwargs)
@@ -70,11 +73,13 @@ class ContextHttpResponse(object):
     * Allow responses to be serialized between crawler operations.
     """
 
-    def __init__(self, http, request=None, request_id=None):
+    def __init__(self, http, request=None, request_id=None,
+                 allow_redirects=True):
         self.http = http
         self.context = http.context
         self.request = request
         self.request_id = request_id
+        self.allow_redirects = allow_redirects
         self._response = None
         self._status_code = None
         self._url = None
@@ -101,10 +106,12 @@ class ContextHttpResponse(object):
                 if etag:
                     request.headers['If-None-Match'] = etag
 
-            prepared = self.http.session.prepare_request(request)
-            response = self.http.session.send(prepared,
-                                              stream=True,
-                                              verify=False)
+            session = self.http.session
+            prepared = session.prepare_request(request)
+            response = session.send(prepared,
+                                    stream=True,
+                                    verify=False,
+                                    allow_redirects=self.allow_redirects)
 
             if existing is not None and response.status_code == 304:
                 self.context.log.info("Using cached HTTP response: %s",
@@ -138,6 +145,9 @@ class ContextHttpResponse(object):
             if self.http.cache and self.ok:
                 self.context.set_tag(self.request_id, self.serialize())
         return self._file_path
+
+    def execute(self):
+        self._stream_content()
 
     @property
     def url(self):
@@ -269,13 +279,6 @@ class ContextHttpResponse(object):
         obj = cls(http, request_id=data.get('request_id'))
         obj.apply_data(data)
         return obj
-
-    @classmethod
-    def from_request(cls, http, request):
-        request_id = hash_data((request.url, request.method,
-                                request.params, request.data,
-                                request.json))
-        return cls(http, request=request, request_id=request_id)
 
     def __repr__(self):
         return '<ContextHttpResponse(%s,%s)>' % (self.url,
