@@ -17,6 +17,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True)
     level = Column(String, nullable=False, index=True)
+    crawler = Column(String, nullable=False, index=True)
     operation_id = Column(Integer, ForeignKey("operation.id"), nullable=False)
     error_type = Column(String, nullable=True)
     error_message = Column(String, nullable=True)
@@ -24,12 +25,13 @@ class Event(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     @classmethod
-    def save(cls, operation_id, level, error_type=None,
+    def save(cls, crawler, operation_id, level, error_type=None,
              error_message=None, error_details=None):
         """Create an event, possibly based on an exception."""
         event = cls()
-        event.level = level
+        event.crawler = crawler
         event.operation_id = operation_id
+        event.level = level
         event.error_type = error_type
         event.error_message = error_message
         event.error_details = error_details
@@ -39,14 +41,11 @@ class Event(Base):
 
     @classmethod
     def delete(cls, crawler):
-        from memorious.model.operation import Operation
-        op_ids = session.query(Operation.id)
-        op_ids = op_ids.filter(Operation.crawler == crawler)
         pq = session.query(cls)
-        pq = pq.filter(cls.operation_id.in_(op_ids.subquery()))
+        pq = pq.filter(cls.crawler == crawler)
         pq.delete(synchronize_session=False)
         session.flush()
 
     def __repr__(self):
-        return '<Event(%s,%s,%s)>' % \
-            (self.operation_id, self.error_type, self.level)
+        return '<Event(%s,%s,%s,%s)>' % \
+            (self.crawler, self.operation_id, self.error_type, self.level)

@@ -174,7 +174,7 @@ TODO
 To autogenerate a migration:
 
 ```sh
-$ cd memorious/migration
+$ cd memorious/migrate
 $ alembic revision --autogenerate -m 'message'
 ```
 

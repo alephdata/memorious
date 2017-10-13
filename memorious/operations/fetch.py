@@ -14,9 +14,9 @@ def fetch(context, data):
         return
 
     if not result.ok:
-        context.log.warning("Fetch fail [%s]: %s",
-                            result.status_code,
-                            result.url)
+        context.emit_warning("Fetch fail [%s]: %s",
+                             result.status_code,
+                             result.url)
         return
 
     context.log.info("Fetched [%s]: %r", result.status_code, result.url)

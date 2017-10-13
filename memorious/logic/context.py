@@ -30,7 +30,7 @@ class Context(object):
 
     def get(self, name, default=None):
         """Get a configuration value and expand environment variables."""
-        value = self.params.get(name, default=None)
+        value = self.params.get(name, default)
         if isinstance(value, six.string_types):
             value = os.path.expandvars(value)
         return value
@@ -83,15 +83,22 @@ class Context(object):
             session.add(op)
             session.commit()
 
-    def emit_warning(self, message, type=None, details=None):
-        return Event.save(self.operation_id, Event.LEVEL_WARNING,
+    def emit_warning(self, message, type=None, details=None, *args):
+        if len(args):
+            message = message % args
+        self.log.warning(message)
+        return Event.save(self.crawler.name,
+                          self.operation_id,
+                          Event.LEVEL_WARNING,
                           error_type=type,
                           error_message=message,
                           error_details=details)
 
     def emit_exception(self, exc):
         self.log.exception(exc)
-        return Event.save(self.operation_id, Event.LEVEL_ERROR,
+        return Event.save(self.crawler.name,
+                          self.operation_id,
+                          Event.LEVEL_ERROR,
                           error_type=exc.__class__.__name__,
                           error_message=unicode(exc),
                           error_details=traceback.format_exc())

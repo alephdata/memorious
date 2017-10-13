@@ -1,5 +1,5 @@
 import random
-from urlparse import urljoin
+from urlparse import urljoin, urlparse
 from memorious.helpers.rule import Rule
 from memorious.util import normalize_url
 
@@ -30,6 +30,9 @@ def parse_html(context, data, result):
     random.shuffle(urls)
     for url in urls:
         if context.check_run_tag(url):
+            continue
+        parsed = urlparse(url)
+        if parsed.scheme.lower() not in ['http', 'https']:
             continue
         context.set_run_tag(url, None)
         context.emit(rule='fetch', data={
