@@ -1,0 +1,60 @@
+/*
+
+* background: #333
+* foreground: #999
+* occrp: #982022
+* blue: #0099cc
+* ID green: #3a4953
+
+*/
+
+body {
+    background-color: #333;
+    color: #999;
+    font-size: 14px;
+}
+
+a, a:visited, a:hover {
+    color: #999;
+}
+
+i {
+    color: #982022;
+}
+
+.error, .error i {
+    color: red;
+}
+
+.warning, .warning i {
+    color: orange;
+}
+
+#airlock {
+    position: relative;
+    min-height: 95vh;
+    padding-bottom: 1em;
+}
+
+footer {
+    padding-top: 1em;
+    padding-bottom: 2em;
+    background-color: #222;
+    text-align: right;
+}
+
+/* Table */
+
+.table td, .table th {
+    border-top: 1px solid #222;
+}
+
+td.number, th.number {
+    text-align: right;
+}
+
+/* Utility */
+
+code {
+    background-color: none;
+}

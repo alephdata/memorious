@@ -1,0 +1,61 @@
+{%extends "layout.html" %}
+
+{% block title %}
+  Crawler overview
+{% endblock %}
+
+{% block content %}
+    <table class="table table-sm">
+        <tr>
+            <th colspan="2">Crawler</th>
+            <th>Schedule</th>
+            <th class="number">Runs (Operations)</th>
+            <th class="number">Errors</th>
+            <th class="number">Warnings</th>
+        </tr>
+
+        {% for item in crawlers %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('.crawler', name=item.crawler.name) }}">
+                        <i class="fa fa-circle" aria-hidden="true"></i>
+                        <code>
+                            {{item.crawler.name}}
+                        </code>
+                    </a>
+                </td>
+                <td>
+                    {{item.crawler.description}}
+                </td>
+                <td>
+                    {{item.crawler.schedule or 'none'}}
+                </td>
+                <td class="number">
+                    {% if item.operations %}
+                        {{item.runs | number}}
+                        ({{item.operations | number}})
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="number">
+                    {% if item.error %}
+                        <span class="error">
+                            {{item.error | number}}
+                            <i class="fa fa-warning" aria-hidden="true"></i>
+                        </span>
+                    {% endif %}
+                </td>
+                <td class="number">
+                    {% if item.warning %}
+                        <span class="warning">
+                            {{item.warning | number}}
+                            <i class="fa fa-warning" aria-hidden="true"></i>
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+
