@@ -11,12 +11,14 @@ class CrawlerStage(object):
         self.params = config.get('params') or {}
         self.handlers = config.get('handle') or {}
 
-        method = config.get('method')
+    @property
+    def method(self):        
+        method = self.config.get('method')
         package = 'memorious.operations'
         if ':' in method:
             package, method = method.rsplit(':', 1)
         module = import_module(package)
-        self.method = getattr(module, method)
+        return getattr(module, method)
 
     def __repr__(self):
         return '<CrawlerStage(%r, %s)>' % (self.crawler, self.name)
