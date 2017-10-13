@@ -1,5 +1,7 @@
+import pkg_resources
 from sqlalchemy import func, distinct
 from sqlalchemy.orm import aliased
+from datetime import datetime, timedelta
 
 from memorious.core import session, manager
 from memorious.model import Event, Operation
@@ -41,7 +43,20 @@ def crawlers_index():
     for crawler in manager:
         data = counts.get(crawler.name, {})
         data['crawler'] = crawler
-        print data
         crawlers.append(data)
-
     return crawlers
+
+
+def global_stats():
+    stats = {
+        'version': pkg_resources.get_distribution('memorious').version,
+        'num_crawlers': len(manager)
+    }
+
+    steps = (('ops_last_hour', timedelta(hours=1)),
+             ('ops_last_day', timedelta(days=1)))
+    for (field, delta) in steps:
+        q = session.query(func.count(Operation.id))
+        q = q.filter(Operation.started_at >= datetime.utcnow() - delta)
+        stats[field] = q.scalar()
+    return stats

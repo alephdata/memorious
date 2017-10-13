@@ -17,6 +17,24 @@
     <link rel="shortcut icon" href="http://assets.pudo.org/img/favicon.ico">
   </head>
   <body>
+    <header>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <i class="fa fa-cogs" aria-hidden="true"></i>    
+                    <strong>memorious</strong>
+                </div>
+                <div class="col text-right">
+                    {{ num_crawlers | number }} crawlers
+                    &middot;
+                    last hour: {{ ops_last_hour | number }} ops
+                    &middot;
+                    last day: {{ ops_last_day | number }} ops
+                </div>
+            </div>
+        </div>
+    </header>
+
     <div id="airlock" class="container-fluid">
         {% block content %}This page intentionally left blank{% endblock %}
     </div>
@@ -30,6 +48,8 @@
                 </strong>
                 &middot;
                 data crawling framework
+                &middot;
+                version {{version}}
                 &middot;
                 <a href="https://github.com/alephdata/memorious">
                     <i class="fa fa-github" aria-hidden="true"></i>

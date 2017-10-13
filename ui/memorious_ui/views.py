@@ -2,7 +2,7 @@ from flask import Flask
 from flask import render_template
 from babel.numbers import format_number
 
-from memorious_ui.reporting import crawlers_index
+from memorious_ui.reporting import crawlers_index, global_stats
 
 app = Flask(__name__)
 
@@ -13,6 +13,9 @@ def number_filter(s):
         return '-'
     return format_number(s, locale='en_US')
 
+@app.context_processor
+def context():
+    return global_stats()
 
 @app.route('/')
 def index():

@@ -24,15 +24,15 @@ def parse_html(context, data, result):
             if attr is None:
                 continue
             url = normalize_url(urljoin(result.url, attr))
+            parsed = urlparse(url)
+            if parsed.scheme.lower() not in ['http', 'https']:
+                continue
             if url not in urls:
                 urls.append(url)
 
     random.shuffle(urls)
     for url in urls:
         if context.check_run_tag(url):
-            continue
-        parsed = urlparse(url)
-        if parsed.scheme.lower() not in ['http', 'https']:
             continue
         context.set_run_tag(url, None)
         context.emit(rule='fetch', data={
