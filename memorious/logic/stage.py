@@ -8,12 +8,13 @@ class CrawlerStage(object):
         self.crawler = crawler
         self.name = name
         self.config = config
+        self.method_name = config.get('method')
         self.params = config.get('params') or {}
         self.handlers = config.get('handle') or {}
 
     @property
-    def method(self):        
-        method = self.config.get('method')
+    def method(self):
+        method = self.method_name
         package = 'memorious.operations'
         if ':' in method:
             package, method = method.rsplit(':', 1)

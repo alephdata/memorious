@@ -6,6 +6,7 @@
 dist/*
 build/*
 data/*
+ui/data/*
 env
 celerybeat-schedule*
 *.sh

@@ -24,7 +24,8 @@ class Crawler(object):
         self.manager = manager
         self.source_file = source_file
         with open(source_file) as fh:
-            self.config = yaml.load(fh)
+            self.config_yaml = fh.read()
+            self.config = yaml.load(self.config_yaml)
 
         self.name = os.path.basename(source_file)
         self.name = self.config.get('name', self.name)
@@ -77,6 +78,9 @@ class Crawler(object):
 
     def get(self, name):
         return self.stages.get(name)
+
+    def __iter__(self):
+        return iter(self.stages.values())
 
     def __repr__(self):
         return '<Crawler(%s)>' % self.name
