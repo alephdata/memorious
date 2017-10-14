@@ -22,7 +22,8 @@ def fetch(context, data):
     context.log.info("Fetched [%s]: %r", result.status_code, result.url)
     data.update(result.serialize())
     if url != result.url:
-        context.set_run_tag(result.url, None)
+        tag = '%s:%s' % (context.run_id, url)
+        context.set_tag(tag, None)
     context.emit(data=data)
 
 

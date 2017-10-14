@@ -39,6 +39,7 @@ setup(
         'fake-useragent',
         'pycountry',
         'countrynames',
+        'dateparser',
         'stringcase'
     ],
     entry_points={

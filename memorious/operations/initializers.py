@@ -51,7 +51,7 @@ def sequence(context, data):
         number = number + step
         if step > 0 and number >= stop:
             break
-        if step < 0 and number <= stop: 
+        if step < 0 and number <= stop:
             break
 
         if delay is not None:
