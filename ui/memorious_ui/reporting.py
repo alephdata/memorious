@@ -1,8 +1,8 @@
-import pkg_resources
 from sqlalchemy import func, distinct
 from sqlalchemy.orm import aliased
 from datetime import datetime, timedelta
 
+from memorious import settings
 from memorious.core import session, manager
 from memorious.model import Event, Operation
 
@@ -10,7 +10,7 @@ from memorious.model import Event, Operation
 def global_stats():
     """Stats visible on each page of the UI."""
     stats = {
-        'version': pkg_resources.get_distribution('memorious').version,
+        'version': settings.VERSION,
         'num_crawlers': len(manager)
     }
 

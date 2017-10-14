@@ -1,4 +1,5 @@
 import os
+import pkg_resources
 
 
 def env(name, default=None, required=False):
@@ -20,6 +21,9 @@ def env_bool(name, default=False):
 ###############################################################################
 # Core configuration
 
+VERSION = pkg_resources.get_distribution('memorious').version
+
+# Enable debug logging etc.
 DEBUG = env_bool('DEBUG', default=False)
 
 # Base operating path
@@ -38,11 +42,14 @@ INCREMENTAL = env_bool('INCREMENTAL', default=True)
 # HTTP request configuration
 HTTP_CACHE = env_bool('HTTP_CACHE', default=True)
 
+# HTTP user agent default
+USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.1)'
+USER_AGENT = '%s aleph.memorious/%s' % (USER_AGENT, VERSION)
+USER_AGENT = env('USER_AGENT', USER_AGENT)
 
-###############################################################################
 # Datastore: operational data store (ODS) database connection
-
-DATASTORE_URI = env('DATASTORE_URI')
+DATASTORE_FILE = os.path.join(BASE_PATH, 'datastore.sqlite3')
+DATASTORE_URI = env('DATASTORE_URI', 'sqlite:///%s' % DATASTORE_FILE)
 
 
 ###############################################################################

@@ -35,6 +35,7 @@ class ContextHttp(object):
 
     def reset(self):
         self.session = Session()
+        self.session.headers['User-Agent'] = settings.USER_AGENT
         if self.context.crawler.stealthy:
             self.session.headers['User-Agent'] = UserAgent().random
         return self.session
