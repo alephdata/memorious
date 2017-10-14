@@ -21,15 +21,17 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col">
-                    <i class="fa fa-cogs" aria-hidden="true"></i>    
-                    <strong>memorious</strong>
+                    <a href="{{ url_for('.index') }}" class="no-underline">
+                        <i class="fa fa-cogs" aria-hidden="true"></i>    
+                        <strong>memorious</strong>
+                    </a>
                 </div>
                 <div class="col text-right">
                     {{ num_crawlers | number }} crawlers
                     &middot;
-                    last hour: {{ ops_last_hour | number }} ops
+                    last hour: {{ ops_last_hour | number('0') }} ops
                     &middot;
-                    last day: {{ ops_last_day | number }} ops
+                    last day: {{ ops_last_day | number('0') }} ops
                 </div>
             </div>
         </div>
@@ -42,22 +44,28 @@
     <footer>
         <div class="container-fluid">
             <div class="col">
-                <strong>
-                    <i class="fa fa-cogs" aria-hidden="true"></i>    
-                    funes the memorious
-                </strong>
-                &middot;
-                data crawling framework
-                &middot;
-                version {{version}}
-                &middot;
-                <a href="https://github.com/alephdata/memorious">
+                <p>
+                    <strong>
+                        <i class="fa fa-cogs" aria-hidden="true"></i>    
+                        funes the memorious
+                    </strong>
+                    &middot;
+                    data crawling framework
+                    &middot;
+                    version {{version}}
+                    &middot;
                     <i class="fa fa-github" aria-hidden="true"></i>
-                    source code    
-                </a>
+                    <a href="https://github.com/alephdata/memorious">
+                        source code    
+                    </a>
+                </p>
+                <p>
+                    &copy; 2017: Organized Crime and Corruption Reporting Project (JDN)
+                </p>
             </div>
         </div>
     </footer>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="{{ url_for('static', filename='invoke.js') }}"></script>
   </body>
 </html>

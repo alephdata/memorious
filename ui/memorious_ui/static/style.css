@@ -9,45 +9,55 @@
 */
 
 body {
-    background-color: #333;
+    background-color: #222;
     color: #999;
     font-size: 14px;
-}
-
-a, a:visited, a:hover {
-    color: #999;
 }
 
 i {
     color: #982022;
 }
 
-.error, .error i {
-    color: red;
+a, a:visited, a:hover {
+    color: #999;
+    text-decoration: underline;
 }
 
-.warning, .warning i {
+a.no-underline, a.no-underline:hover {
+    text-decoration: none;
+}
+
+.error, .error i, a.error, a.error:hover {
+    color: red;
+    text-decoration: none;
+}
+
+.warning, .warning i, a.warning, a.warning:hover {
     color: orange;
+    text-decoration: none;
 }
 
 #airlock {
     position: relative;
-    min-height: 95vh;
+    background-color: #333;
+    min-height: 80vh;
     padding-bottom: 1em;
+    padding-top: 1em;
 }
 
 header {
     padding-top: 1em;
     padding-bottom: 1em;
-    margin-bottom: 1em;
-    background-color: #222;
 }
 
 footer {
     padding-top: 1em;
     padding-bottom: 2em;
-    background-color: #222;
     text-align: right;
+}
+
+footer p {
+    margin-bottom: 0.2em;
 }
 
 /* Table */
@@ -60,8 +70,58 @@ td.number, th.number {
     text-align: right;
 }
 
+th.heading {
+    background: #222;
+    font-size: 1.1em;
+}
+
+/* Button */
+
+.invoke {
+    background-color: #222;
+    color: #999;
+    padding: 0.2em 0.5em 0.2em 0.5em;
+    font-size: 0.8em;
+    border-radius: 0.1em;
+    display: inline-block;
+    font-weight: bolder;
+    text-decoration: none;
+}
+
+.invoke:hover {
+    text-decoration: none;
+    background-color: #000;
+}
+
+.invoke i {
+    color: #999;
+    margin-right: 0.2em;
+}
+
+.invoke.done, .invoke.done i {
+    background-color: #111;
+    color: #555;
+}
+
 /* Utility */
 
 code {
-    background-color: none;
+    background-color: #333;
+    padding: 0;
+    color: #999;
+}
+
+pre {
+    color: #999;
+    background-color: #222;
+    padding: 0.5em;
+    margin-top: 1em;
+}
+
+hr {
+    border-top: 1px solid #222;
+}
+
+.breadcrumb {
+    background-color: #222;
 }

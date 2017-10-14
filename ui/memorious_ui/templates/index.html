@@ -1,7 +1,7 @@
 {%extends "layout.html" %}
 
 {% block title %}
-  Crawler overview
+    Crawler overview
 {% endblock %}
 
 {% block content %}
@@ -10,19 +10,19 @@
             <th>Crawler</th>
             <th>Description</th>
             <th>Schedule</th>
-            <th class="number">Runs (Operations)</th>
+            <th class="number">Runs (Ops)</th>
+            <th>Latest</th>
             <th class="number">Errors</th>
-            <th class="number">Warnings</th>
+            <th class="number">Warn</th>
+            <th class="number">Action</th>
         </tr>
 
         {% for item in crawlers %}
             <tr>
                 <td>
+                    <i class="fa fa-circle" aria-hidden="true"></i>
                     <a href="{{ url_for('.crawler', name=item.crawler.name) }}">
-                        <i class="fa fa-circle" aria-hidden="true"></i>
-                        <code>
-                            {{item.crawler.name}}
-                        </code>
+                        <code>{{item.crawler.name}}</code>
                     </a>
                 </td>
                 <td>
@@ -39,21 +39,30 @@
                         -
                     {% endif %}
                 </td>
+                <td>
+                    {{item.last_active | datetime}}
+                </td>
                 <td class="number">
                     {% if item.error %}
-                        <span class="error">
+                        <a href="{{ url_for('.events', name=item.crawler.name, level='error') }}" class="error">
                             {{item.error | number}}
                             <i class="fa fa-warning" aria-hidden="true"></i>
-                        </span>
+                        </a>
                     {% endif %}
                 </td>
                 <td class="number">
                     {% if item.warning %}
-                        <span class="warning">
+                        <a href="{{ url_for('.events', name=item.crawler.name, level='warning') }}" class="warning">
                             {{item.warning | number}}
                             <i class="fa fa-warning" aria-hidden="true"></i>
-                        </span>
+                        </a>
                     {% endif %}
+                </td>
+                <td class="number">
+                    <a class="invoke" href='#' data-crawler="{{ item.crawler.name }}" data-action="run">
+                        <i class="fa fa-play" aria-hidden="true"></i>    
+                        Run
+                    </a>
                 </td>
             </tr>
         {% endfor %}

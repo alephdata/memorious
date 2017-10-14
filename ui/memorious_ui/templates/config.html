@@ -1,0 +1,26 @@
+{%extends "layout.html" %}
+
+{% block title %}
+    Configuration: {{crawler.name}}
+{% endblock %}
+
+{% block content %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ url_for('.index') }}">Crawlers</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ url_for('.crawler', name=crawler.name) }}">{{crawler.name}}</a>
+        </li>
+        <li class="breadcrumb-item active">
+            Configuration
+        </li>
+    </ol>
+
+    <p>
+        <strong>Configuration: </strong>
+        <code>{{ crawler.source_file }}</code>
+    </p>
+    <pre>{{ crawler.config_yaml }}</pre>
+{% endblock %}
+

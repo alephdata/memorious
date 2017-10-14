@@ -1,0 +1,89 @@
+{%extends "layout.html" %}
+
+{% block title %}
+    {{crawler.name}}
+{% endblock %}
+
+{% block content %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ url_for('.index') }}">Crawlers</a>
+        </li>
+        <li class="breadcrumb-item active">
+            {{crawler.name}}
+        </li>
+    </ol>
+
+    <table class="table table-sm">
+        <tr>
+            <th colspan="4" class="heading">
+                Overview: {{crawler.name}}
+            </th>
+        </tr>
+        <tr>
+            <th width="15%">Description</th>
+            <td>{{crawler.description}}</td>
+            <th width="15%">Schedule</th>
+            <td>{{crawler.schedule}}</td>
+        </tr>
+        <tr>
+            <th width="15%">Configuration</th>
+            <td>
+                <a href="{{ url_for('.config', name=crawler.name) }}">
+                    .yaml
+                </a>
+            </td>
+            <th width="15%">Schedule</th>
+            <td>{{crawler.schedule}}</td>
+        </tr>
+    </table>
+
+    <table class="table table-sm">
+        <tr>
+            <th colspan="7" class="heading">
+                Crawler stability by stage
+            </th>
+        </tr>
+        <tr>
+            <th>Stage</th>
+            <th>Operation</th>
+            <th class="number">Pending</th>
+            <th class="number">Success</th>
+            <th class="number">Failed</th>
+            <th class="number">Errors</th>
+            <th class="number">Warn</th>
+        </tr>
+        {% for item in stages %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('.events', name=crawler.name, stage=item.stage.name) }}">
+                        <code>{{ item.stage.name }}</code>
+                    </a>
+                </td>
+                <td>
+                    <code>{{ item.stage.method_name }}</code>
+                </td>
+                <td class="number">{{ item.pending | number('0') }}</td>
+                <td class="number">{{ item.success | number('0') }}</td>
+                <td class="number">{{ item.failed | number('0') }}</td>
+                <td class="number">
+                    {% if item.error %}
+                        <a href="{{ url_for('.events', name=crawler.name, stage=item.stage.name, level='error') }}" class="error">
+                            {{item.error | number}}
+                            <i class="fa fa-warning" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                </td>
+                <td class="number">
+                    {% if item.warning %}
+                        <a href="{{ url_for('.events', name=crawler.name, stage=item.stage.name, level='error') }}" class="warning">
+                            {{item.warning | number}}
+                            <i class="fa fa-warning" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+
