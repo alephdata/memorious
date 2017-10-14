@@ -17,27 +17,30 @@ def parse_html(context, data, result):
     if title is not None and 'title' not in data:
         data['title'] = title
 
-    urls = []
+    seen = set()
     for tag_query, attr_name in URL_TAGS:
-        for tag in result.html.findall(tag_query):
-            attr = tag.get(attr_name)
+        for element in result.html.findall(tag_query):
+            attr = element.get(attr_name)
             if attr is None:
                 continue
+
             url = normalize_url(urljoin(result.url, attr))
+            if url in seen:
+                continue
+            seen.add(url)
             parsed = urlparse(url)
             if parsed.scheme.lower() not in ['http', 'https']:
                 continue
-            if url not in urls:
-                urls.append(url)
 
-    random.shuffle(urls)
-    for url in urls:
-        if context.check_run_tag(url):
-            continue
-        context.set_run_tag(url, None)
-        context.emit(rule='fetch', data={
-            'url': url
-        })
+            tag = '%s:%s' % (context.run_id, url)
+            if context.check_tag(tag):
+                continue
+            context.set_tag(tag, None)
+
+            data = {'url': url}
+            if element.get('title'):
+                data['title'] = element.get('title')
+            context.emit(rule='fetch', data=data)
 
 
 def parse(context, data):

@@ -39,6 +39,9 @@ CONFIG_PATH = env('CONFIG_PATH', required=True)
 # Try and run scrapers in a way that only acquires new data
 INCREMENTAL = env_bool('INCREMENTAL', default=True)
 
+# How many days until an incremental crawl expires
+EXPIRE = int(env('EXPIRE', 100))
+
 # HTTP request configuration
 HTTP_CACHE = env_bool('HTTP_CACHE', default=True)
 

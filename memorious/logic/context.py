@@ -4,7 +4,8 @@ import uuid
 import logging
 import traceback
 from copy import deepcopy
-from datetime import datetime
+from normality import stringify
+from datetime import datetime, timedelta
 from contextlib import contextmanager
 
 from memorious.core import manager, storage, celery, session
@@ -22,6 +23,7 @@ class Context(object):
         self.stage = stage
         self.state = state
         self.params = stage.params
+        self.incremental = state.get('incremental')
         self.run_id = state.get('run_id') or uuid.uuid1().hex
         self.operation_id = None
         self.log = logging.getLogger('%s.%s' % (crawler.name, stage.name))
@@ -103,25 +105,46 @@ class Context(object):
                           error_message=unicode(exc),
                           error_details=traceback.format_exc())
 
-    def set_tag(self, key, value, run_id=None):
-        return Tag.save(self.crawler, key, value, run_id=run_id)
+    def set_tag(self, key, value):
+        return Tag.save(self.crawler, key, value)
 
-    def set_run_tag(self, key, value):
-        return self.set_tag(key, value, run_id=self.run_id)
-
-    def get_tag(self, key, run_id=None):
-        tag = Tag.find(self.crawler, key, run_id=run_id)
+    def get_tag(self, key):
+        tag = Tag.find(self.crawler, key)
         if tag is not None:
             return tag.value
 
-    def get_run_tag(self, key):
-        return self.get_tag(key, run_id=self.run_id)
+    def check_tag(self, key):
+        return Tag.exists(self.crawler, key)
 
-    def check_tag(self, key, run_id=None):
-        return Tag.exists(self.crawler, key, run_id=run_id)
+    def skip_incremental(self, *criteria):
+        """Perform an incremental check on a set of criteria.
 
-    def check_run_tag(self, key):
-        return self.check_tag(key, run_id=self.run_id)
+        This can be used to execute a part of a crawler only once per an
+        interval (which is specified by the ``expire`` setting). If the
+        operation has already been performed (and should thus be skipped),
+        this will return ``True``. If the operation needs to be executed,
+        the returned value will be ``False``.
+        """
+        if not self.incremental:
+            return False
+
+        # this is pure convenience, and will probably backfire at some point.
+        criteria = [stringify(c) for c in criteria]
+        key = ':'.join([c for c in criteria if c is not None])
+        if not len(key):
+            return False
+
+        # this is used to re-run parts of a scrape after a certain interval,
+        # e.g. half a year, or a year
+        since = None
+        if self.crawler.expire > 0:
+            delta = timedelta(days=-1 * self.crawler.expire)
+            since = datetime.utcnow() - delta
+
+        if Tag.exists(self.crawler, key, since=since):
+            return True
+        self.set_tag(key, None)
+        return False
 
     def store_file(self, file_path, content_hash=None):
         """Put a file into permanent storage so it can be visible to other

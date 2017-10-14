@@ -4,6 +4,7 @@ import logging
 
 from datetime import timedelta, datetime
 
+from memorious import settings
 from memorious.core import session
 from memorious.model import Tag, Operation, Result
 from memorious.logic.context import handle
@@ -29,11 +30,12 @@ class Crawler(object):
 
         self.name = os.path.basename(source_file)
         self.name = self.config.get('name', self.name)
-        self.description = self.config.get('description')
+        self.description = self.config.get('description', self.name)
         self.schedule = self.config.get('schedule')
         self.init_stage = self.config.get('init', 'init')
         self.delta = Crawler.SCHEDULES.get(self.schedule)
         self.delay = int(self.config.get('delay', 0))
+        self.expire = int(self.config.get('expire', settings.EXPIRE))
         self.stealthy = self.config.get('stealthy', False)
 
         self.stages = {}
@@ -59,9 +61,14 @@ class Crawler(object):
         Operation.delete(self.name)
         session.commit()
 
-    def run(self):
+    def run(self, incremental=None):
         """Queue the execution of a particular crawler."""
-        state = {'crawler': self.name}
+        state = {
+            'crawler': self.name,
+            'incremental': settings.INCREMENTAL
+        }
+        if incremental is not None:
+            state['incremental'] = incremental
         stage = self.get(self.init_stage)
         handle.delay(state, stage.name, {})
 

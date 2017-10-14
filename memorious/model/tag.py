@@ -14,39 +14,40 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     crawler = Column(String(255), nullable=False, index=True)
-    run_id = Column(String(50), nullable=True, index=True)
     key = Column(String, nullable=False, index=True)
     value = Column(JSON, nullable=False, default={})
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     @classmethod
-    def save(cls, crawler, key, value, run_id=None):
-        obj = cls.find(crawler, key, run_id=run_id)
+    def save(cls, crawler, key, value):
+        obj = cls.find(crawler, key)
         if obj is None:
             obj = cls()
             obj.crawler = crawler.name
-            obj.run_id = run_id
             obj.key = key
         obj.value = value
+        obj.timestamp = datetime.utcnow()
         session.add(obj)
         session.flush()
         return obj
 
     @classmethod
-    def find(cls, crawler, key, run_id=None):
+    def find(cls, crawler, key, since=None):
         q = session.query(cls)
         q = q.filter(cls.crawler == crawler.name)
-        q = q.filter(cls.run_id == run_id)
         q = q.filter(cls.key == key)
+        if since is not None:
+            q = q.filter(cls.timestamp >= since)
         q = q.order_by(cls.timestamp.desc())
         return q.first()
 
     @classmethod
-    def exists(cls, crawler, key, run_id=None):
+    def exists(cls, crawler, key, since=None):
         q = session.query(cls)
         q = q.filter(cls.crawler == crawler.name)
-        q = q.filter(cls.run_id == run_id)
         q = q.filter(cls.key == key)
+        if since is not None:
+            q = q.filter(cls.timestamp >= since)
         return q.count() > 0
 
     @classmethod
