@@ -6,7 +6,9 @@ import tempfile
 from lxml import html, etree
 from hashlib import sha1
 from banal import hash_data
-from normality import guess_encoding
+from urllib import unquote
+from urlparse import urlparse
+from normality import guess_encoding, stringify
 from fake_useragent import UserAgent
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
@@ -198,6 +200,22 @@ class ContextHttpResponse(object):
         if content_type is not None:
             content_type, options = cgi.parse_header(content_type)
         return content_type or 'application/octet-stream'
+
+    @property
+    def file_name(self):
+        disposition = self.headers.get('content-disposition')
+        file_name = None
+        if disposition is not None:
+            _, options = cgi.parse_header(disposition)
+            filename = options.get('filename') or ''
+            file_name = stringify(unquote(filename))
+
+        if file_name is None and self.url:
+            parsed = urlparse(self.url)
+            path = os.path.basename(parsed.path) or ''
+            file_name = stringify(unquote(path))
+
+        return file_name
 
     @property
     def ok(self):
