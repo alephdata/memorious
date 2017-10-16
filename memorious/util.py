@@ -1,4 +1,5 @@
 import six
+from normality import stringify
 from urlparse import urlsplit, urlunsplit
 
 
@@ -34,3 +35,11 @@ def normalize_url(url):
         return urlunsplit((scheme, netloc, path, query, None))
     except:
         return url
+
+
+def make_key(criteria):
+    """Make a string key out of many criteria."""
+    criteria = [stringify(c) for c in criteria]
+    criteria = [c for c in criteria if c is not None]
+    if len(criteria):
+        return ':'.join(criteria)

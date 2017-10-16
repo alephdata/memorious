@@ -1,7 +1,6 @@
-import random
 from urlparse import urljoin, urlparse
 from memorious.helpers.rule import Rule
-from memorious.util import normalize_url
+from memorious.util import normalize_url, make_key
 
 
 URL_TAGS = [('.//a', 'href'),
@@ -32,7 +31,7 @@ def parse_html(context, data, result):
             if parsed.scheme.lower() not in ['http', 'https']:
                 continue
 
-            tag = '%s:%s' % (context.run_id, url)
+            tag = make_key((context.run_id, url))
             if context.check_tag(tag):
                 continue
             context.set_tag(tag, None)

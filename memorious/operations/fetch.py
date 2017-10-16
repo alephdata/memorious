@@ -1,6 +1,7 @@
 from urlparse import urljoin
 
 from memorious.helpers.rule import Rule
+from memorious.util import make_key
 
 
 def fetch(context, data):
@@ -22,7 +23,7 @@ def fetch(context, data):
     context.log.info("Fetched [%s]: %r", result.status_code, result.url)
     data.update(result.serialize())
     if url != result.url:
-        tag = '%s:%s' % (context.run_id, url)
+        tag = make_key((context.run_id, url))
         context.set_tag(tag, None)
     context.emit(data=data)
 

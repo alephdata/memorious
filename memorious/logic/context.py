@@ -4,7 +4,6 @@ import uuid
 import logging
 import traceback
 from copy import deepcopy
-from normality import stringify
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
@@ -13,6 +12,7 @@ from memorious.core import datastore
 from memorious.model import Result, Tag, Operation, Event
 from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
+from memorious.util import make_key
 
 
 class Context(object):
@@ -129,9 +129,8 @@ class Context(object):
             return False
 
         # this is pure convenience, and will probably backfire at some point.
-        criteria = [stringify(c) for c in criteria]
-        key = ':'.join([c for c in criteria if c is not None])
-        if not len(key):
+        key = make_key(criteria)
+        if key is None:
             return False
 
         # this is used to re-run parts of a scrape after a certain interval,
