@@ -33,8 +33,17 @@
                     .yaml
                 </a>
             </td>
-            <th width="15%">Schedule</th>
-            <td>{{crawler.schedule}}</td>
+            <th width="15%">Actions</th>
+            <td>
+                <a class="invoke" href='#' data-crawler="{{ crawler.name }}" data-action="run">
+                    <i class="fa fa-play" aria-hidden="true"></i>    
+                    Run
+                </a>
+                <a class="invoke" href='#' data-crawler="{{ crawler.name }}" data-action="flush">
+                    <i class="fa fa-trash" aria-hidden="true"></i>    
+                    Flush
+                </a>
+            </td>
         </tr>
     </table>
 

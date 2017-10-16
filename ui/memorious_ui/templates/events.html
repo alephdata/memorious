@@ -16,5 +16,52 @@
             Errors and Warnings
         </li>
     </ol>
+
+    <table class="table table-sm">
+        <tr>
+            <th>Stage</th>
+            <th>Error</th>
+            <th>Message</th>
+            <th class="number">Timestamp</th>
+        </tr>
+        {% for res in events.results %}
+            <tr>
+                <td>
+                    <code>
+                        {{res.operation.name}}
+                    </code>
+                </td>
+                <td class="nobreak">
+                    <span class="{{res.event.level}}">
+                        <i class="fa fa-warning" aria-hidden="true"></i>
+                        <code>
+                            {{ res.event.error_type or '' }}
+                        </code>
+                    </span>
+                </td>
+                <td>
+                    {{res.event.error_message}}
+                </td>
+                <td class="number nobreak">
+                    {{res.event.timestamp | datetime}}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <div class="float-right">
+        <ul class="pagination">
+            {% if events.page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ state_change('page', events.page - 1)}}">Previous</a>
+                </li>
+            {% endif %}
+            {% if (events.page + 1) <= events.pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ state_change('page', events.page + 1)}}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="clearfix"></div>
 {% endblock %}
 

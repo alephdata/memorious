@@ -1,3 +1,4 @@
+import math
 from sqlalchemy import func, distinct
 from sqlalchemy.orm import aliased
 from datetime import datetime, timedelta
@@ -112,9 +113,40 @@ def crawler_stages(crawler):
     return stages
 
 
-def crawler_runs(crawler):
-    pass
+# def crawler_runs(crawler):
+#     pass
 
 
-def crawler_events(crawler, run_id=None, level=None, stage=None, page=1):
-    pass
+def crawler_events(crawler, run_id=None, level=None, stage=None,
+                   page=1, per_page=15):
+    evt = aliased(Event)
+    op = aliased(Operation)
+    q = session.query(evt, op)
+    q = q.join(op, op.id == evt.operation_id)
+    q = q.filter(evt.crawler == crawler.name)
+    if level is not None:
+        q = q.filter(evt.level == level)
+    if run_id is not None:
+        q = q.filter(op.run_id == run_id)
+    if run_id is not None:
+        q = q.filter(op.run_id == run_id)
+
+    total = q.count()
+    q = q.order_by(evt.timestamp.desc())
+    q = q.limit(per_page)
+    q = q.offset((max(1, page) - 1) * per_page)
+
+    results = []
+    for (event, operation) in q:
+        results.append({
+            'event': event,
+            'operation': operation
+        })
+
+    return {
+        'page': page,
+        'per_page': per_page,
+        'pages': int(math.ceil((float(total) / per_page))),
+        'total': total,
+        'results': results
+    }

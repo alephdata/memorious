@@ -27,12 +27,12 @@ a.no-underline, a.no-underline:hover {
     text-decoration: none;
 }
 
-.error, .error i, a.error, a.error:hover {
+.error, .error i, .error code, a.error, a.error:hover {
     color: red;
     text-decoration: none;
 }
 
-.warning, .warning i, a.warning, a.warning:hover {
+.warning, .warning i, .warning code, a.warning, a.warning:hover {
     color: orange;
     text-decoration: none;
 }
@@ -68,6 +68,10 @@ footer p {
 
 td.number, th.number {
     text-align: right;
+}
+
+td.nobreak {
+    white-space: nowrap;
 }
 
 th.heading {
@@ -123,5 +127,15 @@ hr {
 }
 
 .breadcrumb {
+    background-color: #222;
+}
+
+.pagination li a, .pagination li a:hover {
+    background-color: #333;
+    border: 1px solid #222;
+    color: #999;
+}
+
+.pagination li a:hover {
     background-color: #222;
 }
