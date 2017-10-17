@@ -12,3 +12,6 @@ celerybeat-schedule*
 *.sh
 .DS_Store
 *.sqlite3
+docs/_build
+docs/_static
+docs/_templates
