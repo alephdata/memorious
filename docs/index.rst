@@ -3,17 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Memorious's documentation!
-=====================================
+Memorious documentation
+=======================
+
+-----------------
+Table of contents
+-----------------
 
 .. toctree::
+   gettingstarted.rst
    buildingcrawler.md
-   initializers.md
-   fetching.md
-   storing.md
-   rules.md
-   extending.md
-
-.. include:: ../README.md
 
 
