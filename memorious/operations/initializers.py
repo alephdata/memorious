@@ -18,6 +18,14 @@ def seed(context, data):
             context.emit(data={'url': url})
 
 
+def enumerate(context, data):
+    """Iterate through a set of items and emit each one of them."""
+    items = ensure_list(context.params.get('items'))
+    for item in items:
+        data['item'] = item
+        context.emit(data=data)
+
+
 def sequence(context, data):
     """Generate a sequence of numbers.
 
