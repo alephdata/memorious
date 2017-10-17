@@ -6,12 +6,16 @@
 Memorious documentation
 =======================
 
+.. include:: ../README.rst
+
 -----------------
 Table of contents
 -----------------
 
 .. toctree::
-   gettingstarted.rst
+   installation.md
+   usage.md
    buildingcrawler.md
+   development.md
 
 
