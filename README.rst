@@ -31,4 +31,13 @@ The basic steps of writing a Memorious crawler:
 3. Write code for stage operations (optional)
 4. Test, rinse, repeat
 
+Documentation
+-------------
 
+The documentation for Memorious is available at
+`memorious.readthedocs.io <http://memorious.readthedocs.io/>`_.
+Feel free to edit the source files in the ``docs`` folder and send pull requests for improvements.
+
+To build the documentation, inside the ``docs`` folder run ``make html``
+
+You'll find the resulting HTML files in /docs/_build/html.
