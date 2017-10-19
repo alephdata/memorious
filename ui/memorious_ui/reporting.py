@@ -128,8 +128,8 @@ def crawler_events(crawler, run_id=None, level=None, stage=None,
         q = q.filter(evt.level == level)
     if run_id is not None:
         q = q.filter(op.run_id == run_id)
-    if run_id is not None:
-        q = q.filter(op.run_id == run_id)
+    if stage is not None:
+        q = q.filter(op.name == stage)
 
     total = q.count()
     q = q.order_by(evt.timestamp.desc())
