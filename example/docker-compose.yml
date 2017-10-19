@@ -1,0 +1,52 @@
+version: "2"
+
+services:
+  postgres:
+    image: postgres:10.0
+    volumes:
+      - "./build/postgres:/var/lib/postgresql/data"
+    environment:
+      POSTGRES_USER: funes
+      POSTGRES_PASSWORD: funes
+      POSTGRES_DB: memorious
+
+  rabbitmq:
+    image: rabbitmq:3.6
+    volumes:
+      - "./build/rabbitmq:/var/lib/rabbitmq"
+
+  worker:
+    build: .
+    command: celery -A memorious.tasks -c 4 -l INFO worker --pidfile /var/lib/celery.pid
+    links:
+      - postgres
+      - rabbitmq
+    volumes:
+      - "./build/data:/data"
+    tmpfs:
+      - "/tmp"
+
+  ui:
+    build: .
+    command: gunicorn -t 900 -w 8 -b 0.0.0.0:8000 --log-level info --log-file - memorious_ui:app 
+    links:
+      - postgres
+      - rabbitmq
+    volumes:
+      - "./build/data:/data"
+    tmpfs:
+      - "/tmp"
+    ports:
+      - "8000:8000"
+
+  beat:
+    build: .
+    command: celery -A memorious.tasks beat -s /var/lib/celerybeat-schedule.db --pidfile /var/lib/celery.pid
+    links:
+      - postgres
+      - rabbitmq
+    volumes:
+      - "./build/data:/data"
+      - "./build/beat:/var/lib"
+    tmpfs:
+      - "/tmp"

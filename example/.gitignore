@@ -1,0 +1,10 @@
+build/*
+data/*
+*.env
+*.egg-info
+*.pyc
+*.rdb
+.vscode/*
+dist/*
+.DS_Store
+*.sqlite3

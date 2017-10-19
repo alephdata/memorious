@@ -1,0 +1,63 @@
+# Scraper for the OCCRP web site.
+# The goal is not to download all HTML, but only PDFs & other documents
+# linked from the page as proof.
+name: occrp_web_site
+
+# A title for display in the UI:
+description: 'Organized Crime and Corruption Reporting Project'
+
+# Uncomment to run this scraper automatically:
+# schedule: weekly
+pipeline:
+
+  init:
+    # This first stage will get the ball rolling with a seed URL.
+    method: seed
+    params:
+      urls:
+        - https://occrp.org
+    handle:
+      pass: fetch
+
+  fetch:
+    # Download the seed page
+    method: fetch
+    params:
+      # These rules specify which pages should be scraped or included:
+      rules:
+        and:
+          - domain: occrp.org
+          - not:
+              or:
+                - domain: vis.occrp.org
+                - domain: tech.occrp.org
+                - domain: data.occrp.org
+                - mime_group: assets
+                - mime_group: images
+                - pattern: 'https://www.occrp.org/en/component/.*'
+                - pattern: 'https://www.occrp.org/en/donate.*'
+                - pattern: 'https://www.occrp.org/.*start=.*'
+                - pattern: 'https://www.occrp.org/ru/.*'
+    handle:
+      pass: parse
+
+  parse:
+    # Parse the scraped pages to find if they contain additional links.
+    method: parse
+    params:
+      # Additional rules to determine if a scraped page should be stored or not.
+      # In this example, we're only keeping PDFs, word files, etc.
+      store:
+        or:
+          - mime_group: archives
+          - mime_group: documents
+    handle:
+      store: store
+      # this makes it a recursive web crawler:
+      fetch: fetch
+  
+  store:
+    # Store the crawled documents to a directory
+    method: directory
+    params:
+      path: /data/results
