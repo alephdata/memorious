@@ -19,7 +19,7 @@ COPY setup.py /memorious/
 COPY memorious /memorious/memorious
 WORKDIR /memorious
 RUN pip install -q -e .
-RUN pip install -q -e memorious_ui
+RUN pip install -q -e ./memorious_ui
 
 ENV MEMORIOUS_BASE_PATH=/data \
     MEMORIOUS_INCREMENTAL=true \
