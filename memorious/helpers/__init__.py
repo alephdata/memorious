@@ -25,3 +25,12 @@ def soviet_checksum(code):
         if check == 10:
             return code + '0'
     return code + str(check)
+
+
+def search_results_total(html, xpath, check, delimiter):
+    """ Get the total number of results from the DOM of a search index. """
+    for container in html.findall(xpath):
+        if check in container.findtext('.'):
+            text = container.findtext('.').split(delimiter)
+            total = int(text[-1].strip())
+            return total
