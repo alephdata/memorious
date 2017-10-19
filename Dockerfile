@@ -17,9 +17,10 @@ RUN pip install -q --upgrade psycopg2 pyicu lxml requests[security] gunicorn
 
 COPY setup.py /memorious/
 COPY memorious /memorious/memorious
+COPY ui /memorious/ui
 WORKDIR /memorious
 RUN pip install -q -e .
-RUN pip install -q -e ./memorious_ui
+RUN pip install -q -e ./ui
 
 ENV MEMORIOUS_BASE_PATH=/data \
     MEMORIOUS_INCREMENTAL=true \
