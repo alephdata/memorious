@@ -31,7 +31,8 @@ def directory(context, data):
             return
 
         path = _get_directory_path(context)
-        file_name = safe_filename(result.file_name, default='raw')
+        file_name = data.get('file_name', result.file_name)
+        file_name = safe_filename(file_name, default='raw')
         file_name = '%s.%s' % (content_hash, file_name)
         data['_file_name'] = file_name
         file_path = os.path.join(path, file_name)

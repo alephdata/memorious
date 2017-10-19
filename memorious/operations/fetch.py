@@ -7,7 +7,7 @@ from memorious.util import make_key
 def fetch(context, data):
     """Do an HTTP GET on the ``url`` specified in the inbound data."""
     url = data.get('url')
-    result = context.http.get(url)
+    result = context.http.get(url, lazy=True)
 
     rules = context.get('rules', {'match_all': {}})
     if not Rule.get_rule(rules).apply(result):

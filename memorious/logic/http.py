@@ -15,6 +15,7 @@ from requests.structures import CaseInsensitiveDict
 
 from memorious import settings
 from memorious.core import storage
+from memorious.logic.mime import NON_HTML
 from memorious.util import normalize_url
 from memorious.exc import ParseError
 
@@ -43,17 +44,20 @@ class ContextHttp(object):
         return self.session
 
     def request(self, url, method='GET', headers={}, auth=None, data=None,
-                params=None, json=None, allow_redirects=True):
+                params=None, json=None, allow_redirects=True, lazy=False):
         url = normalize_url(url)
+        method = method.upper().strip()
         request = Request(method, url, data=data, headers=headers,
                           params=params, json=json, auth=auth)
-        request_id = hash_data((request.url, request.method,
-                                request.params, request.data,
-                                request.json))
-        return ContextHttpResponse(self,
-                                   request=request,
-                                   request_id=request_id,
-                                   allow_redirects=allow_redirects)
+        request_id = hash_data((url, method, request.params,
+                                request.data, request.json))
+        response = ContextHttpResponse(self,
+                                       request=request,
+                                       request_id=request_id,
+                                       allow_redirects=allow_redirects)
+        if not lazy:
+            response._stream_content()
+        return response
 
     def get(self, url, **kwargs):
         return self.request(url, method='GET', **kwargs)
@@ -75,6 +79,7 @@ class ContextHttpResponse(object):
     * Will evaluate lazily in order to allow fast web crawling.
     * Allow responses to be serialized between crawler operations.
     """
+    CACHE_METHODS = ['GET', 'HEAD']
 
     def __init__(self, http, request=None, request_id=None,
                  allow_redirects=True):
@@ -93,11 +98,20 @@ class ContextHttpResponse(object):
         self._remove_file = False
 
     @property
+    def use_cache(self):
+        # It's complicated.
+        if not self.http.cache:
+            return False
+        if self.request is not None:
+            return self.request.method in self.CACHE_METHODS
+        return True
+
+    @property
     def response(self):
         if self._response is None and self.request is not None:
             request = self.request
             existing = None
-            if self.http.cache:
+            if self.use_cache:
                 existing = self.context.get_tag(self.request_id)
             if existing is not None:
                 headers = CaseInsensitiveDict(existing.get('headers'))
@@ -149,9 +163,6 @@ class ContextHttpResponse(object):
                 self.context.set_tag(self.request_id, self.serialize())
         return self._file_path
 
-    def execute(self):
-        self._stream_content()
-
     @property
     def url(self):
         if self._response is not None:
@@ -199,6 +210,8 @@ class ContextHttpResponse(object):
         content_type = self.headers.get('content-type')
         if content_type is not None:
             content_type, options = cgi.parse_header(content_type)
+        if content_type is not None:
+            content_type = content_type.lower().strip()
         return content_type or 'application/octet-stream'
 
     @property
@@ -241,11 +254,17 @@ class ContextHttpResponse(object):
     def html(self):
         if not hasattr(self, '_html'):
             self._html = None
+            if self.content_type in NON_HTML:
+                return
+            if not len(self.text):
+                return
             try:
                 self._html = html.fromstring(self.text)
             except ValueError as ve:
                 if 'encoding declaration' in ve.message:
                     self._html = html.parse(self.file_path)
+            except html.ParserError:
+                return
         return self._html
 
     @property
