@@ -286,14 +286,14 @@ The HTTP session:
 
 * `context.http` is a wrapper for [requests](http://docs.python-requests.org/en/master/). Use `context.http.get` (or `.post`) just like you would use requests, and benefit from Memorious database caching; session persistence; lazy evaluation; and serialization of responses between crawler operations.
 * Properties of the `ContextHTTPResponse` object:
- * `url`
- * `status_code`
- * `headers`
- * `encoding`
- * `file_path`
- * `content_hash`
- * `content_type`
- * `ok` (bool)
+** `url`
+** `status_code`
+** `headers`
+** `encoding`
+** `file_path`
+** `content_hash`
+** `content_type`
+** `ok` (bool)
  * The content as `raw`, `text`, `html`, `xml`, or `json`
 
 The datastore:
@@ -309,4 +309,11 @@ Output:
 
 Memorious contains useful helper functions you might like to use:
 
-* TODO.
+```
+from memorious.helpers import ...
+```
+
+* `ViewForm`: Helper for VIEWSTATE in ASP-driven web sites.
+* `convert_snakecase`
+* `soviet_checksum`: Ensure a company code from [TODO: countries] is valid.
+* `search_results_total`: Extracts the total search results count from a search index page. Pass it the page as an html object, an xpath route to the element containing the results text, a string to check that you're looking in the right element, and a string delimiter which occurs immediately before the actual number. 
