@@ -1,66 +1,39 @@
-## Installation
+# Installation (running your own crawlers)
 
-Lots of commands you need are in the [Makefile](https://github.com/alephdata/memorious/blob/master/Makefile).
+We recommend using [Docker Compose](https://docs.docker.com/compose/) to run your crawlers in production, and we have an [example project](https://github.com/alephdata/memorious/tree/master/example) to help you get started.
 
-### Production (with Docker)
+* Make a copy of the `memorious/example` directory.
+* Add your own crawler YAML configurations into the `config` directory.
+* Add your Python extensions into the `src` directory (if applicable).
+* Update `setup.py` with the name of your project and any additional dependencies.
+* If you need to (eg. if your database connection or directory structure is different), update any environment variables in the `Dockerfile` or `docker-compose.yml`, although the defaults should work fine.
+* Run `docker-compose up -d`. This might take a while when it's building for the first time.
 
-1. Configure the environment variables in `docker-compose.yml` and 
-`memorious.env`. 
-2. Copy your crawlers (yaml and optional python files, see next section) into 
-the `crawlers` directory.
-3. Run:
+You can access the Memorious CLI through the `worker` container:
 
-```sh
-$ make build
-$ docker-compose up -d 
+```
+docker-compose run --rm worker /bin/bash
 ```
 
-This launches a celery worker and scheduler, as well as containers for 
-PostgreSQL and RabbitMQ.
+To see the crawlers available to you:
 
-To access the shell, use:
-
-```sh
-$ make shell
+```
+memorious list
 ```
 
-If you add new crawlers, you'll need to rebuild.
+And to run a crawler:
 
-(TODO: find a way to avoid rebuilding?)
-
-### Development mode
-
-To set the ``MEMORIOUS_*`` environment variables, modify `env.sh` (*before* 
-running `make install`). See the next section for configuration options.
-
-If you leave ``MEMORIOUS_DATABASE_URI`` unset, it will use SQLite.
-
-Otherwise set the `MEMORIOUS_DATABASE_URI` environment
-variable in `env.sh` to match your local Postgres database.
-
-```sh
-$ git clone git@github.com:alephdata/memorious.git memorious
-$ cd memorious
-$ virtualenv env
-$ source env/bin/activate
-$ make install
-$ source env.sh
+```
+memorious run my_crawler
 ```
 
-As well as installing ``memorious``, this looks for a setup.py in your 
-`MEMORIOUS_CONFIG_PATH` and runs pip install if it finds one. (This isn't 
-needed if you only have yaml configurations - see the next two sections).
+See [Usage](https://memorious.readthedocs.io/en/latest/usage.html) (or run `memorious --help`) for the complete list of Memorious commands.
 
-## Configuration
+*Note: you can use any directory structure you like, `src` and `config` are not required, and nor is separation of YAML and Python files. So long as the `MEMORIOUS_CONFIG_PATH` environment variable points to a directory containing, within any level of directory nesting, your YAML files, Memorious will find them.*
 
-There are two principal components to the configuration of ``memorious``. A
-set of environment variables that control database connectivity and general
-principles of how the sytem operates. 
+## Environment variables
 
-A recursive folder of YAML configuration files are used to specify the 
-operation of each individual crawler.
-
-### Environment variables
+Your Memorious instance is configured by a set of environment variables that control database connectivity and general principles of how the sytem operates. You can set all of these in the `Dockerfile`.
 
 * ``MEMORIOUS_DATABASE_URI``
 * ``MEMORIOUS_CONFIG_PATH``
@@ -82,21 +55,29 @@ operation of each individual crawler.
   of Aleph 2.0 or greater should work.
 * ``ALEPH_API_KEY``, a valid API key for use by the upload operation.
 
-### Crawler configuration files
+## Shut it down
 
-For simple crawlers which don't need to extend ``memorious``, you just need
-a yaml configuration file per crawler.
+To gracefully exit, run `docker-compose down`.
 
-You can configure more complex crawlers to execute custom python functions. You 
-should package your python modules with a `setup.py` and include along them with 
-your yaml files.
+Files which were downloaded by crawlers you ran, Memorious progress data from the Postgres database, and the RabbitMQ queue, are all persisted in the `build` directory, and will be reused next time you start it up. (If you need a completely fresh start, you can delete this directory).
 
-See 'Writing a crawler' for what these files should contain.
+## Building a crawler
 
-You can arrange the files using any directory structure you like, ``memorious`` will
-find them. You might, for example, like to put your yaml config and python source
-files in different directories. If you have a lot of crawlers, you can organise
-these into different subdirectories or python modules.
+To understand what goes into your `config` and `src` directories, check out the [examples](https://github.com/alephdata/memorious/tree/master/example) and [reference documentation](https://memorious.readthedocs.io/en/latest/buildingcrawler.html).
 
-If you're running ``memorious`` with Docker, your package will be installed at
-build time. If not, you'll need to run `pip install` in the `crawlers` directory.
+### Development mode
+
+When you're working on your crawlers, it's not convenient to rebuild your Docker containers all the time. To run without Docker:
+
+* Copy the environment variables from the `Dockerfile` to `env.sh`.
+* Run `source env.sh`.
+
+If you leave ``MEMORIOUS_DATABASE_URI`` unset, it will use SQLite. Otherwise you need to set it to match a local Postgres database.
+
+Make sure ``MEMORIOUS_CONFIG_PATH`` points to your crawler YAML files, wherever they may be.
+
+Then either:
+
+* Run `pip install memorious`. If your crawlers use Python extensions, you'll need to run `pip install` in your crawlers directory as well;
+* **or** clone the [Memorious repository](https://github.com/alephdata/memorious) and run `make install` (this will also install your crawlers for you).
+
