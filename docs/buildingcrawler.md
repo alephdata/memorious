@@ -277,7 +277,7 @@ The `data` dict is what was output from the previous stage, and what it contains
 
 ### Context
 
-From the YAML config:
+Access the YAML config:
 
 * You can access `params` with `context.params.get('my_param')`.
 * You can also access other properties of the crawler, eg. `context.get('name')` and `context.get('description')`.
@@ -286,15 +286,15 @@ The HTTP session:
 
 * `context.http` is a wrapper for [requests](http://docs.python-requests.org/en/master/). Use `context.http.get` (or `.post`) just like you would use requests, and benefit from Memorious database caching; session persistence; lazy evaluation; and serialization of responses between crawler operations.
 * Properties of the `ContextHTTPResponse` object:
-** `url`
-** `status_code`
-** `headers`
-** `encoding`
-** `file_path`
-** `content_hash`
-** `content_type`
-** `ok` (bool)
- * The content as `raw`, `text`, `html`, `xml`, or `json`
+  * `url`
+  * `status_code`
+  * `headers`
+  * `encoding`
+  * `file_path`
+  * `content_hash`
+  * `content_type`
+  * `ok` (bool)
+  * The content as `raw`, `text`, `html`, `xml`, or `json`
 
 The datastore:
 
@@ -303,7 +303,13 @@ The datastore:
 
 Output:
 
-* To pass data from `my_method` to the next stage, use: `context.emit(data={'my_key': 'my_value'})`
+* Call `context.recurse(data=data)` to have a stage invoke itself with a modified set of arguments (this is useful for example for paging through search results and handing off each list of links to a `fetch` stage).
+* To pass data from `my_method` to the next stage, use: `context.emit(data={'my_key': 'my_value'})`.
+* `context.store_file(path, content_hash)`: Put a file into permanent storage so it can be visible to other stages.
+
+Logs:
+
+* `context.log.info()`, `.warning()`, `.error()` to explictly log things.
 
 ### Helpers
 
