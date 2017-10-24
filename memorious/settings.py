@@ -22,6 +22,7 @@ def env_bool(name, default=False):
 # Core configuration
 
 VERSION = pkg_resources.get_distribution('memorious').version
+APP_NAME = env('APP_NAME', 'memorious')
 
 # Enable debug logging etc.
 DEBUG = env_bool('DEBUG', default=False)
