@@ -1,6 +1,7 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import func
 
 from memorious.core import session
 from memorious.model.common import Base
@@ -60,6 +61,17 @@ class Operation(Base):
         pq = pq.filter(cls.crawler == crawler)
         pq.delete(synchronize_session=False)
         session.flush()
+
+    @classmethod
+    def check_rate(cls, crawler, stage, sample=1):
+        q = session.query(func.count(cls.id))
+        q = q.filter(cls.crawler == crawler)
+        q = q.filter(cls.name == stage)
+        period = timedelta(seconds=sample * 60)
+        start = datetime.utcnow() - period
+        q = q.filter(cls.started_at >= start)
+        count = q.scalar()
+        return (float(count) / sample) / 60.0
 
     def __repr__(self):
         return '<Operation(%s,%s,%s)>' % \

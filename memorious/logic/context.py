@@ -7,6 +7,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
+from memorious import settings
 from memorious.core import manager, storage, celery, session
 from memorious.core import datastore
 from memorious.model import Result, Tag, Operation, Event
@@ -170,7 +171,7 @@ class Context(object):
 
     @classmethod
     def from_state(cls, state, stage):
-        state_crawler = state.pop('crawler')
+        state_crawler = state.get('crawler')
         crawler = manager.get(state_crawler)
         if crawler is None:
             raise RuntimeError("Missing crawler: [%s]" % state_crawler)
@@ -183,7 +184,16 @@ class Context(object):
         return '<Context(%r, %r)>' % (self.crawler, self.stage)
 
 
-@celery.task
-def handle(state, stage, data):
+@celery.task(bind=True, max_retries=None)
+def handle(task, state, stage, data):
+    """Execute the operation, rate limiting allowing."""
     context = Context.from_state(state, stage)
+
+    if not settings.EAGER and context.stage.rate_limit is not None:
+        rate = Operation.check_rate(context.crawler.name,
+                                    context.stage.name)
+        if rate > context.stage.rate_limit:
+            context.log.info("Rate exceeded [%.2f], delaying.", rate)
+            task.retry(countdown=rate * 10)
+
     context.execute(data)
