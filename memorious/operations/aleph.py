@@ -35,11 +35,12 @@ def submit_result(context, result, data):
         'mime_type': data.get('mime_type', result.content_type),
         'countries': data.get('countries'),
         'languages': data.get('languages'),
-        'headers': result.headers
+        'headers': dict(result.headers or {})
     }
     meta = clean_dict(meta)
     url = make_url('collections/%s/ingest' % collection_id)
-    context.log.info("Sending %r to %s/collections/%s", result,
+    title = meta.get('title', meta.get('file_name', meta.get('source_url')))
+    context.log.info("Sending '%s' to %s/collections/%s", title,
                      settings.ALEPH_HOST, collection_id)
 
     files = {
