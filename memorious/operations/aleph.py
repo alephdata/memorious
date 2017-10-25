@@ -28,7 +28,7 @@ def submit_result(context, result, data):
     meta = {
         'crawler': context.crawler.name,
         'source_url': data.get('source_url', result.url),
-        'file_name': data.get('file_name'),
+        'file_name': data.get('file_name', result.file_name),
         'title': data.get('title'),
         'author': data.get('author'),
         'foreign_id': data.get('foreign_id', result.request_id),
@@ -40,16 +40,15 @@ def submit_result(context, result, data):
     meta = clean_dict(meta)
     url = make_url('collections/%s/ingest' % collection_id)
     title = meta.get('title', meta.get('file_name', meta.get('source_url')))
-    context.log.info("Sending '%s' to %s/collections/%s", title,
-                     settings.ALEPH_HOST, collection_id)
-
-    files = {
-        'file': (meta.get('file_name'), result.file_path, result.content_type)
-    }
-    data = {'meta': json.dumps(meta)}
-    res = session.post(url, data=data, files=files)
+    context.log.info("Sending '%s' to %s", title, url)
+    res = session.post(url,
+                       data={'meta': json.dumps(meta)},
+                       files={'file': open(result.file_path, 'rb')})
     if not res.ok:
-        context.log.error("Could not ingest %r: %r", result, res.json())
+        context.emit_warning("Could not ingest '%s': %r" % (title, res.text))
+    else:
+        document = res.json().get('documents')[0]
+        context.log.info("Ingesting, document ID: %s", document['id'])
 
 
 def get_collection_id(context, session):
