@@ -53,7 +53,7 @@ def submit_result(context, result, data):
 
 def get_collection_id(context, session):
     url = make_url('collections')
-    foreign_id = context.get('collection', context.name)
+    foreign_id = context.get('collection', context.crawler.name)
     while True:
         res = session.get(url, params={'limit': 100})
         data = res.json()
@@ -66,7 +66,7 @@ def get_collection_id(context, session):
 
     url = make_url('collections')
     res = session.post(url, json={
-        'label': context.description,
+        'label': context.crawler.description,
         'managed': True,
         'foreign_id': foreign_id
     })
