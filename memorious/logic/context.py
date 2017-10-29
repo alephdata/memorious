@@ -194,6 +194,6 @@ def handle(task, state, stage, data):
                                     context.stage.name)
         if rate > context.stage.rate_limit:
             context.log.info("Rate exceeded [%.2f], delaying.", rate)
-            task.retry(countdown=rate * 10)
+            task.retry(countdown=rate * 60)
 
     context.execute(data)
