@@ -8,7 +8,7 @@ from hashlib import sha1
 from banal import hash_data
 from urllib import unquote
 from urlparse import urlparse
-from normality import guess_encoding, stringify
+from normality import guess_file_encoding, stringify
 from fake_useragent import UserAgent
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
@@ -185,8 +185,17 @@ class ContextHttpResponse(object):
 
     @property
     def encoding(self):
-        if self._encoding is None and self.response:
-            self._encoding = self.response.encoding
+        if self._encoding is None:
+            content_type = self.headers.get('content-type')
+            if content_type is not None:
+                content_type, options = cgi.parse_header(content_type)
+                charset = options.get('charset', '')
+                charset = stringify(charset.lower().strip())
+                if charset is not None:
+                    self._encoding = charset
+        if self._encoding is None:
+            with open(self.file_path, 'r') as fh:
+                self._encoding = guess_file_encoding(fh)
         return self._encoding
 
     @encoding.setter
@@ -237,18 +246,17 @@ class ContextHttpResponse(object):
     @property
     def raw(self):
         if not hasattr(self, '_raw'):
-            if self.file_path is None:
-                raise ParseError("Cannot parse failed download.")
-            with open(self.file_path, 'r') as fh:
-                self._raw = fh.read()
+            self._raw = None
+            if self.file_path is not None:
+                with open(self.file_path, 'r') as fh:
+                    self._raw = fh.read()
         return self._raw
 
     @property
     def text(self):
-        encoding = self.encoding
-        if encoding is None:
-            encoding = guess_encoding(self.raw)
-        return self.raw.decode(encoding)
+        if self.raw is None:
+            return None
+        return self.raw.decode(self.encoding, 'replace')
 
     @property
     def html(self):
@@ -256,7 +264,7 @@ class ContextHttpResponse(object):
             self._html = None
             if self.content_type in NON_HTML:
                 return
-            if not len(self.text):
+            if self.raw is None or not len(self.raw):
                 return
             try:
                 self._html = html.fromstring(self.text)
@@ -264,7 +272,7 @@ class ContextHttpResponse(object):
                 if 'encoding declaration' in ve.message:
                     self._html = html.parse(self.file_path)
             except html.ParserError:
-                return
+                pass
         return self._html
 
     @property
@@ -301,7 +309,7 @@ class ContextHttpResponse(object):
             'status_code': self.status_code,
             'url': self.url,
             'content_hash': self.content_hash,
-            'encoding': self.encoding,
+            'encoding': self._encoding,
             'headers': dict(self.headers)
         }
 
