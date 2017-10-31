@@ -22,6 +22,10 @@ def aleph_emit(context, data):
 
 
 def submit_result(context, result, data):
+    if result.file_path is None:
+        context.log.info("Cannot ingest non-existant response: %s", result)
+        return
+
     session = requests.Session()
     session.headers['Authorization'] = 'apikey %s' % settings.ALEPH_API_KEY
     collection_id = get_collection_id(context, session)
