@@ -1,6 +1,8 @@
 from urlparse import urljoin, urlparse
+from urlnormalizer import normalize_url
+
 from memorious.helpers.rule import Rule
-from memorious.util import normalize_url, make_key
+from memorious.util import make_key
 
 
 URL_TAGS = [('.//a', 'href'),

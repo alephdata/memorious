@@ -1,6 +1,7 @@
 import os
 import six
 import uuid
+import random
 import logging
 import traceback
 from copy import deepcopy
@@ -193,8 +194,10 @@ def handle(task, state, stage, data):
         rate = Operation.check_rate(context.crawler.name,
                                     context.stage.name)
         if rate > context.stage.rate_limit:
-            context.log.info("Rate exceeded [%.2f], delaying.", rate)
-            delay = max(1.0, rate) * 60.0
+            delay = max(10, rate * 120.0)
+            delay = random.randint(10, delay)
+            context.log.info("Rate exceeded [%.2f], delaying %d sec.",
+                             rate, delay)
             task.retry(countdown=delay)
 
     context.execute(data)

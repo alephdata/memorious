@@ -5,9 +5,10 @@ import pickle
 import tempfile
 from lxml import html, etree
 from hashlib import sha1
-from banal import hash_data
+from banal import hash_data, is_mapping
 from urllib import unquote
 from urlparse import urlparse
+from urlnormalizer import normalize_url
 from normality import guess_file_encoding, stringify
 from fake_useragent import UserAgent
 from requests import Session, Request
@@ -16,7 +17,6 @@ from requests.structures import CaseInsensitiveDict
 from memorious import settings
 from memorious.core import storage
 from memorious.logic.mime import NON_HTML
-from memorious.util import normalize_url
 from memorious.exc import ParseError
 
 
@@ -45,12 +45,13 @@ class ContextHttp(object):
 
     def request(self, url, method='GET', headers={}, auth=None, data=None,
                 params=None, json=None, allow_redirects=True, lazy=False):
-        url = normalize_url(url)
+        if is_mapping(params):
+            params = params.items()
+        url = normalize_url(url, extra_query_args=params)
         method = method.upper().strip()
         request = Request(method, url, data=data, headers=headers,
-                          params=params, json=json, auth=auth)
-        request_id = hash_data((url, method, request.params,
-                                request.data, request.json))
+                          json=json, auth=auth)
+        request_id = hash_data((url, method, request.data, request.json))
         response = ContextHttpResponse(self,
                                        request=request,
                                        request_id=request_id,
