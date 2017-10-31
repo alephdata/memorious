@@ -323,3 +323,15 @@ from memorious.helpers import ...
 * `convert_snakecase`
 * `soviet_checksum`: Ensure a company code from [TODO: countries] is valid.
 * `search_results_total`: Extracts the total search results count from a search index page. Pass it the page as an html object, an xpath route to the element containing the results text, a string to check that you're looking in the right element, and a string delimiter which occurs immediately before the actual number. 
+
+#### OCR
+
+```
+from memorious.helpers.ocr import ...
+```
+
+Memorious contains some helpers that use [Tesseract](https://github.com/tesseract-ocr) to OCR images. This depends on [tesserocr](https://github.com/sirfz/tesserocr), which depends on Tesseract version 0.3.4+. If you wish to use these helpers you need to install an up to date version of Tesseract (and *its* dependencies), *then* `pip install tesserocr`.
+
+[See the Tesseract wiki](https://github.com/tesseract-ocr/tesseract/wiki/Compiling) for more installation details.
+
+`tesserocr` is not listed as a Memorious dependency, because Tesseract is not a sane dependency unless you're actually going to use it.
