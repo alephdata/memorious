@@ -14,10 +14,9 @@ def read_word(image, whitelist=None, chars=None, spaces=False):
     guess = api.GetUTF8Text()
 
     if not spaces:
-        guess = ''.join([c for c in guess if c is not " "])
+        guess = ''.join([c for c in guess if c != " "])
 
     if chars is not None and len(guess) != chars:
-    	print guess
         return None, api.MeanTextConf()
 
     return guess, api.MeanTextConf()
