@@ -26,12 +26,9 @@ def parse_html(context, data, result):
                 continue
 
             url = normalize_url(urljoin(result.url, attr))
-            if url in seen:
+            if url is None or url in seen:
                 continue
             seen.add(url)
-            parsed = urlparse(url)
-            if parsed.scheme.lower() not in ['http', 'https']:
-                continue
 
             tag = make_key((context.run_id, url))
             if context.check_tag(tag):

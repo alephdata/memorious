@@ -272,7 +272,7 @@ class ContextHttpResponse(object):
             except ValueError as ve:
                 if 'encoding declaration' in ve.message:
                     self._html = html.parse(self.file_path)
-            except html.ParserError:
+            except (etree.ParserError, etree.ParseError):
                 pass
         return self._html
 
