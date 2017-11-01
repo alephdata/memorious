@@ -34,7 +34,7 @@ setup(
         'dataset >= 1.0.3',
         'six',
         'storagelayer >= 0.2.0',
-        'urlnormalizer >= 1.0.3',
+        'urlnormalizer >= 1.0.4',
         'werkzeug',
         'fake-useragent',
         'pycountry',
