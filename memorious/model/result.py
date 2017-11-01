@@ -34,11 +34,8 @@ class Result(Base):
 
     @classmethod
     def delete(cls, crawler):
-        from memorious.model.operation import Operation
-        op_ids = session.query(Operation.id)
-        op_ids = op_ids.filter(Operation.crawler == crawler)
         pq = session.query(cls)
-        pq = pq.filter(cls.operation_id.in_(op_ids.subquery()))
+        pq = pq.filter(cls.crawler == crawler)
         pq.delete(synchronize_session=False)
         session.flush()
 

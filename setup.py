@@ -33,7 +33,7 @@ setup(
         'sqlalchemy',
         'dataset >= 1.0.3',
         'six',
-        'storagelayer',
+        'storagelayer >= 0.2.0',
         'urlnormalizer >= 1.0.3',
         'werkzeug',
         'fake-useragent',
