@@ -75,10 +75,12 @@ def dates(context, data):
 
     if 'end' in context.params:
         current = context.params.get('end')
-        current = data.get('current', current)
         current = datetime.strptime(current, format)
     else:
         current = datetime.utcnow()
+
+    if 'current' in data:
+        current = datetime.strptime(data.get('current'), format)
 
     if 'begin' in context.params:
         begin = context.params.get('begin')
