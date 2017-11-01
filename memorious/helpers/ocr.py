@@ -15,8 +15,9 @@ def read_word(image, whitelist=None, chars=None, spaces=False):
 
     if not spaces:
         guess = ''.join([c for c in guess if c != " "])
+        guess = guess.strip()
 
     if chars is not None and len(guess) != chars:
-        return None, api.MeanTextConf()
+        return guess, None
 
     return guess, api.MeanTextConf()
