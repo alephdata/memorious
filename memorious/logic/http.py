@@ -10,7 +10,6 @@ from urllib import unquote
 from urlparse import urlparse
 from urlnormalizer import normalize_url
 from normality import guess_file_encoding, stringify
-from fake_useragent import UserAgent
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
 
@@ -18,6 +17,7 @@ from memorious import settings
 from memorious.core import storage
 from memorious.logic.mime import NON_HTML
 from memorious.exc import ParseError
+from memorious.helpers.ua import UserAgent
 
 
 class ContextHttp(object):
@@ -40,7 +40,7 @@ class ContextHttp(object):
         self.session = Session()
         self.session.headers['User-Agent'] = settings.USER_AGENT
         if self.context.crawler.stealthy:
-            self.session.headers['User-Agent'] = UserAgent().random
+            self.session.headers['User-Agent'] = UserAgent().random()
         return self.session
 
     def request(self, url, method='GET', headers={}, auth=None, data=None,
