@@ -61,6 +61,7 @@ def session(context, data):
 
     user = context.get('user')
     password = context.get('password')
+
     if user is not None and password is not None:
         context.http.session.auth = (user, password)
 
@@ -68,4 +69,6 @@ def session(context, data):
     if user_agent is not None:
         context.http.session.headers['User-Agent'] = user_agent
 
+    # Explictly save the session because no actual HTTP requests were made.
+    context.http.save()
     context.emit(data=data)

@@ -69,6 +69,10 @@ class ContextHttp(object):
     def rehash(self, data):
         return ContextHttpResponse.deserialize(self, data)
 
+    def save(self):
+        session = pickle.dumps(self.session)
+        self.context.state[self.STATE_SESSION] = session
+
 
 class ContextHttpResponse(object):
     """Handle a cached and managed HTTP response.
@@ -139,8 +143,7 @@ class ContextHttpResponse(object):
                 self._response = response
 
             # update the serialised session with cookies etc.
-            session = pickle.dumps(self.http.session)
-            self.context.state[self.http.STATE_SESSION] = session
+            self.http.save()
         return self._response
 
     def _stream_content(self):
