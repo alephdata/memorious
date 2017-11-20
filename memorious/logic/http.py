@@ -43,7 +43,7 @@ class ContextHttp(object):
             self.session.headers['User-Agent'] = UserAgent().random()
         return self.session
 
-    def request(self, url, method='GET', headers={}, auth=None, data=None,
+    def request(self, method, url, headers={}, auth=None, data=None,
                 params=None, json=None, allow_redirects=True, lazy=False):
         if is_mapping(params):
             params = params.items()
@@ -61,10 +61,10 @@ class ContextHttp(object):
         return response
 
     def get(self, url, **kwargs):
-        return self.request(url, method='GET', **kwargs)
+        return self.request('GET', url, **kwargs)
 
     def post(self, url, **kwargs):
-        return self.request(url, method='POST', **kwargs)
+        return self.request('POST', url, **kwargs)
 
     def rehash(self, data):
         return ContextHttpResponse.deserialize(self, data)
