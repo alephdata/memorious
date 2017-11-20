@@ -32,6 +32,7 @@ class Crawler(object):
         self.name = self.config.get('name', self.name)
         self.description = self.config.get('description', self.name)
         self.schedule = self.config.get('schedule')
+        self.disabled = self.config.get('disabled', False)
         self.init_stage = self.config.get('init', 'init')
         self.delta = Crawler.SCHEDULES.get(self.schedule)
         self.delay = int(self.config.get('delay', 0))
@@ -45,6 +46,8 @@ class Crawler(object):
     def check_due(self):
         """Check if the last execution of this crawler is older than
         the scheduled interval."""
+        if self.disabled:
+            return False
         if self.delta is None:
             return False
         last_run = Operation.last_run(self.name)
