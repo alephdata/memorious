@@ -31,16 +31,17 @@ def crawlers_index():
     op = aliased(Operation)
     q = session.query(
         op.crawler,
-        func.count(distinct(op.run_id)),
-        func.count(op.id),
+        # func.count(distinct(op.run_id)),
+        # func.count(op.id),
         func.max(op.started_at),
     )
     q = q.group_by(op.crawler)
     counts = {}
-    for (name, runs, operations, last_active) in q:
+    # for (name, runs, operations, last_active) in q:
+    for (name, last_active) in q:
         counts[name] = {
-            'runs': runs,
-            'operations': operations,
+            # 'runs': runs,
+            # 'operations': operations,
             'last_active': last_active,
         }
 
@@ -49,7 +50,7 @@ def crawlers_index():
     q = session.query(
         event.crawler,
         event.level,
-        func.count(event.id).label('operations'),
+        func.count(event.id),
     )
     q = q.group_by(event.crawler, event.level)
     for (name, level, count) in q:

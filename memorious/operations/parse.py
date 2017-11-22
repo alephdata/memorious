@@ -1,5 +1,6 @@
-from urlparse import urljoin, urlparse
+from urlparse import urljoin
 from urlnormalizer import normalize_url
+from normality import collapse_spaces
 
 from memorious.helpers.rule import Rule
 from memorious.util import make_key
@@ -36,8 +37,11 @@ def parse_html(context, data, result):
             context.set_tag(tag, None)
 
             data = {'url': url}
-            if element.get('title'):
-                data['title'] = element.get('title')
+            # Option to set the document title from the link text.
+            if context.get('link_title', False):
+                data['title'] = collapse_spaces(element.text_content())
+            elif element.get('title'):
+                data['title'] = collapse_spaces(element.get('title'))
             context.emit(rule='fetch', data=data)
 
 
