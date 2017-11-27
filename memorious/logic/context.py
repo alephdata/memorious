@@ -131,7 +131,7 @@ class Context(object):
             return False
 
         # this is pure convenience, and will probably backfire at some point.
-        key = make_key(criteria)
+        key = make_key(*criteria)
         if key is None:
             return False
 
@@ -139,7 +139,7 @@ class Context(object):
         # e.g. half a year, or a year
         since = None
         if self.crawler.expire > 0:
-            delta = timedelta(days=-1 * self.crawler.expire)
+            delta = timedelta(days=self.crawler.expire)
             since = datetime.utcnow() - delta
 
         if Tag.exists(self.crawler, key, since=since):

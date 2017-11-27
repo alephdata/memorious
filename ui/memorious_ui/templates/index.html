@@ -10,7 +10,6 @@
             <th>Crawler</th>
             <th>Description</th>
             <th>Schedule</th>
-            <!-- th class="number">Runs (Ops)</th -->
             <th>Latest</th>
             <th class="number">Errors</th>
             <th class="number">Warn</th>
@@ -31,14 +30,6 @@
                 <td>
                     {{item.crawler.schedule or 'none'}}
                 </td>
-                <!-- td class="number">
-                    {% if item.operations %}
-                        {{item.runs | number}}
-                        ({{item.operations | number}})
-                    {% else %}
-                        -
-                    {% endif %}
-                </td -->
                 <td>
                     {{item.last_active | date}}
                 </td>

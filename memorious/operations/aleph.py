@@ -23,7 +23,7 @@ def aleph_emit(context, data):
 
 def submit_result(context, result, data):
     if result.file_path is None:
-        context.log.info("Cannot ingest non-existant response: %s", result)
+        context.log.info("Cannot ingest response: %s", result)
         return
 
     session = requests.Session()

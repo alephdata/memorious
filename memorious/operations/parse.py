@@ -31,7 +31,7 @@ def parse_html(context, data, result):
                 continue
             seen.add(url)
 
-            tag = make_key((context.run_id, url))
+            tag = make_key(context.run_id, url)
             if context.check_tag(tag):
                 continue
             context.set_tag(tag, None)

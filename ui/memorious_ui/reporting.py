@@ -1,5 +1,5 @@
 import math
-from sqlalchemy import func, distinct
+from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from datetime import datetime, timedelta
 
@@ -31,19 +31,12 @@ def crawlers_index():
     op = aliased(Operation)
     q = session.query(
         op.crawler,
-        # func.count(distinct(op.run_id)),
-        # func.count(op.id),
         func.max(op.started_at),
     )
     q = q.group_by(op.crawler)
     counts = {}
-    # for (name, runs, operations, last_active) in q:
-    for (name, last_active) in q:
-        counts[name] = {
-            # 'runs': runs,
-            # 'operations': operations,
-            'last_active': last_active,
-        }
+    for (name, last) in q:
+        counts[name] = {'last_active': last}
 
     # query for error and warning events:
     event = aliased(Event)
