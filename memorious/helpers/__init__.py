@@ -34,3 +34,9 @@ def search_results_total(html, xpath, check, delimiter):
             text = container.findtext('.').split(delimiter)
             total = int(text[-1].strip())
             return total
+
+def search_results_last_url(html, xpath, label):
+    """ Get the URL of the 'last' button in a search results listing. """
+    for container in html.findall(xpath):
+        if container.text_content().strip() == label:
+            return container.find('.//a').get('href')
