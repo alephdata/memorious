@@ -18,6 +18,8 @@ un-structured data. This includes the following use cases:
 * Make crawlers modular and simple tasks re-usable
 * Get out of your way as much as possible
 
+.. image:: docs/memorious-ui.png
+
 Design
 ------
 
