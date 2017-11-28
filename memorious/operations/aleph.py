@@ -74,7 +74,11 @@ def get_collection_id(context, session):
         'managed': True,
         'foreign_id': foreign_id
     })
-    return res.json().get('id')
+    coll_id = res.json().get('id')
+    if coll_id is None:
+        context.log.error("Could not get collection ID. Aleph said: %s" % res.json().get('message'))
+    else:
+        return coll_id
 
 
 def make_url(path):
