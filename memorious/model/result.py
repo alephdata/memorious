@@ -29,7 +29,6 @@ class Result(Base):
         obj.next_stage = next_stage
         obj.data = data
         session.add(obj)
-        session.flush()
         return obj
 
     @classmethod
@@ -37,7 +36,6 @@ class Result(Base):
         pq = session.query(cls)
         pq = pq.filter(cls.crawler == crawler)
         pq.delete(synchronize_session=False)
-        session.flush()
 
     @classmethod
     def by_crawler_next_stage(cls, crawler, next_stage):

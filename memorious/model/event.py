@@ -36,7 +36,6 @@ class Event(Base):
         event.error_message = error_message
         event.error_details = error_details
         session.add(event)
-        session.flush()
         return event
 
     @classmethod
@@ -44,7 +43,6 @@ class Event(Base):
         pq = session.query(cls)
         pq = pq.filter(cls.crawler == crawler)
         pq.delete(synchronize_session=False)
-        session.flush()
 
     def __repr__(self):
         return '<Event(%s,%s,%s,%s)>' % \

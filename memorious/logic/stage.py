@@ -1,5 +1,7 @@
 from importlib import import_module
 
+from memorious import settings
+
 
 class CrawlerStage(object):
     """A single step in a data processing crawler."""
@@ -12,7 +14,7 @@ class CrawlerStage(object):
         self.params = config.get('params') or {}
         self.handlers = config.get('handle') or {}
         self.rate_limit = None
-        if 'rate_limit' in config:
+        if not settings.EAGER and 'rate_limit' in config:
             self.rate_limit = float(config.get('rate_limit'))
 
     @property

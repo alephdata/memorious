@@ -28,7 +28,6 @@ class Tag(Base):
         obj.value = value
         obj.timestamp = datetime.utcnow()
         session.add(obj)
-        session.flush()
         return obj
 
     @classmethod
@@ -55,7 +54,6 @@ class Tag(Base):
         pq = session.query(cls)
         pq = pq.filter(cls.crawler == crawler)
         pq.delete(synchronize_session=False)
-        session.flush()
 
     def __repr__(self):
         return '<Tag(%s,%s)>' % (self.crawler, self.key)

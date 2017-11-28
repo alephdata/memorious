@@ -25,10 +25,9 @@ celery.conf.update(
     task_default_queue=settings.APP_NAME,
     task_default_routing_key='%s.process' % settings.APP_NAME,
     result_persistent=False,
-    # ultra-high time limit to shoot hung tasks:
     worker_max_tasks_per_child=1000,
-    worker_hijack_root_logger=False,
-    worker_prefetch_multiplier=100,
+    worker_prefetch_multiplier=10,
+    # worker_hijack_root_logger=False,
     beat_schedule={
         'scheduled-crawlers': {
             'task': 'memorious.tasks.process_schedule',

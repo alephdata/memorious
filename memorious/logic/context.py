@@ -8,7 +8,6 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
-from memorious import settings
 from memorious.core import manager, storage, celery, session
 from memorious.core import datastore
 from memorious.model import Result, Tag, Operation, Event
@@ -190,7 +189,7 @@ def handle(task, state, stage, data):
     """Execute the operation, rate limiting allowing."""
     context = Context.from_state(state, stage)
 
-    if not settings.EAGER and context.stage.rate_limit is not None:
+    if context.stage.rate_limit is not None:
         rate = Operation.check_rate(context.crawler.name,
                                     context.stage.name)
         if rate > context.stage.rate_limit:

@@ -6,7 +6,6 @@ setup(
     description="A minimalistic, recursive web crawling library for Python.",
     long_description="",
     classifiers=[
-        "Development Status :: 1 - Alpha",
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
