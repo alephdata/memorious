@@ -78,4 +78,4 @@ def get_collection_id(context, session):
 
 
 def make_url(path):
-    return urljoin(settings.ALEPH_HOST, '/api/1/%s' % path)
+    return urljoin(settings.ALEPH_HOST, '/api/%s/%s' % (settings.ALEPH_API_VERSION, path))
