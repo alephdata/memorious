@@ -69,16 +69,17 @@ def get_collection_id(context, session):
         url = urljoin(url, data.get('next_url'))
 
     url = make_url('collections')
+    
     res = session.post(url, json={
         'label': context.crawler.description,
+        'category': context.crawler.category,
         'managed': True,
         'foreign_id': foreign_id
     })
     coll_id = res.json().get('id')
     if coll_id is None:
         context.log.error("Could not get collection ID. Aleph said: %s" % res.json().get('message'))
-    else:
-        return coll_id
+    return coll_id
 
 
 def make_url(path):
