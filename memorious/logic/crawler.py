@@ -31,6 +31,7 @@ class Crawler(object):
         self.name = os.path.basename(source_file)
         self.name = self.config.get('name', self.name)
         self.description = self.config.get('description', self.name)
+        self.category = self.config.get('category', 'scrape')
         self.schedule = self.config.get('schedule')
         self.disabled = self.config.get('disabled', False)
         self.init_stage = self.config.get('init', 'init')
