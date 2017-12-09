@@ -4,6 +4,7 @@ from stringcase import titlecase
 from normality import slugify
 
 from memorious.helpers.asp import ViewForm  # noqa
+from memorious.helpers.dates import parse_date
 
 
 def convert_snakecase(name):
@@ -48,8 +49,7 @@ def get_last_modified_from_headers(headers):
     now = datetime.utcnow()
     if headers.get("Last-Modified") is not None:
         # Tue, 15 Nov 1994 12:45:26 GMT
-        # TODO: I don't know if this timezone parsing is good
-        last_modified = datetime.strptime(headers.get("Last-Modified"), "%a, %d %b %Y %H:%M:%S %Z")
+        last_modified = parse_date(headers.get("Last-Modified"))
         if last_modified < now + timedelta(seconds=16):
             return last_modified.strftime("%Y-%m-%dT%H:%M:%S%z")
     return None
