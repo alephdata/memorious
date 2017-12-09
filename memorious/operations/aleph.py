@@ -34,7 +34,6 @@ def submit_result(context, result, data):
     meta = {
         'crawler': context.crawler.name,
         'source_url': data.get('source_url', result.url),
-        'file_name': data.get('file_name', result.file_name),
         'title': data.get('title'),
         'author': data.get('author'),
         'foreign_id': data.get('foreign_id', result.request_id),
@@ -47,9 +46,12 @@ def submit_result(context, result, data):
     url = make_url('collections/%s/ingest' % collection_id)
     title = meta.get('title', meta.get('file_name', meta.get('source_url')))
     context.log.info("Sending '%s' to %s", title, url)
+    file = (result.file_name or '',
+            open(result.file_path, 'rb'),
+            result.content_type)
     res = session.post(url,
                        data={'meta': json.dumps(meta)},
-                       files={'file': open(result.file_path, 'rb')})
+                       files={'file': file})
     if not res.ok:
         context.emit_warning("Could not ingest '%s': %r" % (title, res.text))
     else:

@@ -5,6 +5,7 @@ import random
 import logging
 import traceback
 from copy import deepcopy
+from tempfile import mkstemp
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
@@ -150,6 +151,20 @@ class Context(object):
         """Put a file into permanent storage so it can be visible to other
         stages."""
         return storage.archive_file(file_path, content_hash=content_hash)
+
+    def store_data(self, data, encoding='utf-8'):
+        """Put the given content into a file, possibly encoding it as UTF-8
+        in the process."""
+        fd, path = mkstemp()
+        try:
+            with os.fdopen(fd, 'w') as fh:
+                if isinstance(data, six.text_type):
+                    data = data.encode(encoding)
+                if data is not None:
+                    fh.write(data)
+            return self.store_file(path)
+        finally:
+            os.unlink(path)
 
     @contextmanager
     def load_file(self, content_hash, file_name=None):

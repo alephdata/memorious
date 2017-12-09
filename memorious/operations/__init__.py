@@ -1,5 +1,6 @@
 from memorious.operations.fetch import fetch, dav_index, session
 from memorious.operations.parse import parse
+from memorious.operations.clean import clean_html
 from memorious.operations.aleph import aleph_emit
 from memorious.operations.initializers import seed, sequence, dates
 from memorious.operations.initializers import enumerate
@@ -9,4 +10,4 @@ from memorious.operations.store import directory
 
 __all__ = [fetch, parse, aleph_emit, seed, sequence, inspect, dates,
            documentcloud_query, dav_index, session, directory,
-           enumerate]
+           enumerate, clean_html]

@@ -237,9 +237,14 @@ class ContextHttpResponse(object):
             file_name = stringify(unquote(filename))
 
         if file_name is None and self.url:
-            parsed = urlparse(self.url)
-            path = os.path.basename(parsed.path) or ''
-            file_name = stringify(unquote(path))
+            try:
+                parsed = urlparse(self.url)
+                parts = unquote(parsed.path).rsplit('/', 1)
+                path = stringify(parts[-1])
+                if path is not None and '.' in path:
+                    file_name = path
+            except Exception:
+                pass
 
         return file_name
 
