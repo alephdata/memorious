@@ -1,6 +1,5 @@
 import os
 from urlparse import urljoin
-from pycountry import languages
 
 DEFAULT_HOST = 'https://documentcloud.org/'
 DEFAULT_INSTANCE = 'documentcloud'
@@ -27,13 +26,8 @@ def documentcloud_query(context, data):
         data['author'] = document.get('author')
         data['file_name'] = os.path.basename(document.get('pdf_url'))
         data['mime_type'] = 'application/pdf'
-
-        # lang_code = document.get('language')
-        # try:
-        #     lang = languages.get(alpha_3=lang_code)
-        #     data['languages'] = [lang.alpha_2]
-        # except Exception:
-        #     context.emit_warning("Unknown language code: %s" % lang_code)
+        # if document.get('language'):
+        #     data['languages'] = [document.get('language')]
         context.emit(rule='pass', data=data)
 
     if len(documents):
