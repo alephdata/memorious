@@ -69,13 +69,18 @@ def get_collection_id(context, session):
         url = urljoin(url, data.get('next_url'))
 
     url = make_url('collections')
+    
     res = session.post(url, json={
         'label': context.crawler.description,
+        'category': context.crawler.category,
         'managed': True,
         'foreign_id': foreign_id
     })
-    return res.json().get('id')
+    coll_id = res.json().get('id')
+    if coll_id is None:
+        context.log.error("Could not get collection ID. Aleph said: %s" % res.json().get('message'))
+    return coll_id
 
 
 def make_url(path):
-    return urljoin(settings.ALEPH_HOST, '/api/1/%s' % path)
+    return urljoin(settings.ALEPH_HOST, '/api/%s/%s' % (settings.ALEPH_API_VERSION, path))

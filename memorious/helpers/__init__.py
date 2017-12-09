@@ -1,4 +1,5 @@
 from itertools import count
+from datetime import datetime, timedelta
 from stringcase import titlecase
 from normality import slugify
 
@@ -41,3 +42,14 @@ def search_results_last_url(html, xpath, label):
     for container in html.findall(xpath):
         if container.text_content().strip() == label:
             return container.find('.//a').get('href')
+
+
+def get_last_modified_from_headers(headers):
+    now = datetime.utcnow()
+    if headers.get("Last-Modified") is not None:
+        # Tue, 15 Nov 1994 12:45:26 GMT
+        # TODO: I don't know if this timezone parsing is good
+        last_modified = datetime.strptime(headers.get("Last-Modified"), "%a, %d %b %Y %H:%M:%S %Z")
+        if last_modified < now + timedelta(seconds=16):
+            return last_modified.strftime("%Y-%m-%dT%H:%M:%S%z")
+    return None
