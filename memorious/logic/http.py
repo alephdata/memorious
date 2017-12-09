@@ -1,6 +1,7 @@
 import os
 import cgi
 import json
+import pytz
 import pickle
 import tempfile
 from lxml import html, etree
@@ -12,12 +13,14 @@ from urlnormalizer import normalize_url
 from normality import guess_file_encoding, stringify
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
+from datetime import datetime, timedelta
 
 from memorious import settings
 from memorious.core import storage
 from memorious.logic.mime import NON_HTML
 from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
+from memorious.helpers.dates import parse_date
 
 
 class ContextHttp(object):
@@ -186,6 +189,17 @@ class ContextHttpResponse(object):
         if self._headers is None and self.response:
             self._headers = self.response.headers
         return self._headers or CaseInsensitiveDict()
+
+    @property
+    def last_modified(self):
+        now = datetime.utcnow().replace(tzinfo=pytz.utc)
+        last_modified_header = self.headers.get("Last-Modified")
+        if last_modified_header is not None:
+            # Tue, 15 Nov 1994 12:45:26 GMT
+            last_modified = parse_date(last_modified_header)
+            if last_modified < now + timedelta(seconds=16):
+                return last_modified.strftime("%Y-%m-%dT%H:%M:%S%z")
+        return None
 
     @property
     def encoding(self):

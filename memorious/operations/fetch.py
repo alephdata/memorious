@@ -1,7 +1,6 @@
 from urlparse import urljoin
 from datetime import datetime
 
-from memorious.helpers import get_last_modified_from_headers
 from memorious.helpers.rule import Rule
 from memorious.util import make_key
 
@@ -23,8 +22,8 @@ def fetch(context, data):
         return
 
     context.log.info("Fetched [%s]: %r", result.status_code, result.url)
-    data["retrieved_at"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S%z")
-    data["modified_at"] = get_last_modified_from_headers(result.headers)
+    data["retrieved_at"] = datetime.utcnow().isoformat()
+    data["modified_at"] = result.last_modified
     data.update(result.serialize())
     if url != result.url:
         tag = make_key(context.run_id, url)
