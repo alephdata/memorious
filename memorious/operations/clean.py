@@ -18,7 +18,7 @@ def clean_html(context, data):
     remove_paths = context.params.get('remove_paths')
     for path in ensure_list(remove_paths):
         for el in doc.findall(path):
-                el.drop_tree()
+            el.drop_tree()
 
     title_path = context.params.get('title_path')
     if title_path is not None:
@@ -26,6 +26,7 @@ def clean_html(context, data):
         if el is not None:
             title = collapse_spaces(el.text_content())
             if title is not None:
+                context.log.info("Title extracted: %s", title)
                 data['title'] = title
 
     html_text = html.tostring(doc, pretty_print=True)

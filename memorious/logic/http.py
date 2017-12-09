@@ -249,17 +249,6 @@ class ContextHttpResponse(object):
             _, options = cgi.parse_header(disposition)
             filename = options.get('filename') or ''
             file_name = stringify(unquote(filename))
-
-        if file_name is None and self.url:
-            try:
-                parsed = urlparse(self.url)
-                parts = unquote(parsed.path).rsplit('/', 1)
-                path = stringify(parts[-1])
-                if path is not None and '.' in path:
-                    file_name = path
-            except Exception:
-                pass
-
         return file_name
 
     @property
