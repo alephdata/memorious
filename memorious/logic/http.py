@@ -57,7 +57,7 @@ class ContextHttp(object):
                                        request=request,
                                        allow_redirects=allow_redirects)
         if not lazy:
-            response._stream_content()
+            response.fetch()
         return response
 
     def get(self, url, **kwargs):
@@ -145,11 +145,14 @@ class ContextHttpResponse(object):
             self.http.save()
         return self._response
 
-    def _stream_content(self):
+    def fetch(self):
         """Lazily trigger download of the data when requested."""
-        if self.response is None:
+        if self._file_path is not None:
+            return self._file_path
+        if self._content_hash is not None:
             self._file_path = storage.load_file(self._content_hash)
-        else:
+            return self._file_path
+        if self.response is not None:
             fd, self._file_path = tempfile.mkstemp()
             os.close(fd)
             content_hash = sha1()
@@ -161,29 +164,34 @@ class ContextHttpResponse(object):
             chash = content_hash.hexdigest()
             self._content_hash = storage.archive_file(self._file_path,
                                                       content_hash=chash)
-
             if self.http.cache and self.ok:
                 self.context.set_tag(self.request_id, self.serialize())
         return self._file_path
 
+    def _complete(self):
+        if self._content_hash is None:
+            self.fetch()
+
     @property
     def url(self):
+        if self._url is not None:
+            return self._url
         if self._response is not None:
             return normalize_url(self._response.url)
         if self.request is not None:
             return self.request.url
-        return self._url
 
     @property
     def request_id(self):
-        if self._request_id is None and self.request is not None:
+        if self._request_id is not None:
+            return self._request_id
+        if self.request is not None:
             parts = [self.request.method, self.url]
             if self.request.data:
                 parts.append(hash_data(self.request.data))
             if self.request.json:
                 parts.append(hash_data(self.request.json))
-            self._request_id = ' '.join(parts)
-        return self._request_id
+            return ' '.join(parts)
 
     @property
     def status_code(self):
@@ -229,14 +237,12 @@ class ContextHttpResponse(object):
 
     @property
     def file_path(self):
-        if self._file_path is None:
-            self._stream_content()
+        self.fetch()
         return self._file_path
 
     @property
     def content_hash(self):
-        if self._content_hash is None:
-            self._stream_content()
+        self.fetch()
         return self._content_hash
 
     @property
@@ -323,6 +329,7 @@ class ContextHttpResponse(object):
         storage.cleanup_file(self._content_hash)
 
     def serialize(self):
+        self.fetch()
         return {
             'request_id': self.request_id,
             'status_code': self.status_code,
