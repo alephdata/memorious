@@ -19,16 +19,18 @@ def documentcloud_query(context, data):
     })
     documents = res.json.get('documents', [])
     for document in documents:
-        data['foreign_id'] = '%s:%s' % (instance, document.get('id'))
-        data['url'] = document.get('pdf_url')
-        data['source_url'] = document.get('canonical_url')
-        data['title'] = document.get('title')
-        data['author'] = document.get('author')
-        data['file_name'] = os.path.basename(document.get('pdf_url'))
-        data['mime_type'] = 'application/pdf'
+        doc = {
+            'foreign_id': '%s:%s' % (instance, document.get('id')),
+            'url': document.get('pdf_url'),
+            'source_url': document.get('canonical_url'),
+            'title': document.get('title'),
+            'author': document.get('author'),
+            'file_name': os.path.basename(document.get('pdf_url')),
+            'mime_type': 'application/pdf'
+        }
         # if document.get('language'):
         #     data['languages'] = [document.get('language')]
-        context.emit(rule='pass', data=data)
+        context.emit(data=doc)
 
     if len(documents):
         context.recurse(data={'page': page + 1})
