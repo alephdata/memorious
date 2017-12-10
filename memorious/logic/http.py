@@ -8,7 +8,6 @@ from lxml import html, etree
 from hashlib import sha1
 from banal import hash_data, is_mapping
 from urllib import unquote
-from urlparse import urlparse
 from urlnormalizer import normalize_url
 from normality import guess_file_encoding, stringify
 from requests import Session, Request
@@ -54,10 +53,8 @@ class ContextHttp(object):
         method = method.upper().strip()
         request = Request(method, url, data=data, headers=headers,
                           json=json, auth=auth)
-        request_id = hash_data((url, method, request.data, request.json))
         response = ContextHttpResponse(self,
                                        request=request,
-                                       request_id=request_id,
                                        allow_redirects=allow_redirects)
         if not lazy:
             response._stream_content()
@@ -89,16 +86,15 @@ class ContextHttpResponse(object):
     """
     CACHE_METHODS = ['GET', 'HEAD']
 
-    def __init__(self, http, request=None, request_id=None,
-                 allow_redirects=True):
+    def __init__(self, http, request=None, allow_redirects=True):
         self.http = http
         self.context = http.context
         self.request = request
-        self.request_id = request_id
         self.allow_redirects = allow_redirects
         self._response = None
         self._status_code = None
         self._url = None
+        self._request_id = None
         self._headers = None
         self._encoding = None
         self._content_hash = None
@@ -173,10 +169,21 @@ class ContextHttpResponse(object):
     @property
     def url(self):
         if self._response is not None:
-            return self._response.url
+            return normalize_url(self._response.url)
         if self.request is not None:
             return self.request.url
         return self._url
+
+    @property
+    def request_id(self):
+        if self._request_id is None and self.request is not None:
+            parts = [self.request.method, self.url]
+            if self.request.data:
+                parts.append(hash_data(self.request.data))
+            if self.request.json:
+                parts.append(hash_data(self.request.json))
+            self._request_id = ' '.join(parts)
+        return self._request_id
 
     @property
     def status_code(self):
@@ -328,13 +335,14 @@ class ContextHttpResponse(object):
     def apply_data(self, data):
         self._status_code = data.get('status_code')
         self._url = data.get('url')
+        self._request_id = data.get('request_id')
         self._headers = CaseInsensitiveDict(data.get('headers'))
         self._encoding = data.get('encoding')
         self._content_hash = data.get('content_hash')
 
     @classmethod
     def deserialize(cls, http, data):
-        obj = cls(http, request_id=data.get('request_id'))
+        obj = cls(http)
         obj.apply_data(data)
         return obj
 
