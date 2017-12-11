@@ -308,6 +308,8 @@ The HTTP session:
   * `content_type`
   * `ok` (bool)
   * The content as `raw`, `text`, `html`, `xml`, or `json`
+  * `retrieved_at`: the date the GET request was made.
+  * `modified_at`: from the `Last-Modified` header, provided it wasn't in the last 16 seconds.
 
 The datastore:
 

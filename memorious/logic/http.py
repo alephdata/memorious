@@ -99,6 +99,7 @@ class ContextHttpResponse(object):
         self._encoding = None
         self._content_hash = None
         self._file_path = None
+        self._retrieved = None
         self._remove_file = False
 
     @property
@@ -166,6 +167,7 @@ class ContextHttpResponse(object):
                                                       content_hash=chash)
             if self.http.cache and self.ok:
                 self.context.set_tag(self.request_id, self.serialize())
+            self._retrieved = datetime.utcnow().isoformat()
         return self._file_path
 
     def _complete(self):
@@ -215,6 +217,11 @@ class ContextHttpResponse(object):
             if last_modified < now + timedelta(seconds=16):
                 return last_modified.strftime("%Y-%m-%dT%H:%M:%S%z")
         return None
+
+    @property
+    def retrieved(self):
+        self.fetch()
+        return self._retrieved
 
     @property
     def encoding(self):
@@ -336,7 +343,9 @@ class ContextHttpResponse(object):
             'url': self.url,
             'content_hash': self.content_hash,
             'encoding': self._encoding,
-            'headers': dict(self.headers)
+            'headers': dict(self.headers),
+            'modified_at': self.last_modified,
+            'retrieved_at': self._retrieved
         }
 
     def apply_data(self, data):

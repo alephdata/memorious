@@ -22,8 +22,6 @@ def fetch(context, data):
         return
 
     context.log.info("Fetched [%s]: %r", result.status_code, result.url)
-    data["retrieved_at"] = datetime.utcnow().isoformat()
-    data["modified_at"] = result.last_modified
     data.update(result.serialize())
     if url != result.url:
         tag = make_key(context.run_id, url)
