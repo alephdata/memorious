@@ -138,6 +138,19 @@ Output data:
 
 * TODO: the serialized result of the GET response
 
+#### Clean
+
+The `clean_html` takes an HTTP response from something like `fetch` and strips down the HTML according to the parameters you pass. You can also use it to set metadata from an XPath (so far, `title`).
+
+Parameters:
+
+* `remove_paths`: a list of XPaths to strip from the HTML.
+* `title_path`: a single XPath to indicate where to find the title of the document.
+
+Output data:
+
+* What went in, plus added metadata, with the HTML content hash replaced with the cleaned version.
+
 #### DAV index
 
 The `dav_index` method lists the files in a WebDAV directory; the directory is passed via the `url` of the previous stage data.
