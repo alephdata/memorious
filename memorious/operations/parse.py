@@ -19,30 +19,39 @@ def parse_html(context, data, result):
     if title is not None and 'title' not in data:
         data['title'] = title
 
+    include = context.params.get('include_paths')
+    if include is None:
+        roots = [result.html]
+    else:
+        roots = []
+        for path in include:
+            roots = roots + result.html.findall(path)
+
     seen = set()
-    for tag_query, attr_name in URL_TAGS:
-        for element in result.html.findall(tag_query):
-            attr = element.get(attr_name)
-            if attr is None:
-                continue
+    for root in roots:
+        for tag_query, attr_name in URL_TAGS:
+            for element in root.findall(tag_query):
+                attr = element.get(attr_name)
+                if attr is None:
+                    continue
 
-            url = normalize_url(urljoin(result.url, attr))
-            if url is None or url in seen:
-                continue
-            seen.add(url)
+                url = normalize_url(urljoin(result.url, attr))
+                if url is None or url in seen:
+                    continue
+                seen.add(url)
 
-            tag = make_key(context.run_id, url)
-            if context.check_tag(tag):
-                continue
-            context.set_tag(tag, None)
-
-            data = {'url': url}
-            # Option to set the document title from the link text.
-            if context.get('link_title', False):
-                data['title'] = collapse_spaces(element.text_content())
-            elif element.get('title'):
-                data['title'] = collapse_spaces(element.get('title'))
-            context.emit(rule='fetch', data=data)
+                tag = make_key(context.run_id, url)
+                if context.check_tag(tag):
+                    continue
+                context.set_tag(tag, None)
+                print url
+                data = {'url': url}
+                # Option to set the document title from the link text.
+                if context.get('link_title', False):
+                    data['title'] = collapse_spaces(element.text_content())
+                elif element.get('title'):
+                    data['title'] = collapse_spaces(element.get('title'))
+                context.emit(rule='fetch', data=data)
 
 
 def parse(context, data):

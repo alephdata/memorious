@@ -182,6 +182,7 @@ As `data` input from the previous stage, it expects a `ContextHttpResponse` obje
 Parameters (optional):
 
 * `store`: only the results which match are stored. See [Rules](#rules). If no rules are passed, everything is stored.
+* `include_paths`: A list of XPaths. If included, parse will only check these routes for URLs.
 
 Output:
 
@@ -196,6 +197,9 @@ An example `parse` configuration, which crawls links and stores only documents:
     params:
       store:
         mime_group: documents
+      include_paths:
+       - './/aside'
+       - './/article
     handle:
       fetch: fetch
       store: store
