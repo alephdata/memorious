@@ -183,6 +183,8 @@ Parameters (optional):
 
 * `store`: only the results which match are stored. See [Rules](#rules). If no rules are passed, everything is stored.
 * `include_paths`: A list of XPaths. If included, parse will only check these routes for URLs.
+* `meta`: A list of key-value pairs of additional metadata to parse from the DOM, where the key is the key for `data` and the value is an XPath of where to find it.
+* `meta_date`: The same as `meta` but the value is parsed as a date.
 
 Output:
 
@@ -200,6 +202,12 @@ An example `parse` configuration, which crawls links and stores only documents:
       include_paths:
        - './/aside'
        - './/article
+      meta:
+        creator: './/article/p[@class="author"]'
+        title: './/h1'
+      meta_date:
+        published_at: './/article/time'
+        updated_at: './/article//span[@id="updated"]'
     handle:
       fetch: fetch
       store: store

@@ -3,6 +3,7 @@ from urlnormalizer import normalize_url
 from normality import collapse_spaces
 
 from memorious.helpers.rule import Rule
+from memorious.helpers.dates import parse_date
 from memorious.util import make_key
 
 
@@ -54,10 +55,33 @@ def parse_html(context, data, result):
                 context.emit(rule='fetch', data=data)
 
 
+def parse_for_metadata(context, data, result):
+    meta = context.params.get('meta', {})
+    date = context.params.get('date', {})
+
+    meta_paths = meta
+    meta_paths.update(date)
+
+    for key, xpath in meta_paths.items():
+        if result.html.find(xpath) is not None:
+            value = collapse_spaces(result.html.find(xpath).text_content())
+            if key in date.keys():
+                value = parse_date(value)
+            data[key] = value
+            context.log.info("Metadata extracted [%s]: %s" % (key, value))
+
+    return data
+
+
 def parse(context, data):
     with context.http.rehash(data) as result:
         if result.html is not None:
             parse_html(context, data, result)
+
+            # Get extra metadata from the DOM
+            if context.params.get('meta') is not None or context.params.get('meta_date') is not None:
+                meta = parse_for_metadata(context, data, result)
+                data.update(meta)
 
         rules = context.params.get('store') or {'match_all': {}}
         if Rule.get_rule(rules).apply(result):
