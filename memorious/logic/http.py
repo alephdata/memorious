@@ -99,7 +99,7 @@ class ContextHttpResponse(object):
         self._encoding = None
         self._content_hash = None
         self._file_path = None
-        self._retrieved = None
+        self.retrieved_at = None
         self._remove_file = False
 
     @property
@@ -167,7 +167,7 @@ class ContextHttpResponse(object):
                                                       content_hash=chash)
             if self.http.cache and self.ok:
                 self.context.set_tag(self.request_id, self.serialize())
-            self._retrieved = datetime.utcnow().isoformat()
+            self.retrieved_at = datetime.utcnow().isoformat()
         return self._file_path
 
     def _complete(self):
@@ -337,16 +337,18 @@ class ContextHttpResponse(object):
 
     def serialize(self):
         self.fetch()
-        return {
+        data = {
             'request_id': self.request_id,
             'status_code': self.status_code,
             'url': self.url,
             'content_hash': self.content_hash,
             'encoding': self._encoding,
             'headers': dict(self.headers),
-            'modified_at': self.last_modified,
-            'retrieved_at': self._retrieved
+            'retrieved_at': self.retrieved_at
         }
+        if self.last_modified is not None:
+            data['modified_at'] = self.last_modified
+        return data
 
     def apply_data(self, data):
         self._status_code = data.get('status_code')
@@ -355,6 +357,7 @@ class ContextHttpResponse(object):
         self._headers = CaseInsensitiveDict(data.get('headers'))
         self._encoding = data.get('encoding')
         self._content_hash = data.get('content_hash')
+        self.retrieved_at = data.get('retrieved_at')
 
     @classmethod
     def deserialize(cls, http, data):
