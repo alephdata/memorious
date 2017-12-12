@@ -53,15 +53,22 @@ def dav_index(context, data):
         if href is None:
             continue
 
+        rurl = urljoin(url, href)
         rdata = data.copy()
-        rdata['url'] = urljoin(url, href)
+        rdata['url'] = rurl
+        rdata['foreign_id'] = rurl
         if rdata['url'] == url:
             continue
 
         if resp.find('.//{DAV:}collection') is not None:
+            rdata['parent_foreign_id'] = rurl
+            context.log.info("Fetching contents of folder: %s" % rurl)
             context.recurse(data=rdata)
         else:
-            context.emit(data=rdata)
+            rdata['parent_foreign_id'] = url    
+        
+        # Do GET requests on the urls
+        fetch(context, rdata)
 
 
 def session(context, data):

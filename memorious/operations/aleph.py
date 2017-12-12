@@ -31,12 +31,19 @@ def submit_result(context, result, data):
     collection_id = get_collection_id(context, session)
     if collection_id is None:
         return
+
+    parent = None
+    parent_fid = data.get('parent_foreign_id')
+    if parent_fid is not None:
+        parent = { 'foreign_id': parent_fid }
+
     meta = {
         'crawler': context.crawler.name,
         'source_url': data.get('source_url', result.url),
         'title': data.get('title'),
         'author': data.get('author'),
         'foreign_id': data.get('foreign_id', result.request_id),
+        'parent': parent,
         'mime_type': data.get('mime_type', result.content_type),
         'countries': data.get('countries'),
         'languages': data.get('languages'),
