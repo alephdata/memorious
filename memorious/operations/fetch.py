@@ -1,5 +1,6 @@
 from urlparse import urljoin
 from datetime import datetime
+from requests.exceptions import ConnectionError
 
 from memorious.helpers.rule import Rule
 from memorious.util import make_key
@@ -8,25 +9,36 @@ from memorious.util import make_key
 def fetch(context, data):
     """Do an HTTP GET on the ``url`` specified in the inbound data."""
     url = data.get('url')
-    result = context.http.get(url, lazy=True)
+    retries = int(context.get('retry', 3))
+    attempt = data.get('retry_attempt', 1)
+    try:
+        result = context.http.get(url, lazy=True)
+        rules = context.get('rules', {'match_all': {}})
+        if not Rule.get_rule(rules).apply(result):
+            context.log.info('Fetch skip: %r', result.url)
+            return
 
-    rules = context.get('rules', {'match_all': {}})
-    if not Rule.get_rule(rules).apply(result):
-        context.log.info('Fetch skip: %r', result.url)
-        return
+        if not result.ok:
+            context.emit_warning("Fetch fail [%s]: %s",
+                                 result.status_code,
+                                 result.url)
+            return
 
-    if not result.ok:
-        context.emit_warning("Fetch fail [%s]: %s",
-                             result.status_code,
-                             result.url)
-        return
-
-    context.log.info("Fetched [%s]: %r", result.status_code, result.url)
-    data.update(result.serialize())
-    if url != result.url:
-        tag = make_key(context.run_id, url)
-        context.set_tag(tag, None)
-    context.emit(data=data)
+        context.log.info("Fetched [%s]: %r",
+                         result.status_code,
+                         result.url)
+        data.update(result.serialize())
+        if url != result.url:
+            tag = make_key(context.run_id, url)
+            context.set_tag(tag, None)
+        context.emit(data=data)
+    except ConnectionError as ce:
+        if attempt >= retries:
+            raise
+        data['retry_attempt'] = attempt + 1
+        delay = 2 ** attempt
+        context.log.warning("Connection error: %s", ce)
+        context.recurse(data=data, delay=delay)
 
 
 def dav_index(context, data):
