@@ -219,11 +219,6 @@ class ContextHttpResponse(object):
         return None
 
     @property
-    def retrieved(self):
-        self.fetch()
-        return self._retrieved
-
-    @property
     def encoding(self):
         if self._encoding is None:
             content_type = self.headers.get('content-type')

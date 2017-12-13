@@ -47,7 +47,7 @@ def submit_result(context, result, data):
         'mime_type': data.get('mime_type', result.content_type),
         'countries': data.get('countries'),
         'languages': data.get('languages'),
-        'retrieved_at': data.get('retrieved_at', result.retrieved),
+        'retrieved_at': data.get('retrieved_at', result.retrieved_at),
         'modified_at': data.get('modified_at', result.last_modified),
         'headers': dict(result.headers or {})
     }
