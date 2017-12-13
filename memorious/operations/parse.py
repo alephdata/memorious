@@ -53,6 +53,8 @@ def parse_html(context, data, result):
                     data['title'] = collapse_spaces(element.text_content())
                 elif element.get('title'):
                     data['title'] = collapse_spaces(element.get('title'))
+
+                context.http.session.headers['Referer'] = url
                 context.emit(rule='fetch', data=data)
 
 
