@@ -7,7 +7,10 @@ def parse_date(text, format_hint=None):
     if format_hint is not None:
         return datetime.strptime(text, format_hint)
     else:
-        return dateparser.parse(text)
+        # Strip things that don't belong in dates but websites like to wrap
+        # their dates with them anyway
+        cleaned = text.strip('[] ')
+        return dateparser.parse(cleaned)
 
 
 def iso_date(text, format_hint=None):
