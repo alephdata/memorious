@@ -1,9 +1,10 @@
 from urlparse import urljoin
+from banal import ensure_list
 from urlnormalizer import normalize_url
 from normality import collapse_spaces
 
 from memorious.helpers.rule import Rule
-from memorious.helpers.dates import parse_date
+from memorious.helpers.dates import iso_date
 from memorious.util import make_key
 
 
@@ -57,20 +58,32 @@ def parse_html(context, data, result):
 
 def parse_for_metadata(context, data, result):
     meta = context.params.get('meta', {})
-    date = context.params.get('date', {})
+    date = context.params.get('meta_date', {})
 
     meta_paths = meta
     meta_paths.update(date)
 
-    for key, xpath in meta_paths.items():
-        if result.html.find(xpath) is not None:
-            value = collapse_spaces(result.html.find(xpath).text_content())
-            if key in date.keys():
-                value = parse_date(value)
-            data[key] = value
-            context.log.info("Metadata extracted [%s]: %s" % (key, value))
+    for key, xpaths in meta_paths.items():
+        meta = parse_xpaths(result.html, key, date.keys(), xpaths)
+        if meta is not None:
+            context.log.info("Metadata extracted [%s]: %s" % (
+                key, meta[key]))
+            data.update(meta)
 
     return data
+
+
+def parse_xpaths(html, key, dates, xpaths):
+    data = {}
+    for xpath in ensure_list(xpaths):
+        if html.find(xpath) is not None:
+            value = collapse_spaces(html.find(xpath).text_content())
+            if key in dates:
+                value = iso_date(value)
+            data[key] = value
+            # Takes the value from the first xpath in the list that is present.
+            return data
+    return None
 
 
 def parse(context, data):

@@ -49,6 +49,8 @@ def submit_result(context, result, data):
         'languages': data.get('languages'),
         'retrieved_at': data.get('retrieved_at', result.retrieved_at),
         'modified_at': data.get('modified_at', result.last_modified),
+        'author': data.get('author'),
+        'published_at': data.get('published_at'),
         'headers': dict(result.headers or {})
     }
     meta = clean_dict(meta)
