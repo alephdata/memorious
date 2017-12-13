@@ -46,7 +46,6 @@ def parse_html(context, data, result):
                 if context.check_tag(tag):
                     continue
                 context.set_tag(tag, None)
-                print url
                 data = {'url': url}
                 # Option to set the document title from the link text.
                 if context.get('link_title', False):
