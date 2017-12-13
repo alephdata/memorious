@@ -14,4 +14,6 @@ def parse_date(text, format_hint=None):
 
 
 def iso_date(text, format_hint=None):
-    return parse_date(text, format_hint).isoformat()
+    parsed = parse_date(text, format_hint)
+    if parsed is not None:
+        return parsed.isoformat()
