@@ -25,6 +25,7 @@ def documentcloud_query(context, data):
             'source_url': document.get('canonical_url'),
             'title': document.get('title'),
             'author': document.get('author'),
+            'published_at': document.get('created_at'),
             'file_name': os.path.basename(document.get('pdf_url')),
             'mime_type': 'application/pdf'
         }
