@@ -79,7 +79,7 @@ class Crawler(object):
             # If running in eager mode, we need to block until all the queued
             # tasks are finished.
             from memorious.core import task_queue
-            while task_queue.unfinished_tasks:
+            while not task_queue.is_empty:
                 time.sleep(1)
 
     def replay(self, stage):

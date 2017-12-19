@@ -14,6 +14,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
 
 from memorious import settings
+from memorious.logic.queue import CrawlerExecutionQueue
 
 log = logging.getLogger(__name__)
 
@@ -41,17 +42,7 @@ celery.conf.update(
 
 # set up a task queue using a Queue if celery is set to eager mode.
 if settings.EAGER:
-    task_queue = Queue()
-
-    def execute_crawler(q):
-        while True:
-            context, data = q.get()
-            context.execute(data)
-            q.task_done()
-
-    worker = Thread(target=execute_crawler, args=(task_queue,))
-    worker.setDaemon(True)
-    worker.start()
+    task_queue = CrawlerExecutionQueue()
 
 # File storage layer for blobs on local file system or S3
 storage = storagelayer.init(settings.ARCHIVE_TYPE,
