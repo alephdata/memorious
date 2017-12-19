@@ -216,6 +216,8 @@ def handle(task, state, stage, data):
             task.retry(countdown=delay)
 
     if settings.EAGER:
+        # If celery is running in eager mode, put the crawler in a Queue.
+        # Then we get to execute them sequentially and avoid recursion errors.
         from memorious.core import task_queue
         task_queue.put((context, data))
     else:
