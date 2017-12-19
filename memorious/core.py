@@ -1,5 +1,7 @@
 import os
 import logging
+from threading import Thread
+from Queue import Queue
 import dataset
 import storagelayer
 from celery import Celery
@@ -35,6 +37,22 @@ celery.conf.update(
         },
     },
 )
+
+# set up task queue
+if settings.EAGER:
+    num_threads = 2
+    task_queue = Queue()
+
+    def execute_context(i, q):
+        while True:
+            context, data = q.get()
+            context.execute(data)
+            q.task_done()
+
+    for i in range(num_threads):
+        worker = Thread(target=execute_context, args=(i, task_queue,))
+        worker.setDaemon(True)
+        worker.start()
 
 # File storage layer for blobs on local file system or S3
 storage = storagelayer.init(settings.ARCHIVE_TYPE,

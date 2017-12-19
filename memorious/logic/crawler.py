@@ -75,6 +75,9 @@ class Crawler(object):
             state['incremental'] = incremental
         stage = self.get(self.init_stage)
         handle.delay(state, stage.name, {})
+        if settings.EAGER:
+            from memorious.core import task_queue
+            task_queue.join()
 
     def replay(self, stage):
         """Re-run all tasks issued to a particular stage.
