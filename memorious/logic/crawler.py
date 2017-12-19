@@ -1,7 +1,7 @@
 import os
 import yaml
 import logging
-
+import time
 from datetime import timedelta, datetime
 
 from memorious import settings
@@ -76,8 +76,11 @@ class Crawler(object):
         stage = self.get(self.init_stage)
         handle.delay(state, stage.name, {})
         if settings.EAGER:
+            # If running in eager mode, we need to block until all the queued
+            # tasks are finished.
             from memorious.core import task_queue
-            task_queue.join()
+            while task_queue.unfinished_tasks:
+                time.sleep(1)
 
     def replay(self, stage):
         """Re-run all tasks issued to a particular stage.
