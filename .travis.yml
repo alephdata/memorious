@@ -1,0 +1,18 @@
+sudo: false
+cache:
+directories:
+- $HOME/.cache/pip
+
+language: python
+
+
+matrix:
+  include:
+    - python: "2.7"
+      env: TOXENV=py27
+    - python: "3.6"
+      env: TOXENV=py36
+
+
+script:
+  - tox
