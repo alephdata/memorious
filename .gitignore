@@ -18,3 +18,4 @@ docs/_templates
 .cache/*
 .coverage
 memorious/tests/testdata/data/*
+.tox

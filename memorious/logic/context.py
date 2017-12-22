@@ -158,7 +158,7 @@ class Context(object):
         in the process."""
         fd, path = mkstemp()
         try:
-            with os.fdopen(fd, 'w') as fh:
+            with os.fdopen(fd, 'wb') as fh:
                 if isinstance(data, six.text_type):
                     data = data.encode(encoding)
                 if data is not None:

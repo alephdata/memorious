@@ -7,12 +7,13 @@ import tempfile
 from lxml import html, etree
 from hashlib import sha1
 from banal import hash_data, is_mapping
-from urllib import unquote
 from urlnormalizer import normalize_url
 from normality import guess_file_encoding, stringify
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
 from datetime import datetime, timedelta
+
+from six.moves.urllib.parse import unquote
 
 from memorious import settings
 from memorious.core import storage

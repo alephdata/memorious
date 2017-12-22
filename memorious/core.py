@@ -1,7 +1,5 @@
 import os
 import logging
-from threading import Thread
-from Queue import Queue
 
 import dataset
 import storagelayer
