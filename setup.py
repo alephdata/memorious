@@ -45,5 +45,11 @@ setup(
             'memorious = memorious.cli:main'
         ],
     },
-    tests_require=[]
+    extras_require={
+        'dev': [
+            'pytest',
+            'pytest-env',
+            'pytest-cov'
+        ]
+    }
 )

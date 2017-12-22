@@ -1,0 +1,44 @@
+# Example scraper to demonstrate Memorious XPath narrowing
+name: book_scraper
+description: Books to scraper
+# Uncomment to run this scraper automatically:
+# schedule: weekly
+pipeline:
+  init:
+    # Start URL
+    method: seed
+    params:
+      urls: 
+        - http://books.toscrape.com
+    handle:
+      pass: fetch
+  fetch:
+    # Download the page passed from the seed stage.
+    method: fetch
+    handle:
+      pass: parse 
+  parse:
+    # Crawl the HTML of the page passed in to extract specific things.
+    method: parse
+    params:
+      # This only checks the <section> element for links to follow (effectively keeping only links to book pages and pagination, and skipping the sidebar which lists book categories).
+      include_paths:
+        - './/section'
+      # This tells the parser to also extract additional metadata from the DOM, which is added to `data` and passed to the 'store' stage.
+      meta:
+        title: './/article[@class="product_page"]//h1'
+        price: './/article[@class="product_page"]//p[@class="price_color"]'
+      # It uses a regex rule to skip URLs with '/category/' in them, so it only stores the book pages and not the listings.
+      store:
+        not:
+          pattern: '.*/category/.*'
+    handle:
+      # If the 'fetch' rule is invoked, re-trigger the fetch stage
+      fetch: fetch
+      # Otherwise, pass data on to the store stage
+      store: store
+  store:
+    # Store the crawled documents to a directory
+    method: directory
+    params:
+      path: /data/results

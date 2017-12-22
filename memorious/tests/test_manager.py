@@ -1,0 +1,21 @@
+import os
+import collections
+
+from memorious.logic.manager import Crawler, CrawlerManager
+
+
+class TestManager(object):
+    def test_manager(self):
+        file_path = os.path.realpath(__file__)
+        crawler_dir = os.path.normpath(os.path.join(
+            file_path, "../testdata/config"
+        ))
+        manager = CrawlerManager(crawler_dir)
+        assert isinstance(manager.crawlers, dict)
+        assert all(
+            isinstance(crawler, Crawler) for crawler in manager.crawlers.values()
+        )
+        assert len(manager) == 3
+        assert isinstance(manager.get("book_scraper"), Crawler)
+        assert isinstance(manager["book_scraper"], Crawler)
+        assert isinstance(manager, collections.Iterable)
