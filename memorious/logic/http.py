@@ -230,7 +230,7 @@ class ContextHttpResponse(object):
                 if charset is not None:
                     self._encoding = charset
         if self._encoding is None:
-            with open(self.file_path, 'r') as fh:
+            with open(self.file_path, 'rb') as fh:
                 self._encoding = guess_file_encoding(fh)
         return self._encoding
 
@@ -276,7 +276,7 @@ class ContextHttpResponse(object):
         if not hasattr(self, '_raw'):
             self._raw = None
             if self.file_path is not None:
-                with open(self.file_path, 'r') as fh:
+                with open(self.file_path, 'rb') as fh:
                     self._raw = fh.read()
         return self._raw
 

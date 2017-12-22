@@ -1,6 +1,8 @@
 import json
 import six
 from memorious.logic.context import Context
+from memorious.model import Event
+from memorious.core import session
 
 
 class TestContext(object):
@@ -24,3 +26,21 @@ class TestContext(object):
             (k, v) in new_context.state.items()
             for k, v in context.state.items()
         )
+
+    def test_emit_exception(self, context):
+        exc = Exception("Uh oh!")
+        event = context.emit_exception(exc)
+        assert isinstance(event, Event)
+        assert event.level == Event.LEVEL_ERROR
+        # TODO:
+        # Without rollback, segmentation fault on py3; corrupt session on py2.
+        # Why? IDK.
+        # Also, class level teardown methods doesn't prevent the errors.
+        session.rollback()
+
+    def test_emit_warning(self, context):
+        msg = "hello"
+        event = context.emit_warning(msg)
+        assert isinstance(event, Event)
+        assert event.level == Event.LEVEL_WARNING
+        session.rollback()

@@ -60,4 +60,4 @@ pipeline:
     # Store the crawled documents to a directory
     method: directory
     params:
-      path: /data/results
+      path: ./data/results

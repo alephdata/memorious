@@ -13,7 +13,7 @@ class TestManager(object):
         manager = CrawlerManager(crawler_dir)
         assert isinstance(manager.crawlers, dict)
         assert all(
-            isinstance(crawler, Crawler) for crawler in manager.crawlers.values()
+            isinstance(crawler, Crawler) for crawler in manager
         )
         assert len(manager) == 3
         assert isinstance(manager.get("book_scraper"), Crawler)
