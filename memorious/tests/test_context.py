@@ -1,6 +1,6 @@
 import json
 import six
-from memorious.logic.context import Context
+from memorious.logic.context import Context, handle
 from memorious.model import Event
 from memorious.core import session
 
@@ -35,7 +35,7 @@ class TestContext(object):
         # TODO:
         # Without rollback, segmentation fault on py3; corrupt session on py2.
         # Why? IDK.
-        # Also, class level teardown methods doesn't prevent the errors.
+        # Also, class level teardown method doesn't prevent the errors.
         session.rollback()
 
     def test_emit_warning(self, context):
@@ -44,3 +44,18 @@ class TestContext(object):
         assert isinstance(event, Event)
         assert event.level == Event.LEVEL_WARNING
         session.rollback()
+
+    def test_execute(self, context, mocker):
+        data = {"answer": 42}
+        mocker.patch("memorious.logic.stage.CrawlerStage.method",
+                     new_callable=mocker.PropertyMock)
+        context.execute(data)
+        assert context.stage.method.called_once_with(data)
+
+
+def test_handle_execute(stage, context, mocker):
+    mocker.patch.object(Context, "from_state", return_value=context)
+    mocker.patch.object(context, "execute")
+    data = {"hello": "world"}
+    handle({"foo": "bar"}, stage, data)
+    assert context.execute.called_once_with(data)

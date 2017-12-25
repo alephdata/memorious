@@ -19,6 +19,7 @@ def crawler_dir():
     ))
     return crawler_dir
 
+
 @pytest.fixture(scope="module")
 def manager():
     return CrawlerManager(crawler_dir())

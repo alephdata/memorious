@@ -64,8 +64,8 @@ def dav_index(context, data):
             context.log.info("Fetching contents of folder: %s" % rurl)
             context.recurse(data=rdata)
         else:
-            rdata['parent_foreign_id'] = url    
-        
+            rdata['parent_foreign_id'] = url
+
         # Do GET requests on the urls
         fetch(context, rdata)
 

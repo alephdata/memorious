@@ -1,5 +1,10 @@
 import os
+
+import six
+import pytest
 from requests import Session, Response, Request
+from lxml import html, etree
+
 from memorious.logic.http import ContextHttpResponse
 
 
@@ -20,38 +25,94 @@ class TestContextHttp(object):
 
 class TestContextHttpResponse(object):
     def test_fetch_response(self, http):
-        request = Request(
-            "GET", "http://httpbin.org/response-headers?Content-Type=text/plain;"
-            "%20charset=UTF-8&Content-Disposition=attachment;%20filename%3d%22"
-            "test.json%22"
-        )
+        request = Request("GET", "https://httpbin.org/get")
         context_http_response = ContextHttpResponse(http, request)
         file_path = context_http_response.fetch()
         assert os.path.exists(file_path)
 
     def test_contenttype(self, http):
-        request = Request(
-            "GET", "http://httpbin.org/response-headers?Content-Type=text/plain;"
-            "%20charset=UTF-8&Content-Disposition=attachment;%20filename%3d%22"
-            "test.json%22"
-        )
+        request = Request("GET", "https://httpbin.org/get")
         context_http_response = ContextHttpResponse(http, request)
-        assert context_http_response.content_type == "application/json, text/plain"
+        assert context_http_response.content_type == "application/json"
 
     def test_attachment(self, http):
         request = Request(
-            "GET", "http://httpbin.org/response-headers?Content-Type=text/plain;"
+            "GET", "https://httpbin.org/response-headers?Content-Type=text/plain;"
             "%20charset=UTF-8&Content-Disposition=attachment;%20filename%3d%22"
             "test.json%22"
         )
         context_http_response = ContextHttpResponse(http, request)
         assert context_http_response.file_name == "test.json"
 
-    def test_encoding(self, http):
+    @pytest.mark.parametrize("url,encoding", [
+        ("https://httpbin.org/response-headers?charset=", "utf-8"),
+        ("https://httpbin.org/response-headers?content-type=text"
+         "/plain;%20charset=utf-16", "utf-16"),
+        ("https://httpbin.org/response-headers?Content-Type=text/"
+         "plain;%20charset=utf-32", "utf-32")
+    ])
+    def test_encoding(self, url, encoding, http):
+        request = Request("GET", url)
+        context_http_response = ContextHttpResponse(http, request)
+        assert context_http_response.encoding == encoding
+
+    def test_request_id(self, http):
         request = Request(
-            "GET", "http://httpbin.org/response-headers?Content-Type=text/plain;"
-            "%20charset=UTF-8&Content-Disposition=attachment;%20filename%3d%22"
-            "test.json%22"
+            "GET", "https://httpbin.org/get", data={"hello": "world"}
         )
         context_http_response = ContextHttpResponse(http, request)
-        assert context_http_response.encoding == "utf-8"
+        assert context_http_response._request_id is None
+        assert isinstance(context_http_response.request_id, six.string_types)
+
+    def test_content(self, http):
+        request = Request(
+            "GET", "https://httpbin.org/user-agent",
+            headers={"User-Agent": "Memorious Test"}
+        )
+        context_http_response = ContextHttpResponse(http, request)
+        assert isinstance(context_http_response.raw, six.binary_type)
+        assert (context_http_response.raw ==
+                b'{\n  "user-agent": "Memorious Test"\n}\n')
+        assert isinstance(context_http_response.text, six.text_type)
+        assert (context_http_response.text ==
+                '{\n  "user-agent": "Memorious Test"\n}\n')
+        assert context_http_response.json == {"user-agent": "Memorious Test"}
+
+    def test_html(self, http):
+        request = Request("GET", "https://httpbin.org/html")
+        context_http_response = ContextHttpResponse(http, request)
+        assert isinstance(context_http_response.html, html.HtmlElement)
+
+    def test_xml(self, http):
+        request = Request("GET", "https://httpbin.org/xml")
+        context_http_response = ContextHttpResponse(http, request)
+        assert isinstance(context_http_response.xml, etree._ElementTree)
+
+    def test_apply_data(self, http):
+        context_http_response = ContextHttpResponse(http)
+        assert context_http_response.url is None
+        assert context_http_response.status_code is None
+        context_http_response.apply_data(data={
+            "status_code": 200,
+            "url": "https://httpbin.org/get"
+        })
+        assert context_http_response.url == "https://httpbin.org/get"
+        assert context_http_response.status_code == 200
+
+    def test_deserialize(self, http):
+        data = {
+            "status_code": 200,
+            "url": "https://httpbin.org/get"
+        }
+        context_http_response = ContextHttpResponse.deserialize(http, data)
+        assert isinstance(context_http_response, ContextHttpResponse)
+        assert context_http_response.url == "https://httpbin.org/get"
+        assert context_http_response.status_code == 200
+
+    def test_close(self, http):
+        request = Request("GET", "https://httpbin.org/get")
+        context_http_response = ContextHttpResponse(http, request)
+        file_path = context_http_response.fetch()
+        assert os.path.exists(file_path)
+        context_http_response.close()
+        assert not os.path.exists(file_path)

@@ -49,7 +49,8 @@ setup(
         'dev': [
             'pytest',
             'pytest-env',
-            'pytest-cov'
+            'pytest-cov',
+            'pytest-mock',
         ]
     }
 )
