@@ -52,9 +52,9 @@ def test_parse(context, mocker):
         context.params["store"] = rules
         parse(context, data)
         assert context.emit.call_count == 1
-        # assert context.emit.assert_called_once_with(rule="fetch", data={
-        #     "url": "http://www.iana.org/domains/example"
-        # })
+        context.emit.assert_called_once_with(rule="fetch", data={
+            "url": "http://www.iana.org/domains/example"
+        })
 
     # Clear existing tags
     db_session.rollback()
@@ -74,9 +74,9 @@ def test_seed(context, mocker):
     mocker.patch.object(context, "emit")
     seed(context, data={"status": 404})
     assert context.emit.call_count == 1
-    # assert context.emit.assert_called_once_with(
-    #     data={"url": "http://httpbin.org/status/404"}
-    # )
+    context.emit.assert_called_once_with(
+        data={"url": "http://httpbin.org/status/404"}
+    )
 
 
 def test_sequence(context, mocker):
@@ -104,14 +104,14 @@ def test_dates(context, mocker):
     context.params["end"] = "20-12-2012"
     dates(context, data={})
     assert context.emit.call_count == 1
-    # assert context.emit.assert_called_once_with(data={
-    #     "date": "20-12-2012",
-    #     "date_iso": "2012-12-20T00:00:00"
-    # })
+    context.emit.assert_called_once_with(data={
+        "date": "20-12-2012",
+        "date_iso": "2012-12-20T00:00:00"
+    })
     assert context.recurse.call_count == 1
-    # assert context.recurse.assert_called_once_with(
-    #     data={"current": "17-12-2012"}, delay=None
-    # )
+    context.recurse.assert_called_once_with(
+        data={"current": "17-12-2012"}, delay=None
+    )
 
 
 def test_enumerate(context, mocker):
@@ -119,9 +119,14 @@ def test_enumerate(context, mocker):
     context.params["items"] = [1, 2, 3]
     enumerate(context, data={})
     assert context.emit.call_count == 3
-    # assert context.emit.assert_called_with(data={"item": 3})
-    # assert context.emit.assert_called_with(data={"item": 2})
-    # assert context.emit.assert_called_with(data={"item": 1})
+    # expected_calls = [
+    #     mocker.call(data={"item": 1}),
+    #     mocker.call(data={"item": 2}),
+    #     mocker.call(data={"item": 3}),
+    # ]
+    # assert context.emit.mock_calls == expected_calls
+    # Ideally this should work, but currently it doesn't; because we pass
+    # the reference to data dict around and then mutate it.
 
 
 def test_directory(context):

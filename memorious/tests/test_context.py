@@ -45,7 +45,7 @@ class TestContext(object):
                      new_callable=mocker.PropertyMock)
         context.execute(data)
         assert context.stage.method.call_count == 1
-        # assert context.stage.method.assert_called_once_with(context, data)
+        context.stage.method.assert_called_once_with(context, data)
 
 
 def test_handle_execute(stage, context, mocker):
@@ -54,4 +54,4 @@ def test_handle_execute(stage, context, mocker):
     data = {"hello": "world"}
     handle({"foo": "bar"}, stage, data)
     assert task_queue.queue_operation.call_count == 1
-    # assert task_queue.queue_operation.assert_called_once_with(context, data)
+    task_queue.queue_operation.assert_called_once_with(context, data)
