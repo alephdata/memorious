@@ -32,18 +32,12 @@ class TestContext(object):
         event = context.emit_exception(exc)
         assert isinstance(event, Event)
         assert event.level == Event.LEVEL_ERROR
-        # TODO:
-        # Without rollback, segmentation fault on py3; corrupt session on py2.
-        # Why? IDK.
-        # Also, class level teardown method doesn't prevent the errors.
-        session.rollback()
 
     def test_emit_warning(self, context):
         msg = "hello"
         event = context.emit_warning(msg)
         assert isinstance(event, Event)
         assert event.level == Event.LEVEL_WARNING
-        session.rollback()
 
     def test_execute(self, context, mocker):
         data = {"answer": 42}
