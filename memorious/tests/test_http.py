@@ -116,3 +116,13 @@ class TestContextHttpResponse(object):
         assert os.path.exists(file_path)
         context_http_response.close()
         assert not os.path.exists(file_path)
+
+    @pytest.mark.parametrize("url,status_code", [
+        ("https://httpbin.org/status/404", 404),
+        ("https://httpbin.org/status/500", 500),
+        ("https://httpbin.org/status/200", 200)
+    ])
+    def test_status_code(self, url, status_code, http):
+        request = Request("GET", url)
+        context_http_response = ContextHttpResponse(http, request)
+        assert context_http_response.status_code == status_code

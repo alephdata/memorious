@@ -198,7 +198,7 @@ class ContextHttpResponse(object):
 
     @property
     def status_code(self):
-        if self._status_code is None and self.response:
+        if self._status_code is None and self.response is not None:
             self._status_code = self.response.status_code
         return self._status_code
 
