@@ -2,7 +2,7 @@ import json
 import six
 from memorious.logic.context import Context, handle
 from memorious.model import Event
-from memorious.core import session
+from memorious.core import task_queue
 
 
 class TestContext(object):
@@ -44,12 +44,14 @@ class TestContext(object):
         mocker.patch("memorious.logic.stage.CrawlerStage.method",
                      new_callable=mocker.PropertyMock)
         context.execute(data)
-        assert context.stage.method.called_once_with(data)
+        assert context.stage.method.call_count == 1
+        # assert context.stage.method.assert_called_once_with(context, data)
 
 
 def test_handle_execute(stage, context, mocker):
     mocker.patch.object(Context, "from_state", return_value=context)
-    mocker.patch.object(context, "execute")
+    mocker.patch.object(task_queue, "queue_operation")
     data = {"hello": "world"}
     handle({"foo": "bar"}, stage, data)
-    assert context.execute.called_once_with(data)
+    assert task_queue.queue_operation.call_count == 1
+    # assert task_queue.queue_operation.assert_called_once_with(context, data)

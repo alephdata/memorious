@@ -11,4 +11,5 @@ class TestDocumentCloud(object):
 
         documentcloud_query(context, data)
         assert context.emit.call_count == 100
-        assert context.recurse.called_once_with(data={'page': 2})
+        assert context.recurse.call_count == 1
+        # assert context.recurse.assert_called_once_with(data={'page': 2})
