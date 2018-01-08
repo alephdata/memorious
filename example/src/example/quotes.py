@@ -1,4 +1,4 @@
-from urlparse import urljoin
+from six.moves.urllib.parse import urljoin
 
 
 def login(context, data):
@@ -62,6 +62,5 @@ def store(context, data):
     # This example uses a database to store structured data, which you can
     # access through context.datastore.
     table = context.datastore[context.params.get("table")]
-    print table
     # The data is passed in from context.emit of the previous 'crawl' stage.
     table.upsert(data, ['text', 'author'])

@@ -1,6 +1,6 @@
 import re
 import six
-from urlparse import urlparse
+from six.moves.urllib.parse import urlparse
 
 from memorious.logic.mime import GROUPS
 

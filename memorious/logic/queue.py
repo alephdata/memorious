@@ -1,6 +1,6 @@
 import logging
 from threading import Thread
-from Queue import Queue
+from six.moves.queue import Queue
 
 
 log = logging.getLogger(__name__)

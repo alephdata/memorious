@@ -7,7 +7,7 @@ dist/*
 build/*
 data/*
 ui/data/*
-env
+env*
 celerybeat-schedule*
 *.sh
 .DS_Store
@@ -15,3 +15,7 @@ celerybeat-schedule*
 docs/_build
 docs/_static
 docs/_templates
+.cache/*
+.coverage
+memorious/tests/testdata/data/*
+.tox

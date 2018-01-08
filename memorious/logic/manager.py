@@ -42,7 +42,7 @@ class CrawlerManager(object):
 
     def __iter__(self):
         crawlers = self.crawlers.values()
-        crawlers.sort(key=lambda c: c.name)
+        list(crawlers).sort(key=lambda c: c.name)
         return iter(crawlers)
 
     def __len__(self):

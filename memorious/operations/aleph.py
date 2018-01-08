@@ -1,7 +1,7 @@
 import json
 import requests
 from banal import clean_dict
-from urlparse import urljoin
+from six.moves.urllib.parse import urljoin
 
 from memorious import settings
 

@@ -105,7 +105,7 @@ class Context(object):
                           self.operation_id,
                           Event.LEVEL_ERROR,
                           error_type=exc.__class__.__name__,
-                          error_message=unicode(exc),
+                          error_message=six.text_type(exc),
                           error_details=traceback.format_exc())
 
     def set_tag(self, key, value):
@@ -158,7 +158,7 @@ class Context(object):
         in the process."""
         fd, path = mkstemp()
         try:
-            with os.fdopen(fd, 'w') as fh:
+            with os.fdopen(fd, 'wb') as fh:
                 if isinstance(data, six.text_type):
                     data = data.encode(encoding)
                 if data is not None:

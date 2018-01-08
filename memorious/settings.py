@@ -1,5 +1,6 @@
 import os
 import pkg_resources
+import six
 
 
 def env(name, default=None, required=False):
@@ -28,7 +29,7 @@ APP_NAME = env('APP_NAME', 'memorious')
 DEBUG = env_bool('DEBUG', default=False)
 
 # Base operating path
-BASE_PATH = env('BASE_PATH', os.path.join(os.getcwdu(), 'data'))
+BASE_PATH = env('BASE_PATH', os.path.join(six.moves.getcwd(), 'data'))
 
 # Database connection string
 DATABASE_FILE = os.path.join(BASE_PATH, 'memorious.sqlite3')

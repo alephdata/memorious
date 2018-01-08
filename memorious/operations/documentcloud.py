@@ -1,5 +1,5 @@
 import os
-from urlparse import urljoin
+from six.moves.urllib.parse import urljoin
 
 DEFAULT_HOST = 'https://documentcloud.org/'
 DEFAULT_INSTANCE = 'documentcloud'

@@ -1,0 +1,33 @@
+# Example scraper to demonstrate extending Memorious
+name: quote_scraper
+description: Quotes to scraper
+# Uncomment to run this scraper automatically:
+# schedule: weekly
+pipeline:
+  init:
+    # The first stage logs in and creates an HTTP session which is used for subsequent requests.
+    method: example.quotes:login
+    params:
+      url: http://quotes.toscrape.com
+      username: fred
+      password: asdfasdf
+    handle:
+      pass: fetch
+  fetch:
+    # Download the page passed from the login stage.
+    method: fetch
+    handle:
+      pass: crawl 
+  crawl:
+    # Crawl the HTML of the page passed in to extract specific things.
+    method: example.quotes:crawl
+    handle:
+      # If the 'fetch' rule is invoked, re-trigger the fetch stage
+      fetch: fetch
+      # Otherwise, pass data on to the store stage
+      pass: store
+  store:
+    # Use a database to store structured data (which is either SQLite or otherwise set with the MEMORIOUS_DATASTORE_URI environment variable).
+    method: example.quotes:store
+    params:
+      table: example_quotes
