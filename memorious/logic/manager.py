@@ -41,8 +41,8 @@ class CrawlerManager(object):
         return self.crawlers.get(name)
 
     def __iter__(self):
-        crawlers = self.crawlers.values()
-        list(crawlers).sort(key=lambda c: c.name)
+        crawlers = list(self.crawlers.values())
+        crawlers.sort(key=lambda c: c.name)
         return iter(crawlers)
 
     def __len__(self):

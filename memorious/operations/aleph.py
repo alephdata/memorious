@@ -1,5 +1,6 @@
 import json
 import requests
+from pprint import pprint  # noqa
 from banal import clean_dict
 from six.moves.urllib.parse import urljoin
 
@@ -32,34 +33,32 @@ def submit_result(context, result, data):
     if collection_id is None:
         return
 
-    parent = None
-    parent_fid = data.get('parent_foreign_id')
-    if parent_fid is not None:
-        parent = { 'foreign_id': parent_fid }
-
     meta = {
         'crawler': context.crawler.name,
         'source_url': data.get('source_url', result.url),
         'title': data.get('title'),
         'author': data.get('author'),
         'foreign_id': data.get('foreign_id', result.request_id),
-        'parent': parent,
         'mime_type': data.get('mime_type', result.content_type),
         'countries': data.get('countries'),
         'languages': data.get('languages'),
         'retrieved_at': data.get('retrieved_at', result.retrieved_at),
         'modified_at': data.get('modified_at', result.last_modified),
-        'author': data.get('author'),
         'published_at': data.get('published_at'),
         'headers': dict(result.headers or {})
     }
+    if data.get('parent_foreign_id'):
+        meta['parent'] = {'foreign_id': data.get('parent_foreign_id')}
+    if result.file_name:
+        meta['file_name'] = result.file_name
+
     meta = clean_dict(meta)
+    # pprint(meta)
+
     url = make_url('collections/%s/ingest' % collection_id)
     title = meta.get('title', meta.get('file_name', meta.get('source_url')))
     context.log.info("Sending '%s' to %s", title, url)
-    file = (result.file_name or '',
-            open(result.file_path, 'rb'),
-            result.content_type)
+    file = open(result.file_path, 'rb')
     res = session.post(url,
                        data={'meta': json.dumps(meta)},
                        files={'file': file})
