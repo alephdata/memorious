@@ -71,34 +71,28 @@ def submit_result(context, result, data):
 
 def get_collection_id(context, session):
     url = make_url('collections')
+    if hasattr(context.stage, '_aleph_cid'):
+        return context.stage._aleph_cid
     foreign_id = context.get('collection', context.crawler.name)
-    while True:
-        res = session.get(url, params={
-            'limit': 100,
-            'filter:foreign_id': foreign_id
-        })
-        data = res.json()
-        for coll in data.get('results'):
-            if coll.get('foreign_id') == foreign_id:
-                return coll.get('id')
-        if not data.get('next_url'):
-            break
-        url = urljoin(url, data.get('next_url'))
+    res = session.get(url, params={
+        'filter:foreign_id': foreign_id
+    })
+    data = res.json()
+    for coll in data.get('results'):
+        if coll.get('foreign_id') == foreign_id:
+            context.stage._aleph_cid = coll.get('id')
+            return context.stage._aleph_cid
 
-    url = make_url('collections')
     res = session.post(url, json={
         'label': context.crawler.description,
         'category': context.crawler.category,
         'managed': True,
         'foreign_id': foreign_id
     })
-    coll_id = res.json().get('id')
-    if coll_id is None:
-        message = res.json().get('message')
-        context.log.error("Could not get collection: %s", message)
-    return coll_id
+    context.stage._aleph_cid = res.json().get('id')
+    return context.stage._aleph_cid
 
 
 def make_url(path):
-    prefix = urljoin(settings.ALEPH_HOST, '/api/')
-    return urljoin(prefix, '%s/%s' % (settings.ALEPH_API_VERSION, path))
+    prefix = urljoin(settings.ALEPH_HOST, '/api/2/')
+    return urljoin(prefix, path)
