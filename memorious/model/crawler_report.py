@@ -25,12 +25,12 @@ class CrawlerReport(Base):
     last_run = Column(DateTime, nullable=False)
 
     def __repr__(self):
-        return '<CrawlerPreport(%s,%s,%s,%s)>' % \
+        return '<CrawlerReport(%s,%s,%s,%s)>' % \
             (self.crawler, self.op_count, self.last_run)
 
 
 @listens_for(Operation, "after_insert")
-def update_crawler_report(mapper, connect, op):
+def update_crawler_report(mapper, connection, op):
     """
     Update the report of a crawler when a new operation is added for that
     crawler.
@@ -45,10 +45,7 @@ def update_crawler_report(mapper, connect, op):
     report = q.first()
     crawler_report_table = CrawlerReport.__table__
     if report is None:
-        report = CrawlerReport()
-        # report.crawler = op.crawler
-        # report.op_count = 1
-        connect.execute(
+        connection.execute(
             crawler_report_table.insert().values({
                 "crawler": op.crawler,
                 "op_count": 1,
@@ -56,7 +53,7 @@ def update_crawler_report(mapper, connect, op):
             })
         )
     else:
-        connect.execute(
+        connection.execute(
             crawler_report_table.update().
             where(crawler_report_table.c.crawler == op.crawler).
             values({
