@@ -1,6 +1,7 @@
 import logging
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import Column, String, Integer, DateTime, func
 from sqlalchemy.event import listens_for
+from sqlalchemy.orm import aliased
 
 from memorious.core import session
 from memorious.model.common import Base
@@ -27,6 +28,29 @@ class CrawlerReport(Base):
     def __repr__(self):
         return '<CrawlerReport(%s,%s,%s,%s)>' % \
             (self.crawler, self.op_count, self.last_run)
+
+    @classmethod
+    def sync_crawler_stat(cls):
+        """Update the crawler_report table based on current Operation data"""
+        op = aliased(Operation)
+        q = session.query(
+            op.crawler,
+            func.count(op.id),
+            func.max(op.started_at),
+        ).group_by(op.crawler)
+        reports = []
+        for (name, op_count, last_active) in q:
+            q = session.query(cls)
+            q = q.filter(cls.crawler == name)
+            report = q.first()
+            if report is None:
+                report = CrawlerReport()
+                report.crawler = name
+            report.op_count = op_count
+            report.last_run = last_active
+            reports.append(report)
+        session.add_all(reports)
+        session.commit()
 
 
 @listens_for(Operation, "after_insert")
