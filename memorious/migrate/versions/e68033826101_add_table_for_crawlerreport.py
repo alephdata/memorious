@@ -28,23 +28,6 @@ def upgrade():
         'crawler_report', ['crawler'], unique=True
     )
 
-    connection = op.get_bind()
-    results = connection.execute("""
-        SELECT op.crawler AS op_crawler, count(op.id) AS op_count,
-                max(op.started_at) AS last_run
-        FROM operation AS op
-        GROUP BY op.crawler
-    """)
-    records = []
-    for idx, (crawler, op_count, last_run) in enumerate(results):
-        records.append({
-            "id": idx,
-            "crawler": crawler,
-            "op_count": op_count,
-            "last_run": last_run
-        })
-    op.bulk_insert(crawler_report_table, records)
-
 
 def downgrade():
     op.drop_index(
