@@ -38,7 +38,8 @@ setup(
         'pycountry',
         'countrynames',
         'dateparser',
-        'stringcase'
+        'stringcase',
+        'raven',
     ],
     entry_points={
         'console_scripts': [

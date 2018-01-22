@@ -1,13 +1,24 @@
 from urllib import urlencode
+import logging
+
 from flask import Flask, jsonify, request
 from flask import render_template, abort
 from babel.numbers import format_number
 from babel.dates import format_date, format_datetime
+from raven.contrib.flask import Sentry
 
+from memorious import settings
 from memorious_ui.reporting import crawlers_index, global_stats
 from memorious_ui.reporting import get_crawler, crawler_stages, crawler_events
 
 app = Flask(__name__)
+sentry = Sentry()
+
+if settings.SENTRY_DSN:
+    sentry.init_app(app,
+                    dsn=settings.SENTRY_DSN,
+                    logging=True,
+                    level=logging.ERROR)
 
 
 @app.template_filter('number')

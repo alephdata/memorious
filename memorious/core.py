@@ -10,6 +10,8 @@ from alembic import command
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
+from raven import Client
+from raven.contrib.celery import register_signal, register_logger_signal
 
 from memorious import settings
 from memorious.logic.queue import CrawlerExecutionQueue
@@ -41,6 +43,13 @@ celery.conf.update(
 # set up a task queue using a Queue if celery is set to eager mode.
 if settings.EAGER:
     task_queue = CrawlerExecutionQueue()
+
+# set up raven for error reporting
+if settings.SENTRY_DSN:
+    client = Client(settings.SENTRY_DSN)
+    register_logger_signal(client)
+    register_signal(client, ignore_expected=True)
+
 
 # File storage layer for blobs on local file system or S3
 storage = storagelayer.init(settings.ARCHIVE_TYPE,

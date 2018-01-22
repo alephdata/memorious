@@ -87,3 +87,10 @@ ARCHIVE_BUCKET = env('ARCHIVE_BUCKET')
 ALEPH_HOST = env('ALEPH_HOST')
 ALEPH_API_KEY = env('ALEPH_API_KEY')
 ALEPH_API_VERSION = env('ALEPH_API_VERSION', '2')
+
+
+###############################################################################
+# Error reporting
+
+# Using sentry raven
+SENTRY_DSN = env('SENTRY_DSN')
