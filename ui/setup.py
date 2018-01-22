@@ -22,7 +22,8 @@ setup(
     install_requires=[
         'memorious',
         'flask',
-        'babel'
+        'babel',
+        'raven[flask]'
     ],
     entry_points={
         'console_scripts': [
