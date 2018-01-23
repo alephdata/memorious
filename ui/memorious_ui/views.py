@@ -23,8 +23,9 @@ if settings.SENTRY_DSN:
 
 
 @app.after_request
-def cleanup():
+def cleanup(response):
     session.remove()
+    return response
 
 
 @app.template_filter('number')
