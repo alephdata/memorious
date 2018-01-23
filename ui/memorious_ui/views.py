@@ -8,6 +8,7 @@ from babel.dates import format_date, format_datetime
 from raven.contrib.flask import Sentry
 
 from memorious import settings
+from memorious.core import session
 from memorious_ui.reporting import crawlers_index, global_stats
 from memorious_ui.reporting import get_crawler, crawler_stages, crawler_events
 
@@ -19,6 +20,11 @@ if settings.SENTRY_DSN:
                     dsn=settings.SENTRY_DSN,
                     logging=True,
                     level=logging.ERROR)
+
+
+@app.after_request
+def cleanup():
+    session.remove()
 
 
 @app.template_filter('number')
