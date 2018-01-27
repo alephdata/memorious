@@ -67,8 +67,7 @@ def context():
 @app.route('/')
 def index():
     crawlers = crawlers_index()
-    return render_template('index.html',
-                           crawlers=crawlers)
+    return render_template('index.html', crawlers=crawlers)
 
 
 @app.route('/crawlers/<name>')
@@ -102,8 +101,7 @@ def config(name):
     crawler = get_crawler(name)
     if crawler is None:
         abort(404)
-    return render_template('config.html',
-                           crawler=crawler)
+    return render_template('config.html', crawler=crawler)
 
 
 @app.route('/invoke/<crawler>/<action>', methods=['POST'])
