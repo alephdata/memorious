@@ -73,5 +73,5 @@ class Operation(Base):
         return (float(count) / sample) / 60.0
 
     def __repr__(self):
-        return '<Operation(%s,%s,%s)>' % \
-            (self.crawler, self.operation, self.status)
+        return '<Operation(%r, %r, %r)>' % \
+            (self.crawler, self.name, self.status)
