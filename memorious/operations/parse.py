@@ -1,3 +1,4 @@
+import logging
 from six.moves.urllib.parse import urljoin
 from banal import ensure_list
 from urlnormalizer import normalize_url
@@ -8,6 +9,7 @@ from memorious.helpers.dates import iso_date
 from memorious.util import make_key
 
 
+log = logging.getLogger(__name__)
 URL_TAGS = [('.//a', 'href'),
             ('.//img', 'src'),
             ('.//link', 'href'),
@@ -37,7 +39,12 @@ def parse_html(context, data, result):
                 if attr is None:
                     continue
 
-                url = normalize_url(urljoin(result.url, attr))
+                try:
+                    url = normalize_url(urljoin(result.url, attr))
+                except Exception:
+                    log.warning('Invalid URL: %r', attr)
+                    continue
+
                 if url is None or url in seen:
                     continue
                 seen.add(url)

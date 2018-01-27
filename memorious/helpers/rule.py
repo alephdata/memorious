@@ -102,6 +102,8 @@ class DomainRule(Rule):
     """Match all pages from a particular domain."""
 
     def clean_domain(self, domain):
+        if domain is None:
+            return
         pr = urlparse(domain)
         domain = pr.hostname or pr.path
         domain = domain.strip('.').lower()
@@ -115,6 +117,8 @@ class DomainRule(Rule):
 
     def apply(self, res):
         hostname = self.clean_domain(res.url)
+        if hostname is None or self.domain is None:
+            return False
         if hostname == self.domain:
             return True
         if hostname.endswith(self.sub_domain):
