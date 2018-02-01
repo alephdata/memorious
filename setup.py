@@ -40,6 +40,7 @@ setup(
         'dateparser',
         'stringcase',
         'raven',
+        'pylzma == 0.4.9',
     ],
     entry_points={
         'console_scripts': [
