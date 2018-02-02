@@ -1,5 +1,7 @@
 from six.moves.urllib.parse import urljoin
-from requests.exceptions import ConnectionError
+from requests.exceptions import (
+    ConnectionError, SSLError, ReadTimeout, TooManyRedirects
+)
 
 from memorious.helpers.rule import Rule
 from memorious.util import make_key
@@ -30,12 +32,31 @@ def fetch(context, data):
             tag = make_key(context.run_id, url)
             context.set_tag(tag, None)
         context.emit(data=data)
-    except ConnectionError as ce:
+    except SSLError as e:
+        context.log.warning(
+            "SSL error occurred while connecting to %s: %s", url, e
+        )
+    except TooManyRedirects as e:
+        context.log.warning(
+            "Too many redirects while connecting to %s: %s", url, e
+        )
+    except ReadTimeout as e:
         if attempt >= retries:
-            raise
+            return
         data['retry_attempt'] = attempt + 1
         delay = 2 ** attempt
-        context.log.warning("Connection error: %s", ce)
+        context.log.warning(
+            "Request timed out while connecting to %s: %s", url, e
+        )
+        context.recurse(data=data, delay=delay)
+    except ConnectionError as ce:
+        if attempt >= retries:
+            return
+        data['retry_attempt'] = attempt + 1
+        delay = 2 ** attempt
+        context.log.warning(
+            "Connection error while connecting to %s: %s", url, ce
+        )
         context.recurse(data=data, delay=delay)
 
 
