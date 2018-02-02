@@ -168,11 +168,16 @@ class Context(object):
                     fh.write(data)
             return self.store_file(path)
         finally:
-            os.unlink(path)
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
 
     @contextmanager
     def load_file(self, content_hash, file_name=None):
-        file_path = storage.load_file(content_hash, file_name=file_name)
+        file_path = storage.load_file(content_hash,
+                                      file_name=file_name,
+                                      temp_path=self.work_path)
         if file_path is None:
             raise StorageFileMissing(content_hash, file_name=file_name)
 
@@ -180,7 +185,7 @@ class Context(object):
             with open(file_path, 'r') as fh:
                 yield fh
         finally:
-            storage.cleanup_file(content_hash)
+            storage.cleanup_file(content_hash, temp_path=self.work_path)
 
     def dump_state(self):
         state = deepcopy(self.state)
