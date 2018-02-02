@@ -161,7 +161,7 @@ class Context(object):
         in the process."""
         path = random_filename(self.work_path)
         try:
-            with os.open(path, 'wb') as fh:
+            with open(path, 'wb') as fh:
                 if isinstance(data, six.text_type):
                     data = data.encode(encoding)
                 if data is not None:
