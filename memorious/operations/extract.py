@@ -64,5 +64,9 @@ def extract(context, data):
                 "Unsupported archive content type: %s", content_type
             )
             return
-        data["extracted_files"] = extracted_files
+        extracted_content_hashes = []
+        for path in extracted_files:
+            content_hash = context.store_file(path)
+            extracted_content_hashes.append(content_hash)
+        data["extracted_content_hashes"] = extracted_content_hashes
         context.emit(data=data)
