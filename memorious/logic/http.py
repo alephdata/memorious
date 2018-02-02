@@ -3,7 +3,6 @@ import cgi
 import json
 import pytz
 import pickle
-import tempfile
 from lxml import html, etree
 from hashlib import sha1
 from banal import hash_data, is_mapping
@@ -21,6 +20,7 @@ from memorious.logic.mime import NON_HTML
 from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
 from memorious.helpers.dates import parse_date
+from memorious.util import random_filename
 
 
 class ContextHttp(object):
@@ -151,12 +151,13 @@ class ContextHttpResponse(object):
         """Lazily trigger download of the data when requested."""
         if self._file_path is not None:
             return self._file_path
+        temp_path = self.context.work_path
         if self._content_hash is not None:
-            self._file_path = storage.load_file(self._content_hash)
+            self._file_path = storage.load_file(self._content_hash,
+                                                temp_path=temp_path)
             return self._file_path
         if self.response is not None:
-            fd, self._file_path = tempfile.mkstemp()
-            os.close(fd)
+            self._file_path = random_filename(temp_path)
             content_hash = sha1()
             with open(self._file_path, 'wb') as fh:
                 for chunk in self.response.iter_content(chunk_size=8192):
@@ -327,9 +328,8 @@ class ContextHttpResponse(object):
     def close(self):
         if self._response is not None:
             self._response.close()
-        if self._remove_file and os.path.isfile(self._file_path):
-            os.unlink(self._file_path)
-        storage.cleanup_file(self._content_hash)
+        # Will be deleted by the context:
+        # storage.cleanup_file(self._content_hash)
 
     def serialize(self):
         self.fetch()

@@ -32,7 +32,7 @@ setup(
         'sqlalchemy',
         'dataset >= 1.0.3',
         'six',
-        'storagelayer >= 0.2.2',
+        'storagelayer >= 0.3.1',
         'urlnormalizer >= 1.0.4',
         'werkzeug',
         'pycountry',

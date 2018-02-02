@@ -1,11 +1,12 @@
 import os
 import six
 import uuid
+import shutil
 import random
 import logging
 import traceback
 from copy import deepcopy
-from tempfile import mkstemp
+from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
@@ -14,7 +15,7 @@ from memorious.core import datastore
 from memorious.model import Result, Tag, Operation, Event
 from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
-from memorious.util import make_key
+from memorious.util import make_key, random_filename
 from memorious import settings
 
 
@@ -70,6 +71,7 @@ class Context(object):
         session.add(op)
         session.commit()
         self.operation_id = op.id
+        self.work_path = mkdtemp(prefix=op.id)
 
         try:
             self.log.debug('Running: %s', op.name)
@@ -82,6 +84,7 @@ class Context(object):
             session.rollback()
             self.emit_exception(exc)
         finally:
+            shutil.rmtree(self.work_path)
             if op.status == Operation.STATUS_PENDING:
                 op.status = Operation.STATUS_FAILED
             op.ended_at = datetime.utcnow()
@@ -156,9 +159,9 @@ class Context(object):
     def store_data(self, data, encoding='utf-8'):
         """Put the given content into a file, possibly encoding it as UTF-8
         in the process."""
-        fd, path = mkstemp()
+        path = random_filename(self.work_path)
         try:
-            with os.fdopen(fd, 'wb') as fh:
+            with os.open(path, 'wb') as fh:
                 if isinstance(data, six.text_type):
                     data = data.encode(encoding)
                 if data is not None:
