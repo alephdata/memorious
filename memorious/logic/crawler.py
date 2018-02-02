@@ -55,7 +55,7 @@ class Crawler(object):
         last_run = Operation.last_run(self.name)
         if last_run is None:
             return True
-        now = datetime.now()
+        now = datetime.utcnow()
         if now > last_run + self.delta:
             return True
         return False

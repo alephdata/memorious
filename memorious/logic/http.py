@@ -1,4 +1,3 @@
-import os
 import cgi
 import json
 import pytz
@@ -211,12 +210,12 @@ class ContextHttpResponse(object):
 
     @property
     def last_modified(self):
-        now = datetime.utcnow().replace(tzinfo=pytz.utc)
+        now = datetime.utcnow()
         last_modified_header = self.headers.get("Last-Modified")
         if last_modified_header is not None:
             # Tue, 15 Nov 1994 12:45:26 GMT
             last_modified = parse_date(last_modified_header)
-            if last_modified < now + timedelta(seconds=16):
+            if last_modified < now + timedelta(seconds=30):
                 return last_modified.strftime("%Y-%m-%dT%H:%M:%S%z")
         return None
 
