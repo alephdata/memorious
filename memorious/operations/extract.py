@@ -55,9 +55,14 @@ def extract(context, data):
         # TODO: contenttype may vary. Include more.
         if content_type == "application/zip":
             extracted_files = extract_zip(file_path, extract_dir)
-        if content_type == "application/x-gzip":
+        elif content_type == "application/x-gzip":
             extracted_files = extract_tar(file_path, extract_dir, context)
-        if content_type == "application/x-7z-compressed":
+        elif content_type == "application/x-7z-compressed":
             extracted_files = extract_7zip(file_path, extract_dir)
+        else:
+            context.log.warning(
+                "Unsupported archive content type: %s", content_type
+            )
+            return
         data["extracted_files"] = extracted_files
         context.emit(data=data)
