@@ -1,16 +1,16 @@
-from normality import collapse_spaces
 from banal import ensure_list
 from lxml import html
 
 
+def _get_html_document(context, data):
+    with context.http.rehash(data) as result:
+        if result.ok:
+            return result.html
+
+
 def clean_html(context, data):
     """Clean an HTML DOM and store the changed version."""
-    with context.http.rehash(data) as result:
-        if not result.ok:
-            context.emit(data=data)
-            return
-        doc = result.html
-
+    doc = _get_html_document(context, data)
     if doc is None:
         context.emit(data=data)
         return

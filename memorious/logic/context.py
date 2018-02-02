@@ -30,6 +30,7 @@ class Context(object):
         self.incremental = state.get('incremental')
         self.run_id = state.get('run_id') or uuid.uuid1().hex
         self.operation_id = None
+        self.work_path = mkdtemp()
         self.log = logging.getLogger('%s.%s' % (crawler.name, stage.name))
         self.http = ContextHttp(self)
         self.datastore = datastore
@@ -71,7 +72,6 @@ class Context(object):
         session.add(op)
         session.commit()
         self.operation_id = op.id
-        self.work_path = mkdtemp(prefix=op.id)
 
         try:
             self.log.debug('Running: %s', op.name)
