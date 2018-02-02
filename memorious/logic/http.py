@@ -1,12 +1,12 @@
 import cgi
 import json
-import pytz
 import pickle
 from lxml import html, etree
 from hashlib import sha1
 from banal import hash_data, is_mapping
 from urlnormalizer import normalize_url
 from normality import guess_file_encoding, stringify
+from normality.encoding import normalize_encoding
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
 from datetime import datetime, timedelta
@@ -226,9 +226,7 @@ class ContextHttpResponse(object):
             if content_type is not None:
                 content_type, options = cgi.parse_header(content_type)
                 charset = options.get('charset', '')
-                charset = stringify(charset.lower().strip())
-                if charset is not None:
-                    self._encoding = charset
+                self._encoding = normalize_encoding(charset, None)
         if self._encoding is None:
             with open(self.file_path, 'rb') as fh:
                 self._encoding = guess_file_encoding(fh)
