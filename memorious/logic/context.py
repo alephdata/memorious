@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 
 from memorious.core import manager, storage, celery, session
-from memorious.core import datastore
+from memorious.core import datastore, local_queue
 from memorious.model import Result, Tag, Operation, Event
 from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
@@ -226,7 +226,6 @@ def handle(task, state, stage, data):
     if settings.EAGER:
         # If celery is running in eager mode, put the crawler in a Queue.
         # Then we get to execute them sequentially and avoid recursion errors.
-        from memorious.core import task_queue
-        task_queue.queue_operation(context, data)
+        local_queue.queue_operation(context, data)
     else:
         context.execute(data)

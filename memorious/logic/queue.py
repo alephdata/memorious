@@ -12,11 +12,12 @@ class CrawlerExecutionQueue(object):
     """
     def __init__(self):
         self.queue = Queue()
-        worker = Thread(target=self.execute_crawler)
-        worker.setDaemon(True)
-        worker.start()
 
     def queue_operation(self, context, data):
+        if not hasattr(self, 'worker'):
+            self.worker = Thread(target=self.execute_crawler)
+            self.worker.setDaemon(True)
+            self.worker.start()
         self.queue.put((context, data))
 
     def execute_crawler(self):

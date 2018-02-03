@@ -2,7 +2,7 @@ import json
 import six
 from memorious.logic.context import Context, handle
 from memorious.model import Event
-from memorious.core import task_queue
+from memorious.core import local_queue
 
 
 class TestContext(object):
@@ -50,8 +50,8 @@ class TestContext(object):
 
 def test_handle_execute(stage, context, mocker):
     mocker.patch.object(Context, "from_state", return_value=context)
-    mocker.patch.object(task_queue, "queue_operation")
+    mocker.patch.object(local_queue, "queue_operation")
     data = {"hello": "world"}
     handle({"foo": "bar"}, stage, data)
-    assert task_queue.queue_operation.call_count == 1
-    task_queue.queue_operation.assert_called_once_with(context, data)
+    assert local_queue.queue_operation.call_count == 1
+    local_queue.queue_operation.assert_called_once_with(context, data)

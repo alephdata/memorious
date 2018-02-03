@@ -1,6 +1,7 @@
 import os
 import pkg_resources
 import six
+from banal import as_bool
 
 
 def env(name, default=None, required=False):
@@ -12,11 +13,7 @@ def env(name, default=None, required=False):
 
 def env_bool(name, default=False):
     """Extract a boolean value from the environment consistently."""
-    value = env(name)
-    if value is None:
-        return default
-    value = value.lower().strip()
-    return value in ['t', '1', 'y', 'true', 'yes', 'enabled']
+    return as_bool(env(name), default=default)
 
 
 ###############################################################################
