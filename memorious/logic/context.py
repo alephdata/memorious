@@ -48,7 +48,8 @@ class Context(object):
         if stage is None:
             stage = self.stage.handlers.get(rule)
         if stage is None or stage not in self.crawler.stages:
-            raise TypeError("Invalid stage: %s (%s)" % (stage, rule))
+            self.log.info("No next stage: % (%s)" % (stage, rule))
+            return
         state = self.dump_state()
         delay = delay or self.crawler.delay
         Result.save(self.crawler, self.operation_id,
