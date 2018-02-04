@@ -32,11 +32,11 @@ def fetch(context, data):
     except RequestException as ce:
         retries = int(context.get('retry', 3))
         if retries >= attempt:
-            context.log.warn("Retry: %s (error: %s)", result.url, ce)
+            context.log.warn("Retry: %s (error: %s)", url, ce)
             data['retry_attempt'] = attempt + 1
             context.recurse(data=data, delay=2 ** attempt)
         else:
-            context.emit_warning("Fetch fail [%s]: %s" % (result.url, ce))
+            context.emit_warning("Fetch fail [%s]: %s" % (url, ce))
 
 
 def dav_index(context, data):

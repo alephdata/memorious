@@ -33,7 +33,7 @@ setup(
         'dataset >= 1.0.3',
         'six',
         'storagelayer >= 0.3.2',
-        'urlnormalizer >= 1.0.4',
+        'urlnormalizer >= 1.2.0',
         'werkzeug',
         'pycountry',
         'countrynames',
