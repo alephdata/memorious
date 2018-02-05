@@ -59,8 +59,7 @@ def extract_tar(file_path, extract_dir, context):
 
 def extract_7zip(file_path, extract_dir, context):
     return_code = subprocess.call(
-        ['7z', 'x', file_path, '-y', '-r', '-bb0', '-bd',
-            '-oc:%s' % extract_dir])
+        ['7z', 'x', file_path, '-r', '-bb0', '-bd', '-o%s' % extract_dir])
     if return_code != 0:
         context.log.warning(
             "Couldn't extract file: %s", file_path
