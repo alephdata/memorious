@@ -19,3 +19,4 @@ docs/_templates
 .coverage
 memorious/tests/testdata/data/*
 .tox
+.pytest_cache/*

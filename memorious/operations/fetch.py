@@ -1,7 +1,5 @@
 from six.moves.urllib.parse import urljoin
-from requests.exceptions import (
-    ConnectionError, SSLError, ReadTimeout, TooManyRedirects
-)
+from requests.exceptions import RequestException
 
 from memorious.helpers.rule import Rule
 from memorious.util import make_key
@@ -10,8 +8,7 @@ from memorious.util import make_key
 def fetch(context, data):
     """Do an HTTP GET on the ``url`` specified in the inbound data."""
     url = data.get('url')
-    retries = int(context.get('retry', 3))
-    attempt = data.get('retry_attempt', 1)
+    attempt = data.pop('retry_attempt', 1)
     try:
         result = context.http.get(url, lazy=True)
         rules = context.get('rules', {'match_all': {}})
@@ -20,8 +17,8 @@ def fetch(context, data):
             return
 
         if not result.ok:
-            err = (result.status_code, result.url)
-            context.emit_warning("Fetch fail [%s]: %s" % (err))
+            err = (result.url, result.status_code)
+            context.emit_warning("Fetch fail [%s]: HTTP %s" % err)
             return
 
         context.log.info("Fetched [%s]: %r",
@@ -32,32 +29,14 @@ def fetch(context, data):
             tag = make_key(context.run_id, url)
             context.set_tag(tag, None)
         context.emit(data=data)
-    except SSLError as e:
-        context.log.warning(
-            "SSL error occurred while connecting to %s: %s", url, e
-        )
-    except TooManyRedirects as e:
-        context.log.warning(
-            "Too many redirects while connecting to %s: %s", url, e
-        )
-    except ReadTimeout as e:
-        if attempt >= retries:
-            return
-        data['retry_attempt'] = attempt + 1
-        delay = 2 ** attempt
-        context.log.warning(
-            "Request timed out while connecting to %s: %s", url, e
-        )
-        context.recurse(data=data, delay=delay)
-    except ConnectionError as ce:
-        if attempt >= retries:
-            return
-        data['retry_attempt'] = attempt + 1
-        delay = 2 ** attempt
-        context.log.warning(
-            "Connection error while connecting to %s: %s", url, ce
-        )
-        context.recurse(data=data, delay=delay)
+    except RequestException as ce:
+        retries = int(context.get('retry', 3))
+        if retries >= attempt:
+            context.log.warn("Retry: %s (error: %s)", url, ce)
+            data['retry_attempt'] = attempt + 1
+            context.recurse(data=data, delay=2 ** attempt)
+        else:
+            context.emit_warning("Fetch fail [%s]: %s" % (url, ce))
 
 
 def dav_index(context, data):

@@ -41,8 +41,7 @@ celery.conf.update(
 )
 
 # set up a task queue using a Queue if celery is set to eager mode.
-if settings.EAGER:
-    task_queue = CrawlerExecutionQueue()
+local_queue = CrawlerExecutionQueue()
 
 # set up raven for error reporting
 if settings.SENTRY_DSN:
@@ -89,7 +88,7 @@ def ensure_db():
     if settings.DATABASE_FILE in settings.DATABASE_URI:
         try:
             os.makedirs(os.path.dirname(settings.DATABASE_FILE))
-        except:
+        except Exception:
             pass
         log.info("Built-in database: %s", settings.DATABASE_URI)
         upgrade_db()

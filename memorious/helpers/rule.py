@@ -1,6 +1,7 @@
 import re
 import six
 from six.moves.urllib.parse import urlparse
+from celestial import normalize_mimetype
 
 from memorious.logic.mime import GROUPS
 
@@ -86,8 +87,11 @@ class MatchAllRule(Rule):
 
 class MimeTypeRule(Rule):
 
+    def configure(self):
+        self.clean = normalize_mimetype(self.value)
+
     def apply(self, res):
-        return self.res.content_type == self.value
+        return self.res.content_type == self.clean
 
 
 class MimeGroupRule(Rule):

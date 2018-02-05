@@ -1,20 +1,21 @@
 import os
 import six
 import uuid
+import shutil
 import random
 import logging
 import traceback
 from copy import deepcopy
-from tempfile import mkstemp
+from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
 from memorious.core import manager, storage, celery, session
-from memorious.core import datastore
+from memorious.core import datastore, local_queue
 from memorious.model import Result, Tag, Operation, Event
 from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
-from memorious.util import make_key
+from memorious.util import make_key, random_filename
 from memorious import settings
 
 
@@ -29,6 +30,7 @@ class Context(object):
         self.incremental = state.get('incremental')
         self.run_id = state.get('run_id') or uuid.uuid1().hex
         self.operation_id = None
+        self.work_path = mkdtemp()
         self.log = logging.getLogger('%s.%s' % (crawler.name, stage.name))
         self.http = ContextHttp(self)
         self.datastore = datastore
@@ -46,7 +48,8 @@ class Context(object):
         if stage is None:
             stage = self.stage.handlers.get(rule)
         if stage is None or stage not in self.crawler.stages:
-            raise TypeError("Invalid stage: %s (%s)" % (stage, rule))
+            self.log.info("No next stage: %s (%s)" % (stage, rule))
+            return
         state = self.dump_state()
         delay = delay or self.crawler.delay
         Result.save(self.crawler, self.operation_id,
@@ -82,6 +85,7 @@ class Context(object):
             session.rollback()
             self.emit_exception(exc)
         finally:
+            shutil.rmtree(self.work_path)
             if op.status == Operation.STATUS_PENDING:
                 op.status = Operation.STATUS_FAILED
             op.ended_at = datetime.utcnow()
@@ -156,20 +160,25 @@ class Context(object):
     def store_data(self, data, encoding='utf-8'):
         """Put the given content into a file, possibly encoding it as UTF-8
         in the process."""
-        fd, path = mkstemp()
+        path = random_filename(self.work_path)
         try:
-            with os.fdopen(fd, 'wb') as fh:
+            with open(path, 'wb') as fh:
                 if isinstance(data, six.text_type):
                     data = data.encode(encoding)
                 if data is not None:
                     fh.write(data)
             return self.store_file(path)
         finally:
-            os.unlink(path)
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
 
     @contextmanager
     def load_file(self, content_hash, file_name=None):
-        file_path = storage.load_file(content_hash, file_name=file_name)
+        file_path = storage.load_file(content_hash,
+                                      file_name=file_name,
+                                      temp_path=self.work_path)
         if file_path is None:
             raise StorageFileMissing(content_hash, file_name=file_name)
 
@@ -177,7 +186,7 @@ class Context(object):
             with open(file_path, 'r') as fh:
                 yield fh
         finally:
-            storage.cleanup_file(content_hash)
+            storage.cleanup_file(content_hash, temp_path=self.work_path)
 
     def dump_state(self):
         state = deepcopy(self.state)
@@ -218,7 +227,6 @@ def handle(task, state, stage, data):
     if settings.EAGER:
         # If celery is running in eager mode, put the crawler in a Queue.
         # Then we get to execute them sequentially and avoid recursion errors.
-        from memorious.core import task_queue
-        task_queue.queue_operation(context, data)
+        local_queue.queue_operation(context, data)
     else:
         context.execute(data)

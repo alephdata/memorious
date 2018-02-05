@@ -38,6 +38,7 @@ def submit_result(context, result, data):
         'source_url': data.get('source_url', result.url),
         'title': data.get('title'),
         'author': data.get('author'),
+        'file_name': data.get('file_name'),
         'foreign_id': data.get('foreign_id', result.request_id),
         'mime_type': data.get('mime_type', result.content_type),
         'countries': data.get('countries'),
@@ -49,7 +50,7 @@ def submit_result(context, result, data):
     }
     if data.get('parent_foreign_id'):
         meta['parent'] = {'foreign_id': data.get('parent_foreign_id')}
-    if result.file_name:
+    if not data.get('file_name') and result.file_name:
         meta['file_name'] = result.file_name
 
     meta = clean_dict(meta)
