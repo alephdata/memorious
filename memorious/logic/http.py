@@ -5,8 +5,8 @@ from lxml import html, etree
 from hashlib import sha1
 from banal import hash_data, is_mapping
 from urlnormalizer import normalize_url
+from celestial import parse_mimetype, normalize_mimetype
 from normality import guess_file_encoding, stringify
-from normality.encoding import normalize_encoding
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
 from datetime import datetime, timedelta
@@ -222,11 +222,8 @@ class ContextHttpResponse(object):
     @property
     def encoding(self):
         if self._encoding is None:
-            content_type = self.headers.get('content-type')
-            if content_type is not None:
-                content_type, options = cgi.parse_header(content_type)
-                charset = options.get('charset', '')
-                self._encoding = normalize_encoding(charset, None)
+            mime = parse_mimetype(self.headers.get('content-type'))
+            self._encoding = mime.charset
         if self._encoding is None:
             with open(self.file_path, 'rb') as fh:
                 self._encoding = guess_file_encoding(fh)
@@ -249,11 +246,7 @@ class ContextHttpResponse(object):
     @property
     def content_type(self):
         content_type = self.headers.get('content-type')
-        if content_type is not None:
-            content_type, options = cgi.parse_header(content_type)
-        if content_type is not None:
-            content_type = content_type.lower().strip()
-        return content_type or 'application/octet-stream'
+        return normalize_mimetype(content_type)
 
     @property
     def file_name(self):

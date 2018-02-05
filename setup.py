@@ -34,6 +34,7 @@ setup(
         'six',
         'storagelayer >= 0.3.2',
         'urlnormalizer >= 1.2.0',
+        'celestial >= 0.2.0',
         'werkzeug',
         'pycountry',
         'countrynames',
