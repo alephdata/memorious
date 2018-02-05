@@ -1,4 +1,3 @@
-import tempfile
 import zipfile
 import os
 import tarfile
@@ -51,7 +50,7 @@ def extract(context, data):
         file_path = result.file_path
         content_type = result.content_type
         content_hash = result.content_hash
-        extract_dir = tempfile.mkdtemp(prefix="memorious_"+content_hash)
+        extract_dir = context.work_path
         # TODO: contenttype may vary. Include more.
         if content_type == "application/zip":
             extracted_files = extract_zip(file_path, extract_dir)
