@@ -10,6 +10,7 @@ matrix:
       env: TOXENV=py36
 
 install:
+  - "sudo apt-get install p7zip-full"
   - "pip install tox"
 
 

@@ -7,7 +7,8 @@ from memorious.operations.initializers import enumerate
 from memorious.operations.debug import inspect
 from memorious.operations.documentcloud import documentcloud_query
 from memorious.operations.store import directory
+from memorious.operations.extract import extract
 
 __all__ = [fetch, parse, aleph_emit, seed, sequence, inspect, dates,
            documentcloud_query, dav_index, session, directory,
-           enumerate, clean_html]
+           enumerate, clean_html, extract]
