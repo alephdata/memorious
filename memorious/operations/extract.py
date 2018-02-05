@@ -1,7 +1,9 @@
 import zipfile
 import os
 import tarfile
-import py7zlib
+import subprocess
+
+from memorious.util import random_filename
 
 
 def extract_zip(file_path, extract_dir):
@@ -29,19 +31,20 @@ def extract_tar(file_path, extract_dir, context):
         return extracted_files
 
 
-def extract_7zip(file_path, extract_dir):
-    with open(file_path, "rb+") as fp:
-        archive = py7zlib.Archive7z(fp)
-        extracted_files = []
-        for name in archive.getnames():
-            outfilename = os.path.join(extract_dir, name)
-            outdir = os.path.dirname(outfilename)
-            if not os.path.exists(outdir):
-                os.makedirs(outdir)
-            with open(outfilename, 'wb') as outfile:
-                outfile.write(archive.getmember(name).read())
-            extracted_files.append(outfilename)
-        return extracted_files
+def extract_7zip(file_path, extract_dir, context):
+    return_code = subprocess.call(
+        ['7z', 'x', file_path, '-y', '-r', '-bb0', '-bd',
+            '-oc:%s' % extract_dir])
+    if return_code != 0:
+        context.log.warning(
+            "Couldn't extract file: %s", file_path
+        )
+        return
+    extracted_files = []
+    for root, directories, filenames in os.walk(extract_dir):
+        for filename in filenames:
+            extracted_files.append(os.path.join(root, filename))
+    return extracted_files
 
 
 def extract(context, data):
@@ -50,14 +53,14 @@ def extract(context, data):
         file_path = result.file_path
         content_type = result.content_type
         content_hash = result.content_hash
-        extract_dir = context.work_path
+        extract_dir = random_filename(context.work_path)
         # TODO: contenttype may vary. Include more.
         if content_type == "application/zip":
             extracted_files = extract_zip(file_path, extract_dir)
         elif content_type == "application/x-gzip":
             extracted_files = extract_tar(file_path, extract_dir, context)
         elif content_type == "application/x-7z-compressed":
-            extracted_files = extract_7zip(file_path, extract_dir)
+            extracted_files = extract_7zip(file_path, extract_dir, context)
         else:
             context.log.warning(
                 "Unsupported archive content type: %s", content_type
