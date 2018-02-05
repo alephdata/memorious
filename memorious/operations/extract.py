@@ -9,8 +9,11 @@ from memorious.util import random_filename
 def extract_zip(file_path, extract_dir):
     with zipfile.ZipFile(file_path, "r") as zip_ref:
         zip_ref.extractall(extract_dir)
-        extracted_files = [os.path.join(extract_dir, path)
-                           for path in zip_ref.namelist()]
+        extracted_files = []
+        for name in zip_ref.namelist():
+            file_path = os.path.join(extract_dir, name)
+            if os.path.isfile(file_path):
+                extracted_files.append(file_path)
         return extracted_files
 
 
@@ -27,7 +30,9 @@ def extract_tar(file_path, extract_dir, context):
                 )
             else:
                 tar_ref.extract(name, extract_dir)
-                extracted_files.append(os.path.join(extract_dir, name))
+                file_path = os.path.join(extract_dir, name)
+                if os.path.isfile(file_path):
+                    extracted_files.append(file_path)
         return extracted_files
 
 
