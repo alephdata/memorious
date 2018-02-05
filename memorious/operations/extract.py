@@ -5,6 +5,27 @@ import subprocess
 
 from memorious.util import random_filename
 
+ZIP_MIME_TYPES = [
+    'application/zip',
+    'application/x-zip',
+    'multipart/x-zip',
+    'application/zip-compressed',
+    'application/x-zip-compressed',
+]
+
+TAR_MIME_TYPES = [
+    'application/tar',
+    'application/x-tar',
+    'application/x-tgz',
+    'application/x-gtar',
+    'application/x-gzip',
+]
+
+SEVENZIP_MIME_TYPES = [
+    'application/x-7z-compressed',
+    'application/7z-compressed'
+]
+
 
 def extract_zip(file_path, extract_dir):
     with zipfile.ZipFile(file_path, "r") as zip_ref:
@@ -59,12 +80,11 @@ def extract(context, data):
         content_type = result.content_type
         content_hash = result.content_hash
         extract_dir = random_filename(context.work_path)
-        # TODO: contenttype may vary. Include more.
-        if content_type == "application/zip":
+        if content_type in ZIP_MIME_TYPES:
             extracted_files = extract_zip(file_path, extract_dir)
-        elif content_type == "application/x-gzip":
+        elif content_type in TAR_MIME_TYPES:
             extracted_files = extract_tar(file_path, extract_dir, context)
-        elif content_type == "application/x-7z-compressed":
+        elif content_type in SEVENZIP_MIME_TYPES:
             extracted_files = extract_7zip(file_path, extract_dir, context)
         else:
             context.log.warning(
