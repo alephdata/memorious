@@ -1,3 +1,5 @@
+import datetime
+
 import blinker
 import redis
 
@@ -10,7 +12,8 @@ def log_operation_start(context):
         r = redis.Redis(connection_pool=redis_pool)
         crawler_name = context.crawler.name
         r.incr(crawler_name)
-        r.incr(crawler_name+":total_ops")
+        r.incr(crawler_name + ":total_ops")
+        r.set(crawler_name + ":last_run", datetime.datetime.now())
     else:
         pass
 
@@ -24,7 +27,19 @@ def log_operation_finish(context):
         pass
 
 
+def flush_crawler(crawler_name):
+    if settings.REDIS_HOST:
+        r = redis.Redis(connection_pool=redis_pool)
+        r.delete(crawler_name)
+        r.delete(crawler_name + ":total_ops")
+        r.delete(crawler_name + ":last_run")
+    else:
+        pass
+
+
 start_signal = blinker.signal("crawler:running")
 start_signal.connect(log_operation_start)
 stop_signal = blinker.signal("crawler:finished")
 start_signal.connect(log_operation_finish)
+flushed_signal = blinker.signal("crawler:flushed")
+flushed_signal.send(flush_crawler)
