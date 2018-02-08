@@ -21,6 +21,7 @@ from memorious.logic.http import ContextHttp
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.util import make_key, random_filename
 from memorious import settings
+from memorious.logic import signal_handlers  # noqa
 
 
 class Context(object):
