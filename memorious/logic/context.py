@@ -15,7 +15,7 @@ import blinker
 
 from memorious.core import manager, storage, celery, session
 from memorious.core import datastore, local_queue
-from memorious.model import Result, Tag, Operation, Event
+from memorious.model import Result, Tag, Event
 from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
@@ -83,6 +83,7 @@ class Context(object):
             stop_signal = blinker.signal("crawler:finished")
             stop_signal.send(self)
             shutil.rmtree(self.work_path)
+            # Save the results and events created in this op
             session.commit()
 
     def emit_warning(self, message, type=None, details=None, *args):

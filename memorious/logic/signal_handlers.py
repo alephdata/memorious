@@ -2,11 +2,12 @@ import blinker
 import redis
 
 from memorious import settings
+from memorious.core import redis_pool
 
 
 def log_operation_start(context):
     if settings.REDIS_HOST:
-        r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
+        r = redis.Redis(connection_pool=redis_pool)
         crawler_name = context.crawler.name
         r.incr(crawler_name)
         r.incr(crawler_name+":total_ops")
@@ -16,7 +17,7 @@ def log_operation_start(context):
 
 def log_operation_finish(context):
     if settings.REDIS_HOST:
-        r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
+        r = redis.Redis(connection_pool=redis_pool)
         crawler_name = context.crawler.name
         r.decr(crawler_name)
     else:

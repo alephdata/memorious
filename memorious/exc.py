@@ -25,3 +25,8 @@ class StorageFileMissing(MemoriousException):
 class ParseError(MemoriousException):
     """An error while parsing a structured HTTP response."""
     pass
+
+
+class RateLimitException(Exception):
+    """Rate limit exceeded for a crawler operation"""
+    pass
