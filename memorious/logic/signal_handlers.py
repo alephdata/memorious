@@ -11,7 +11,9 @@ def log_operation_start(context):
     if settings.REDIS_HOST:
         r = redis.Redis(connection_pool=redis_pool)
         crawler_name = context.crawler.name
+        stage_name = context.stage.name
         r.incr(crawler_name)
+        r.incr(crawler_name + ":" + stage_name)
         r.incr(crawler_name + ":total_ops")
         r.set(crawler_name + ":last_run", datetime.datetime.now())
     else:
