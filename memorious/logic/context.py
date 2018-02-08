@@ -20,7 +20,7 @@ from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.util import make_key, random_filename
-from memorious import settings
+from memorious import settings, signals
 from memorious.logic import signal_handlers  # noqa
 
 
@@ -70,7 +70,7 @@ class Context(object):
         so."""
 
         try:
-            start_signal = blinker.signal("crawler:running")
+            start_signal = blinker.signal(signals.CRAWLER_RUNNING)
             start_signal.send(self)
             self.log.debug('Running: %s', self.stage.name)
             res = self.stage.method(self, data)
@@ -81,7 +81,7 @@ class Context(object):
             session.rollback()
             self.emit_exception(exc)
         finally:
-            stop_signal = blinker.signal("crawler:finished")
+            stop_signal = blinker.signal(signals.CRAWLER_FINISHED)
             stop_signal.send(self)
             shutil.rmtree(self.work_path)
             # Save the results and events created in this op

@@ -3,7 +3,7 @@ import datetime
 import blinker
 import redis
 
-from memorious import settings
+from memorious import settings, signals
 from memorious.core import redis_pool
 
 
@@ -37,9 +37,9 @@ def flush_crawler(crawler_name):
         pass
 
 
-start_signal = blinker.signal("crawler:running")
+start_signal = blinker.signal(signals.CRAWLER_RUNNING)
 start_signal.connect(log_operation_start)
-stop_signal = blinker.signal("crawler:finished")
+stop_signal = blinker.signal(signals.CRAWLER_FINISHED)
 start_signal.connect(log_operation_finish)
-flushed_signal = blinker.signal("crawler:flushed")
+flushed_signal = blinker.signal(signals.CRAWLER_FLUSHED)
 flushed_signal.send(flush_crawler)

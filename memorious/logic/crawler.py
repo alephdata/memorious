@@ -8,7 +8,7 @@ from datetime import timedelta, datetime
 import redis
 import blinker
 
-from memorious import settings
+from memorious import settings, signals
 from memorious.core import session, local_queue, redis_pool
 from memorious.model import Tag, Event, Result
 from memorious.logic.context import handle
@@ -78,7 +78,7 @@ class Crawler(object):
         Event.delete(self.name)
         Result.delete(self.name)
         session.commit()
-        flushed_signal = blinker.signal("crawler:flushed")
+        flushed_signal = blinker.signal(signals.CRAWLER_FLUSHED)
         flushed_signal.send(self.name)
 
     def run(self, incremental=None):
