@@ -92,7 +92,9 @@ class Context(object):
             message = message % args
         self.log.warning(message)
         return Event.save(self.crawler.name,
+                          self.stage.name,
                           Event.LEVEL_WARNING,
+                          self.run_id,
                           error_type=type,
                           error_message=message,
                           error_details=details)
@@ -100,7 +102,9 @@ class Context(object):
     def emit_exception(self, exc):
         self.log.exception(exc)
         return Event.save(self.crawler.name,
+                          self.stage.name,
                           Event.LEVEL_ERROR,
+                          self.run_id,
                           error_type=exc.__class__.__name__,
                           error_message=six.text_type(exc),
                           error_details=traceback.format_exc())
