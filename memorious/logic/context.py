@@ -9,12 +9,16 @@ from copy import deepcopy
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from contextlib import contextmanager
+import time
+
+import blinker
 
 from memorious.core import manager, storage, celery, session
 from memorious.core import datastore, local_queue
 from memorious.model import Result, Tag, Operation, Event
 from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
+from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.util import make_key, random_filename
 from memorious import settings
 
@@ -65,19 +69,12 @@ class Context(object):
     def execute(self, data):
         """Execute the crawler and create a database record of having done
         so."""
-        op = Operation()
-        op.crawler = self.crawler.name
-        op.name = self.stage.name
-        op.run_id = self.run_id
-        op.status = Operation.STATUS_PENDING
-        session.add(op)
-        session.commit()
-        self.operation_id = op.id
 
         try:
-            self.log.debug('Running: %s', op.name)
+            start_signal = blinker.signal("crawler:running")
+            start_signal.send(self)
+            self.log.debug('Running: %s', self.stage.name)
             res = self.stage.method(self, data)
-            op.status = Operation.STATUS_SUCCESS
             return res
         except Exception as exc:
             # this should clear results and tags created by this op
@@ -85,12 +82,9 @@ class Context(object):
             session.rollback()
             self.emit_exception(exc)
         finally:
+            stop_signal = blinker.signal("crawler:finished")
+            stop_signal.send(self)
             shutil.rmtree(self.work_path)
-            if op.status == Operation.STATUS_PENDING:
-                op.status = Operation.STATUS_FAILED
-            op.ended_at = datetime.utcnow()
-            session.add(op)
-            session.commit()
 
     def emit_warning(self, message, type=None, details=None, *args):
         if len(args):
@@ -213,20 +207,23 @@ class Context(object):
 def handle(task, state, stage, data):
     """Execute the operation, rate limiting allowing."""
     context = Context.from_state(state, stage)
-
-    if context.stage.rate_limit is not None:
-        rate = Operation.check_rate(context.crawler.name,
-                                    context.stage.name)
-        if rate > context.stage.rate_limit:
-            delay = max(10, rate * 120.0)
-            delay = random.randint(10, int(delay))
-            context.log.info("Rate exceeded [%.2f], delaying %d sec.",
-                             rate, delay)
-            task.retry(countdown=delay)
-
+    if context.stage.rate_limit:
+        try:
+            with rate_limiter(context):
+                if settings.EAGER:
+                    local_queue.queue_operation(context, data)
+                else:
+                    context.execute(data)
+                return
+        except RateLimitException:
+            delay = max(1, 1.0/context.stage.rate_limit)
+            delay = random.randint(1, int(delay))
+            context.log.info("Rate limit exceeded, delaying %d sec.", delay)
+            time.sleep(10)
     if settings.EAGER:
-        # If celery is running in eager mode, put the crawler in a Queue.
-        # Then we get to execute them sequentially and avoid recursion errors.
+        # If celery is running in eager mode, put the crawler in a
+        # Queue. Then we get to execute them sequentially and avoid
+        # recursion errors.
         local_queue.queue_operation(context, data)
     else:
         context.execute(data)

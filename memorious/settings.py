@@ -90,3 +90,10 @@ ALEPH_API_KEY = env('ALEPH_API_KEY')
 
 # Using sentry raven
 SENTRY_DSN = env('SENTRY_DSN')
+
+
+###############################################################################
+# Redis
+
+REDIS_HOST = env('REDIS_HOST', '')
+REDIS_PORT = int(env('REDIS_PORT', 6379))

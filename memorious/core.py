@@ -15,6 +15,7 @@ from raven.contrib.celery import register_signal, register_logger_signal
 
 from memorious import settings
 from memorious.logic.queue import CrawlerExecutionQueue
+from memorious.logic import signal_handlers  # noqa
 
 log = logging.getLogger(__name__)
 

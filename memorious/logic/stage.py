@@ -14,7 +14,7 @@ class CrawlerStage(object):
         self.params = config.get('params') or {}
         self.handlers = config.get('handle') or {}
         self.rate_limit = None
-        if not settings.EAGER and 'rate_limit' in config:
+        if 'rate_limit' in config:
             self.rate_limit = float(config.get('rate_limit'))
 
     @property
