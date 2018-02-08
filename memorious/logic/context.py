@@ -33,7 +33,6 @@ class Context(object):
         self.params = stage.params
         self.incremental = state.get('incremental')
         self.run_id = state.get('run_id') or uuid.uuid1().hex
-        self.operation_id = None
         self.work_path = mkdtemp()
         self.log = logging.getLogger('%s.%s' % (crawler.name, stage.name))
         self.http = ContextHttp(self)
@@ -56,8 +55,7 @@ class Context(object):
             return
         state = self.dump_state()
         delay = delay or self.crawler.delay
-        Result.save(self.crawler, self.operation_id,
-                    self.stage.name, stage, data)
+        Result.save(self.crawler, self.stage.name, stage, data)
         handle.apply_async((state, stage, data), countdown=delay)
 
     def recurse(self, data={}, delay=None):
@@ -85,13 +83,13 @@ class Context(object):
             stop_signal = blinker.signal("crawler:finished")
             stop_signal.send(self)
             shutil.rmtree(self.work_path)
+            session.commit()
 
     def emit_warning(self, message, type=None, details=None, *args):
         if len(args):
             message = message % args
         self.log.warning(message)
         return Event.save(self.crawler.name,
-                          self.operation_id,
                           Event.LEVEL_WARNING,
                           error_type=type,
                           error_message=message,
@@ -100,7 +98,6 @@ class Context(object):
     def emit_exception(self, exc):
         self.log.exception(exc)
         return Event.save(self.crawler.name,
-                          self.operation_id,
                           Event.LEVEL_ERROR,
                           error_type=exc.__class__.__name__,
                           error_message=six.text_type(exc),

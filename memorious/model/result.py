@@ -14,17 +14,15 @@ class Result(Base):
 
     id = Column(Integer, primary_key=True)
     crawler = Column(String, nullable=False, index=True)
-    operation_id = Column(Integer, ForeignKey("operation.id"), nullable=True)
     prev_stage = Column(String, nullable=False, index=True)
     next_stage = Column(String, nullable=False, index=True)
     data = Column(JSON, nullable=False, default={})
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     @classmethod
-    def save(cls, crawler, operation_id, prev_stage, next_stage, data):
+    def save(cls, crawler, prev_stage, next_stage, data):
         obj = cls()
         obj.crawler = crawler.name
-        obj.operation_id = operation_id
         obj.prev_stage = prev_stage
         obj.next_stage = next_stage
         obj.data = data
