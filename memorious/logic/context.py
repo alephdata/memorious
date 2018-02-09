@@ -20,8 +20,8 @@ from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.util import make_key, random_filename
-from memorious import settings, signals
-from memorious.logic import signal_handlers  # noqa
+from memorious import settings
+from memorious.signals import signals
 
 
 class Context(object):
