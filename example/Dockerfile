@@ -10,4 +10,5 @@ ENV MEMORIOUS_CONFIG_PATH=/crawlers/config \
     MEMORIOUS_BROKER_URI=amqp://guest:guest@rabbitmq:5672 \
     MEMORIOUS_BASE_PATH=/data \
     MEMORIOUS_EAGER=false \
-    MEMORIOUS_DEBUG=false
+    MEMORIOUS_DEBUG=false \
+    MEMORIOUS_REDIS_HOST=redis
