@@ -11,6 +11,8 @@
             <th>Description</th>
             <th>Schedule</th>
             <th>Latest</th>
+            <th>Total Ops</th>
+            <th>Running</th>
             <th class="number">Errors</th>
             <th class="number">Warn</th>
             <th class="number">Action</th>
@@ -32,6 +34,12 @@
                 </td>
                 <td>
                     {{item.last_active | date}}
+                </td>
+                <td>
+                    {{item.total_ops or '0'}}
+                </td>
+                <td>
+                    {{item.running or 'False'}}
                 </td>
                 <td class="number">
                     {% if item.error %}

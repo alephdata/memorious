@@ -56,9 +56,7 @@
         <tr>
             <th>Stage</th>
             <th>Operation</th>
-            <th class="number">Pending</th>
-            <th class="number">Success</th>
-            <th class="number">Failed</th>
+            <th class="number">Total Ops</th>
             <th class="number">Errors</th>
             <th class="number">Warn</th>
         </tr>
@@ -72,9 +70,7 @@
                 <td>
                     <code>{{ item.stage.method_name }}</code>
                 </td>
-                <td class="number">{{ item.pending | number('0') }}</td>
-                <td class="number">{{ item.success | number('0') }}</td>
-                <td class="number">{{ item.failed | number('0') }}</td>
+                <td class="number">{{ item.total_ops or '0' }}</td>
                 <td class="number">
                     {% if item.error %}
                         <a href="{{ url_for('.events', name=crawler.name, stage=item.stage.name, level='error') }}" class="error">
