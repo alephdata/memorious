@@ -37,6 +37,11 @@ class CrawlerManager(object):
             else:
                 log.info('[%s] not due.', crawler.name)
 
+    def run_cleanup(self):
+        log.info('%s crawlers found in [%s]' % (len(self.crawlers), self.path))
+        for crawler in self:
+            crawler.cleanup()
+
     def __getitem__(self, name):
         return self.crawlers.get(name)
 

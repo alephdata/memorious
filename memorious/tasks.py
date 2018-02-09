@@ -5,3 +5,8 @@ from memorious.logic.context import handle  # noqa
 @app.task
 def process_schedule():
     manager.run_scheduled()
+
+
+@app.task
+def run_cleanup():
+    manager.run_cleanup()

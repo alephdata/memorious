@@ -39,6 +39,10 @@ celery.conf.update(
             'task': 'memorious.tasks.process_schedule',
             'schedule': crontab(minute='*/30')
         },
+        'cleanup-crawlers': {
+            'task': 'memorious.tasks.run_cleanup',
+            'schedule': crontab(hour='*')
+        },
     },
 )
 
