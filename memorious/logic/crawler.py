@@ -100,7 +100,7 @@ class Crawler(object):
         Result.delete(self.name)
         session.commit()
         flushed_signal = blinker.signal(signals.CRAWLER_FLUSHED)
-        flushed_signal.send(self.name)
+        flushed_signal.send(self)
 
     def run(self, incremental=None):
         """Queue the execution of a particular crawler."""

@@ -17,8 +17,8 @@ def log_operation_start(context):
         r.incr(crawler_name + ":" + stage_name)
         r.incr(crawler_name + ":total_ops")
         r.set(crawler_name + ":last_run", datetime.datetime.now())
-        if not r.sismember("runs", context.run_id):
-            r.sadd("runs", context.run_id)
+        if not r.sismember(crawler_name + ":runs", context.run_id):
+            r.sadd(crawler_name + ":runs", context.run_id)
             r.set("run:" + context.run_id + ":start", datetime.datetime.now())
         r.incr("run:" + context.run_id)
         r.incr("run:" + context.run_id + ":total_ops")
@@ -38,12 +38,21 @@ def log_operation_finish(context):
         pass
 
 
-def flush_crawler(crawler_name):
+def flush_crawler(crawler):
+    crawler_name = crawler.name
     if settings.REDIS_HOST:
         r = redis.Redis(connection_pool=redis_pool)
         r.delete(crawler_name)
         r.delete(crawler_name + ":total_ops")
         r.delete(crawler_name + ":last_run")
+        for run_id in r.smembers(crawler_name + ":runs"):
+            r.delete("run:" + run_id + ":start")
+            r.delete("run:" + run_id + ":end")
+            r.delete("run:" + run_id + ":total_ops")
+            r.delete("run:" + run_id)
+        r.delete(crawler_name + ":runs")
+        for stage in crawler.stages:
+            r.delete(crawler_name + ":" + stage)
     else:
         pass
 

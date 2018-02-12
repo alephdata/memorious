@@ -8,6 +8,7 @@ import redis
 from memorious import settings
 from memorious.core import session, manager, redis_pool
 from memorious.model import Event
+from memorious.helpers import parse_date
 
 
 def global_stats():
@@ -108,9 +109,9 @@ def crawler_events(crawler, run_id=None, level=None, stage=None,
     }
 
 
-def crawler_runs(crawler=None):
+def crawler_runs(crawler):
     r = redis.Redis(connection_pool=redis_pool)
-    run_ids = r.smembers("runs")
+    run_ids = r.smembers(crawler.name + ":runs")
 
     counts = {}
     # events by level
@@ -120,8 +121,7 @@ def crawler_runs(crawler=None):
         evt.level,
         func.count(evt.id),
     )
-    if crawler:
-        q = q.filter(evt.crawler == crawler.name)
+    q = q.filter(evt.crawler == crawler.name)
     q = q.group_by(evt.run_id, evt.level)
     for (run_id, level, count) in q:
         if run_id not in counts:
@@ -132,8 +132,8 @@ def crawler_runs(crawler=None):
     for run_id in run_ids:
         data = counts.get(run_id, {})
         data["total_ops"] = r.get("run:" + run_id + ":total_ops")
-        data["start"] = r.get("run:" + run_id + ":start")
-        data["end"] = r.get("run:" + run_id + ":end")
+        data["start"] = parse_date(r.get("run:" + run_id + ":start"))
+        data["end"] = parse_date(r.get("run:" + run_id + ":end"))
         data['run_id'] = run_id
         runs.append(data)
     return runs
