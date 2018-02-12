@@ -4,6 +4,7 @@ from tabulate import tabulate
 
 from memorious import settings
 from memorious.core import manager, upgrade_db, ensure_db
+from memorious.model import CrawlerReport
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +85,12 @@ def list():
 def scheduled():
     """Run crawlers that are due."""
     manager.run_scheduled()
+
+
+@cli.command()
+def sync_crawler_reports():
+    """Update crawler_report table based on data from operation table"""
+    CrawlerReport.sync_crawler_stat()
 
 
 def main():

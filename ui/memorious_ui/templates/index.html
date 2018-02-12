@@ -10,6 +10,7 @@
             <th>Crawler</th>
             <th>Description</th>
             <th>Schedule</th>
+            <th class="number">Op Count</th>
             <th>Latest</th>
             <th class="number">Errors</th>
             <th class="number">Warn</th>
@@ -29,6 +30,13 @@
                 </td>
                 <td>
                     {{item.crawler.schedule or 'none'}}
+                </td>
+                <td class="number">
+                    {% if item.op_count %}
+                        {{item.op_count | number}}
+                    {% else %}
+                        -
+                    {% endif %}
                 </td>
                 <td>
                     {{item.last_active | date}}

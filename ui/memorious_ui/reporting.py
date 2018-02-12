@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from memorious import settings
 from memorious.core import session, manager
-from memorious.model import Event, Operation
+from memorious.model import Event, Operation, CrawlerReport
 
 
 def global_stats():
@@ -28,15 +28,15 @@ def crawlers_index():
     """Generate a list of all crawlers, sorted alphabetically, with op
     counts."""
     # query for overall run and operations count:
-    op = aliased(Operation)
+    report = aliased(CrawlerReport)
     q = session.query(
-        op.crawler,
-        func.max(op.started_at),
+        report.crawler,
+        report.op_count,
+        report.last_run
     )
-    q = q.group_by(op.crawler)
     counts = {}
-    for (name, last) in q:
-        counts[name] = {'last_active': last}
+    for (name, op_count, last) in q:
+        counts[name] = {'last_active': last, 'op_count': op_count}
 
     # query for error and warning events:
     event = aliased(Event)
