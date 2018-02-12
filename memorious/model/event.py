@@ -18,20 +18,22 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
     level = Column(String, nullable=False, index=True)
     crawler = Column(String, nullable=False, index=True)
-    operation_id = Column(Integer, ForeignKey("operation.id"), nullable=False)
+    stage = Column(String, nullable=True, index=True)
+    run_id = Column(String, nullable=True, index=True)
     error_type = Column(String, nullable=True)
     error_message = Column(String, nullable=True)
     error_details = Column(String, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     @classmethod
-    def save(cls, crawler, operation_id, level, error_type=None,
+    def save(cls, crawler, stage, level, run_id, error_type=None,
              error_message=None, error_details=None):
         """Create an event, possibly based on an exception."""
         event = cls()
         event.crawler = crawler
-        event.operation_id = operation_id
+        event.stage = stage
         event.level = level
+        event.run_id = run_id
         event.error_type = error_type
         event.error_message = error_message
         event.error_details = error_details
@@ -46,4 +48,4 @@ class Event(Base):
 
     def __repr__(self):
         return '<Event(%s,%s,%s,%s)>' % \
-            (self.crawler, self.operation_id, self.error_type, self.level)
+            (self.crawler, self.stage, self.error_type, self.level)

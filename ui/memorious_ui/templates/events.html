@@ -28,22 +28,22 @@
             <tr>
                 <td>
                     <code>
-                        {{res.operation.name}}
+                        {{res.stage}}
                     </code>
                 </td>
                 <td class="nobreak">
-                    <span class="{{res.event.level}}">
+                    <span class="{{res.level}}">
                         <i class="fa fa-warning" aria-hidden="true"></i>
                         <code>
-                            {{ res.event.error_type or '' }}
+                            {{ res.error_type or '' }}
                         </code>
                     </span>
                 </td>
                 <td>
-                    {{res.event.error_message}}
+                    {{res.error_message}}
                 </td>
                 <td class="number nobreak">
-                    {{res.event.timestamp | datetime}}
+                    {{res.timestamp | datetime}}
                 </td>
             </tr>
         {% endfor %}

@@ -12,9 +12,11 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
 from raven import Client
 from raven.contrib.celery import register_signal, register_logger_signal
+import redis
 
 from memorious import settings
 from memorious.logic.queue import CrawlerExecutionQueue
+
 
 log = logging.getLogger(__name__)
 
@@ -37,8 +39,16 @@ celery.conf.update(
             'task': 'memorious.tasks.process_schedule',
             'schedule': crontab(minute='*/30')
         },
+        'cleanup-crawlers': {
+            'task': 'memorious.tasks.run_cleanup',
+            'schedule': crontab(hour='*')
+        },
     },
 )
+
+redis_pool = redis.ConnectionPool(
+                    host=settings.REDIS_HOST, port=settings.REDIS_PORT
+            )
 
 # set up a task queue using a Queue if celery is set to eager mode.
 local_queue = CrawlerExecutionQueue()

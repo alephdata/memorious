@@ -50,3 +50,9 @@ services:
       - "./build/beat:/var/lib"
     tmpfs:
       - "/tmp"
+
+  redis:
+    image: redis:alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - ./build/redis-data:/data
