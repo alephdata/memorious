@@ -90,5 +90,47 @@
             </tr>
         {% endfor %}
     </table>
+
+    <table class="table table-sm">
+        <tr>
+            <th colspan="7" class="heading">
+                Crawler Runs
+            </th>
+        </tr>
+        <tr>
+            <th>Run ID</th>
+            <th class="number">Total Ops</th>
+            <th class="number">Started at</th>
+            <th class="number">Ended at</th>
+            <th class="number">Errors</th>
+            <th class="number">Warn</th>
+        </tr>
+        {% for item in runs %}
+        <tr>
+            <td>
+                <code>{{ item.run_id }}</code>
+            </td>
+            <td class="number">{{ item.total_ops or '0' }}</td>
+            <td class="number">{{ item.start | datetime}}</td>
+            <td class="number">{{ item.end | datetime}}</td>
+            <td class="number">
+                {% if item.error %}
+                <a href="{{ url_for('.events', name=crawler.name, run_id=item.run_id, level='error') }}" class="error">
+                    {{item.error | number}}
+                    <i class="fa fa-warning" aria-hidden="true"></i>
+                </a>
+                {% endif %}
+            </td>
+            <td class="number">
+                {% if item.warning %}
+                <a href="{{ url_for('.events', name=crawler.name, run_id=item.run_id, level='error') }}" class="warning">
+                    {{item.warning | number}}
+                    <i class="fa fa-warning" aria-hidden="true"></i>
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
 

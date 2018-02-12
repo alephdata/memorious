@@ -9,8 +9,10 @@ from raven.contrib.flask import Sentry
 
 from memorious import settings
 from memorious.core import session
-from memorious_ui.reporting import crawlers_index, global_stats
-from memorious_ui.reporting import get_crawler, crawler_stages, crawler_events
+from memorious_ui.reporting import (
+    crawlers_index, global_stats, get_crawler, crawler_stages, crawler_events,
+    crawler_runs
+)
 
 app = Flask(__name__)
 sentry = Sentry()
@@ -76,9 +78,10 @@ def crawler(name):
     if crawler is None:
         abort(404)
     stages = crawler_stages(crawler)
+    runs = crawler_runs(crawler)
     return render_template('crawler.html',
                            crawler=crawler,
-                           stages=stages)
+                           stages=stages, runs=runs)
 
 
 @app.route('/crawlers/<name>/events')
