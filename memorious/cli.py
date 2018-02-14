@@ -49,6 +49,14 @@ def run(crawler):
 
 @cli.command()
 @click.argument('crawler')
+def cleanup(crawler):
+    """Run clean up method of a crawler."""
+    crawler = get_crawler(crawler)
+    crawler.cleanup()
+
+
+@cli.command()
+@click.argument('crawler')
 @click.argument('stage')
 def replay(crawler, stage):
     """Re-run a stage of a crawler using previous inputs."""

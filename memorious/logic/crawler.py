@@ -46,7 +46,7 @@ class Crawler(object):
         self.delay = int(self.config.get('delay', 0))
         self.expire = int(self.config.get('expire', settings.EXPIRE))
         self.stealthy = self.config.get('stealthy', False)
-        self.cleanup_method_name = self.config.get('cleanup_method')
+        self.cleanup_config = self.config.get('cleanup', {})
 
         self.stages = {}
         for name, stage in self.config.get('pipeline', {}).items():
@@ -131,11 +131,11 @@ class Crawler(object):
 
     @property
     def cleanup_method(self):
-        method = self.cleanup_method_name
-        if ':' in method:
-            package, method = method.rsplit(':', 1)
-        module = import_module(package)
-        return getattr(module, method)
+        if self.cleanup_config:
+            method = self.cleanup_config["method"]
+            package = 'memorious.helpers.export'
+            module = import_module(package)
+            return getattr(module, method)
 
     def cleanup(self):
         """Run a cleanup method after the crawler finishes running"""
@@ -146,9 +146,9 @@ class Crawler(object):
                 log.info("Clean up did not run: Crawler %s has not run or is"
                          " currently running" % self.name)
                 return
-        if self.cleanup_method_name:
+        if self.cleanup_method:
             log.info("Running clean up for %s" % self.name)
-            self.cleanup_method()
+            self.cleanup_method(self.cleanup_config["params"])
         else:
             pass
 
