@@ -362,3 +362,38 @@ Memorious contains some helpers that use [Tesseract](https://github.com/tesserac
 [See the Tesseract wiki](https://github.com/tesseract-ocr/tesseract/wiki/Compiling) for more installation details.
 
 `tesserocr` is not listed as a Memorious dependency, because Tesseract is not a sane dependency unless you're actually going to use it.
+
+## Postprocessing
+
+It's possible to run predefined postprocessing tasks after a Memorious crawler has finished running. The postprocessing task is defined under `cleanup` section in a crawler's YAML config.
+
+`cleanup` must contain:
+
+* `method`: which postprocessing method to use. These are defined in `memorious.helpers.export`
+* `params`: params to pass to the postprocessing method
+
+### Exporting to S3
+
+The `export_tables` postprocessing method can export tables to csv files and upload that to a Amazon S3 bucket. The params section of this method should contain a list of the following keys:
+
+* `table`: Name of the database table to export
+* `csv_filename` (optional): Name of the output csv file
+* `bucket`: Name of the S3 bucket to upload to
+
+eg:
+
+```
+name: ...
+description: ...
+schedule: ...
+pipeline:
+  ...
+cleanup:
+  method: export_tables
+  params:
+  - table: example_quotes
+    csv_filename: quotes.csv
+    bucket: example
+  - table: example_authors
+    bucket: example
+```
