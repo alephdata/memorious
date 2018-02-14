@@ -1,12 +1,10 @@
 import math
-from datetime import datetime, timedelta
 
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
-import redis
 
 from memorious import settings
-from memorious.core import session, manager, redis_pool
+from memorious.core import session, manager, connect_redis
 from memorious.model import Event
 from memorious.helpers import parse_date
 
@@ -110,30 +108,33 @@ def crawler_events(crawler, run_id=None, level=None, stage=None,
 
 
 def crawler_runs(crawler):
-    r = redis.Redis(connection_pool=redis_pool)
-    run_ids = r.smembers(crawler.name + ":runs")
+    with connect_redis() as conn:
+        runs = []
+        if conn:
+            run_ids = conn.smembers(crawler.name + ":runs")
 
-    counts = {}
-    # events by level
-    evt = aliased(Event)
-    q = session.query(
-        evt.run_id,
-        evt.level,
-        func.count(evt.id),
-    )
-    q = q.filter(evt.crawler == crawler.name)
-    q = q.group_by(evt.run_id, evt.level)
-    for (run_id, level, count) in q:
-        if run_id not in counts:
-            counts[run_id] = {}
-        counts[run_id][level] = count
+            counts = {}
+            # events by level
+            evt = aliased(Event)
+            q = session.query(
+                evt.run_id,
+                evt.level,
+                func.count(evt.id),
+            )
+            q = q.filter(evt.crawler == crawler.name)
+            q = q.group_by(evt.run_id, evt.level)
+            for (run_id, level, count) in q:
+                if run_id not in counts:
+                    counts[run_id] = {}
+                counts[run_id][level] = count
 
-    runs = []
-    for run_id in run_ids:
-        data = counts.get(run_id, {})
-        data["total_ops"] = r.get("run:" + run_id + ":total_ops")
-        data["start"] = parse_date(r.get("run:" + run_id + ":start"))
-        data["end"] = parse_date(r.get("run:" + run_id + ":end"))
-        data['run_id'] = run_id
-        runs.append(data)
-    return runs
+            for run_id in run_ids:
+                data = counts.get(run_id, {})
+                data["total_ops"] = conn.get("run:" + run_id + ":total_ops")
+                data["start"] = parse_date(
+                    conn.get("run:" + run_id + ":start")
+                )
+                data["end"] = parse_date(conn.get("run:" + run_id + ":end"))
+                data['run_id'] = run_id
+                runs.append(data)
+        return runs

@@ -43,7 +43,7 @@ def extract_tar(file_path, extract_dir, context):
         extracted_files = []
         for name in tar_ref.getnames():
             # Make it safe. See warning at
-            # https://docs.python.org/2/library/tarfile.html#tarfile.TarFile.extractall #noqa
+            # https://docs.python.org/2/library/tarfile.html#tarfile.TarFile.extractall  # noqa
             if name.startswith("..") or name.startswith("/"):
                 context.log.info(
                     "Bad path %s while extracting archive at %s",

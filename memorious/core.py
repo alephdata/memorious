@@ -1,5 +1,6 @@
 import os
 import logging
+from contextlib import contextmanager
 
 import dataset
 import storagelayer
@@ -47,8 +48,18 @@ celery.conf.update(
 )
 
 redis_pool = redis.ConnectionPool(
-                    host=settings.REDIS_HOST, port=settings.REDIS_PORT
-            )
+    host=settings.REDIS_HOST, port=settings.REDIS_PORT
+)
+
+
+@contextmanager
+def connect_redis():
+    if settings.REDIS_HOST:
+        conn = redis.Redis(connection_pool=redis_pool)
+        yield conn
+    else:
+        yield None
+
 
 # set up a task queue using a Queue if celery is set to eager mode.
 local_queue = CrawlerExecutionQueue()

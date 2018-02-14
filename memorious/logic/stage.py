@@ -1,9 +1,6 @@
 from importlib import import_module
 
-import redis
-
-from memorious import settings
-from memorious.core import redis_pool
+from memorious.core import connect_redis
 
 
 class CrawlerStage(object):
@@ -31,12 +28,12 @@ class CrawlerStage(object):
 
     def get_op_count(self):
         """Total operations performed for this stage"""
-        if settings.REDIS_HOST:
-            r = redis.Redis(connection_pool=redis_pool)
-            total_ops = r.get(self.crawler.name + ":" + self.name)
-            if total_ops:
-                return int(total_ops)
-        return None
+        with connect_redis() as conn:
+            if conn:
+                total_ops = conn.get(self.crawler.name + ":" + self.name)
+                if total_ops:
+                    return int(total_ops)
+            return None
 
     def __repr__(self):
         return '<CrawlerStage(%r, %s)>' % (self.crawler, self.name)
