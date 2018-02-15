@@ -8,7 +8,8 @@ from memorious.operations.debug import inspect
 from memorious.operations.documentcloud import documentcloud_query
 from memorious.operations.store import directory
 from memorious.operations.extract import extract
+from memorious.operations.db import db
 
 __all__ = [fetch, parse, aleph_emit, seed, sequence, inspect, dates,
            documentcloud_query, dav_index, session, directory,
-           enumerate, clean_html, extract]
+           enumerate, clean_html, extract, db]
