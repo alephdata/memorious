@@ -272,6 +272,15 @@ Parameters:
 
 * `collection`: the slug for the Aleph collection documents should be stored in.
 
+#### Database
+
+The `db` method stores `data` as a row in a specified database table with appropriate timestamps. `__last_seen` and `__first_seen` timestamps are added based on when a row was updated or inserted respectively.
+
+Parameters:
+
+* `table`: the name of the database table in which data will be stored
+* `unique`: A list of keys in data. If `unique` is defined, we try to update existing columns based on the values of keys in `unique`. If no matching row is found, a new row is inserted.
+
 ### Rules
 
 You can configure rules per stage to tell certain methods which inputs to process or skip. You can nest them, and apply `not`,  `and` and `or` for the combinations you desire.
