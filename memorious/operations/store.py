@@ -14,7 +14,7 @@ def _get_directory_path(context):
     path = os.path.abspath(os.path.expandvars(path))
     try:
         os.makedirs(path)
-    except:
+    except Exception:
         pass
     return path
 
