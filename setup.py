@@ -44,7 +44,7 @@ setup(
         'python-redis-rate-limit == 0.0.5',
         'redis == 2.10.6',
         'blinker == 1.4',
-        'morphium',
+        'boto3 == 1.4.8',
     ],
     entry_points={
         'console_scripts': [
