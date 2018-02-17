@@ -11,8 +11,7 @@
             <th>Description</th>
             <th>Schedule</th>
             <th>Latest</th>
-            <th>Total Ops</th>
-            <th>Running</th>
+            <th class="number">Total</th>
             <th class="number">Errors</th>
             <th class="number">Warn</th>
             <th class="number">Action</th>
@@ -30,16 +29,17 @@
                     {{item.crawler.description}}
                 </td>
                 <td>
-                    {{item.crawler.schedule or 'none'}}
+                    {{item.crawler.schedule or ''}}
                 </td>
                 <td>
-                    {{item.last_active | date}}
+                    {% if item.running %}
+                        <i class="fa fa-spinner" aria-hidden="true"></i>
+                    {% else %}
+                        {{item.last_active | date}}
+                    {% endif %}
                 </td>
-                <td>
-                    {{item.total_ops or '0'}}
-                </td>
-                <td>
-                    {{item.running or 'False'}}
+                <td class="number">
+                    {{item.total_ops | number}}
                 </td>
                 <td class="number">
                     {% if item.error %}
@@ -58,10 +58,12 @@
                     {% endif %}
                 </td>
                 <td class="number">
-                    <a class="invoke" href='#' data-crawler="{{ item.crawler.name }}" data-action="run">
-                        <i class="fa fa-play" aria-hidden="true"></i>    
-                        Run
-                    </a>
+                    {% if not item.running %}
+                        <a class="invoke" href='#' data-crawler="{{ item.crawler.name }}" data-action="run">
+                            <i class="fa fa-play" aria-hidden="true"></i>    
+                            Run
+                        </a>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

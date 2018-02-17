@@ -10,7 +10,8 @@ from raven.contrib.flask import Sentry
 from memorious import settings
 from memorious.core import session
 from memorious_ui.reporting import (
-    crawlers_index, global_stats, get_crawler, crawler_stages, crawler_events,
+    crawlers_index, global_stats, get_crawler,
+    crawler_stages, crawler_events,
     crawler_runs
 )
 
