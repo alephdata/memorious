@@ -223,6 +223,7 @@ def handle(task, state, stage, data):
             delay = random.randint(1, int(delay))
             context.log.info("Rate limit exceeded, delaying %d sec.", delay)
             time.sleep(delay)
+
     if settings.EAGER:
         # If celery is running in eager mode, put the crawler in a
         # Queue. Then we get to execute them sequentially and avoid
