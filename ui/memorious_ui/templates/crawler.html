@@ -81,7 +81,7 @@
                 </td>
                 <td class="number">
                     {% if item.warning %}
-                        <a href="{{ url_for('.events', name=crawler.name, stage=item.stage.name, level='error') }}" class="warning">
+                        <a href="{{ url_for('.events', name=crawler.name, stage=item.stage.name, level='warning') }}" class="warning">
                             {{item.warning | number}}
                             <i class="fa fa-warning" aria-hidden="true"></i>
                         </a>
