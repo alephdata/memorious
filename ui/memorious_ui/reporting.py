@@ -4,9 +4,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import aliased
 
 from memorious import settings
-from memorious.core import session, manager, connect_redis
+from memorious.core import session, manager
+from memorious.reporting import get_crawler_op_count, get_stage_op_count
+from memorious.reporting import get_last_run, is_running, get_crawler_runs
 from memorious.model import Event
-from memorious.helpers import parse_date
 
 
 def global_stats():
@@ -39,9 +40,9 @@ def crawlers_index():
     crawlers = []
     for crawler in manager:
         data = counts.get(crawler.name, {})
-        data['last_active'] = crawler.last_run()
-        data['total_ops'] = crawler.get_op_count()
-        data['running'] = crawler.is_running()
+        data['last_active'] = get_last_run(crawler)
+        data['total_ops'] = get_crawler_op_count(crawler)
+        data['running'] = is_running(crawler)
         data['crawler'] = crawler
         crawlers.append(data)
     return crawlers
@@ -71,14 +72,10 @@ def crawler_stages(crawler):
     stages = []
     for stage in crawler:
         data = counts.get(stage.name, {})
-        data['total_ops'] = stage.get_op_count()
+        data['total_ops'] = get_stage_op_count(stage)
         data['stage'] = stage
         stages.append(data)
     return stages
-
-
-# def crawler_runs(crawler):
-#     pass
 
 
 def crawler_events(crawler, run_id=None, level=None, stage=None,
@@ -108,33 +105,19 @@ def crawler_events(crawler, run_id=None, level=None, stage=None,
 
 
 def crawler_runs(crawler):
-    with connect_redis() as conn:
-        runs = []
-        if conn:
-            run_ids = conn.smembers(crawler.name + ":runs")
+    runs = get_crawler_runs(crawler)
 
-            counts = {}
-            # events by level
-            evt = aliased(Event)
-            q = session.query(
-                evt.run_id,
-                evt.level,
-                func.count(evt.id),
-            )
-            q = q.filter(evt.crawler == crawler.name)
-            q = q.group_by(evt.run_id, evt.level)
-            for (run_id, level, count) in q:
-                if run_id not in counts:
-                    counts[run_id] = {}
-                counts[run_id][level] = count
-
-            for run_id in run_ids:
-                data = counts.get(run_id, {})
-                data["total_ops"] = conn.get("run:" + run_id + ":total_ops")
-                data["start"] = parse_date(
-                    conn.get("run:" + run_id + ":start")
-                )
-                data["end"] = parse_date(conn.get("run:" + run_id + ":end"))
-                data['run_id'] = run_id
-                runs.append(data)
-        return runs
+    # events by level
+    evt = aliased(Event)
+    q = session.query(
+        evt.run_id,
+        evt.level,
+        func.count(evt.id),
+    )
+    q = q.filter(evt.crawler == crawler.name)
+    q = q.group_by(evt.run_id, evt.level)
+    for (run_id, level, count) in q:
+        for run in runs:
+            if run['run_id'] == run_id:
+                run[level] = count
+    return runs

@@ -1,7 +1,5 @@
 from importlib import import_module
 
-from memorious.core import connect_redis
-
 
 class CrawlerStage(object):
     """A single step in a data processing crawler."""
@@ -25,15 +23,6 @@ class CrawlerStage(object):
             package, method = method.rsplit(':', 1)
         module = import_module(package)
         return getattr(module, method)
-
-    def get_op_count(self):
-        """Total operations performed for this stage"""
-        with connect_redis() as conn:
-            if conn:
-                total_ops = conn.get(self.crawler.name + ":" + self.name)
-                if total_ops:
-                    return int(total_ops)
-            return None
 
     def __repr__(self):
         return '<CrawlerStage(%r, %s)>' % (self.crawler, self.name)

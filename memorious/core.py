@@ -1,7 +1,9 @@
 import os
 import logging
 from contextlib import contextmanager
+from pkg_resources import iter_entry_points
 
+import redis
 import dataset
 import storagelayer
 from celery import Celery
@@ -13,7 +15,6 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
 from raven import Client
 from raven.contrib.celery import register_signal, register_logger_signal
-import redis
 
 from memorious import settings
 from memorious.logic.queue import CrawlerExecutionQueue
@@ -50,16 +51,6 @@ celery.conf.update(
 redis_pool = redis.ConnectionPool(
     host=settings.REDIS_HOST, port=settings.REDIS_PORT
 )
-
-
-@contextmanager
-def connect_redis():
-    if settings.REDIS_HOST:
-        conn = redis.Redis(connection_pool=redis_pool)
-        yield conn
-    else:
-        yield None
-
 
 # set up a task queue using a Queue if celery is set to eager mode.
 local_queue = CrawlerExecutionQueue()
@@ -121,3 +112,9 @@ def upgrade_db():
     with session.bind.begin() as connection:
         alembic_cfg.attributes['connection'] = connection
         command.upgrade(alembic_cfg, "head")
+
+
+def load_extensions():
+    for ep in iter_entry_points('memorious.plugins'):
+        func = ep.load()
+        func()

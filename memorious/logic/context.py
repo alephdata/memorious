@@ -11,8 +11,6 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 import time
 
-import blinker
-
 from memorious.core import manager, storage, celery, session
 from memorious.core import datastore, local_queue
 from memorious.model import Result, Tag, Event
@@ -20,8 +18,7 @@ from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.util import make_key, random_filename
-from memorious import settings
-from memorious.signals import signals
+from memorious import settings, signals
 
 
 class Context(object):
@@ -70,19 +67,16 @@ class Context(object):
         so."""
 
         try:
-            start_signal = blinker.signal(signals.CRAWLER_RUNNING)
-            start_signal.send(self)
+            signals.operation_start.send(self)
             self.log.debug('Running: %s', self.stage.name)
-            res = self.stage.method(self, data)
-            return res
+            return self.stage.method(self, data)
         except Exception as exc:
             # this should clear results and tags created by this op
             # TODO: should we also use transactions on the datastore?
             session.rollback()
             self.emit_exception(exc)
         finally:
-            stop_signal = blinker.signal(signals.CRAWLER_FINISHED)
-            stop_signal.send(self)
+            signals.operation_end.send(self)
             shutil.rmtree(self.work_path)
             # Save the results and events created in this op
             session.commit()
