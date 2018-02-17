@@ -20,7 +20,11 @@
         {% for item in crawlers %}
             <tr>
                 <td>
-                    <i class="fa fa-circle" aria-hidden="true"></i>
+                    {% if item.running %}
+                        <i class="fa fa-spinner fa-spin fa-fw" aria-hidden="true"></i>
+                    {% else %}
+                        <i class="fa fa-circle fa-fw" aria-hidden="true"></i>
+                    {% endif %}
                     <a href="{{ url_for('.crawler', name=item.crawler.name) }}">
                         <code>{{item.crawler.name}}</code>
                     </a>
@@ -33,7 +37,7 @@
                 </td>
                 <td>
                     {% if item.running %}
-                        <i class="fa fa-spinner" aria-hidden="true"></i>
+                        running
                     {% else %}
                         {{item.last_active | date}}
                     {% endif %}
