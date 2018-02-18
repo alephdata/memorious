@@ -23,7 +23,9 @@ def crawler_dir():
 
 @pytest.fixture(scope="module")
 def manager():
-    return CrawlerManager(crawler_dir())
+    manager = CrawlerManager()
+    manager.load_path(crawler_dir())
+    return manager
 
 
 @pytest.fixture(scope="module")

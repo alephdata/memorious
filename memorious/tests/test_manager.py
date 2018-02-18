@@ -10,7 +10,9 @@ class TestManager(object):
         crawler_dir = os.path.normpath(os.path.join(
             file_path, "../testdata/config"
         ))
-        manager = CrawlerManager(crawler_dir)
+        manager = CrawlerManager()
+        assert len(manager) == 0
+        manager.load_path(crawler_dir)
         assert isinstance(manager.crawlers, dict)
         assert all(
             isinstance(crawler, Crawler) for crawler in manager
