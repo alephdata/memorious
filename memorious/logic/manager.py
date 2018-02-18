@@ -10,14 +10,14 @@ log = logging.getLogger(__name__)
 class CrawlerManager(object):
     """Crawl a directory of YAML files to load a set of crawler specs."""
 
-    def __init__(self, path):
-        self.path = path
-
-        if not os.path.isdir(self.path):
-            log.warning('Crawler config path %s not found.', self.path)
-
+    def __init__(self):
         self.crawlers = {}
-        for root, _, file_names in os.walk(self.path):
+
+    def load_path(self, path):
+        if not os.path.isdir(path):
+            log.warning('Crawler config path %s not found.', path)
+
+        for root, _, file_names in os.walk(path):
             for file_name in file_names:
                 if not (fnmatch(file_name, '*.yaml') or fnmatch(file_name, '*.yml')):
                     continue

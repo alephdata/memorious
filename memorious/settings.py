@@ -33,7 +33,7 @@ DATABASE_FILE = os.path.join(BASE_PATH, 'memorious.sqlite3')
 DATABASE_URI = env('DATABASE_URI', 'sqlite:///%s' % DATABASE_FILE)
 
 # Directory which contains crawler pipeline YAML specs
-CONFIG_PATH = env('CONFIG_PATH', required=True)
+CONFIG_PATH = env('CONFIG_PATH')
 
 # Try and run scrapers in a way that only acquires new data
 INCREMENTAL = env_bool('INCREMENTAL', default=True)

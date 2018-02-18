@@ -3,7 +3,7 @@ from stringcase import titlecase
 from normality import slugify
 
 from memorious.helpers.asp import ViewForm  # noqa
-from memorious.helpers.dates import parse_date
+from memorious.helpers.dates import parse_date  # noqa
 
 
 def convert_snakecase(name):
