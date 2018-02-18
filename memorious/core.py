@@ -120,3 +120,8 @@ def load_extensions():
     for ep in iter_entry_points('memorious.plugins'):
         func = ep.load()
         func()
+
+
+def init_memorious():
+    ensure_db()
+    load_extensions()

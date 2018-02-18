@@ -1,13 +1,11 @@
 import logging
 
 from memorious import settings
-from memorious.core import load_extensions, ensure_db
+from memorious.core import init_memorious
 from memorious_ui.views import app, sentry
 
 
-ensure_db()
-load_extensions()
-
+init_memorious()
 if settings.SENTRY_DSN:
     sentry.init_app(app,
                     dsn=settings.SENTRY_DSN,

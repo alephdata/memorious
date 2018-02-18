@@ -3,8 +3,7 @@ import logging
 from tabulate import tabulate
 
 from memorious import settings
-from memorious.core import manager, load_extensions
-from memorious.core import upgrade_db, ensure_db
+from memorious.core import manager, init_memorious, upgrade_db
 
 log = logging.getLogger(__name__)
 
@@ -23,8 +22,7 @@ def cli(debug, cache, incremental):
     settings.DEBUG = debug
     if settings.DEBUG:
         logging.basicConfig(level=logging.DEBUG)
-    ensure_db()
-    load_extensions()
+    init_memorious()
 
 
 @cli.command()
