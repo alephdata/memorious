@@ -4,10 +4,12 @@ from normality import slugify
 
 from memorious.helpers.asp import ViewForm  # noqa
 from memorious.helpers.dates import parse_date  # noqa
+from memorious.helpers.key import make_id  # noqa
 
 
 def convert_snakecase(name):
-    name = titlecase(name)
+    if name.upper() != name:
+        name = titlecase(name)
     return slugify(name, sep='_')
 
 
