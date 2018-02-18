@@ -18,13 +18,6 @@ from memorious_ui.reporting import (
 app = Flask(__name__)
 sentry = Sentry()
 
-if settings.SENTRY_DSN:
-    sentry.init_app(app,
-                    dsn=settings.SENTRY_DSN,
-                    logging=True,
-                    level=logging.ERROR)
-
-
 @app.after_request
 def cleanup(response):
     session.remove()
