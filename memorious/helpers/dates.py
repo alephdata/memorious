@@ -4,6 +4,8 @@ from datetime import datetime
 
 
 def parse_date(text, format_hint=None):
+    if text is None:
+        return
     if format_hint is not None:
         parsed = datetime.strptime(text, format_hint)
     else:

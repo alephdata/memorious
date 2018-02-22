@@ -64,34 +64,26 @@ def parse_html(context, data, result):
                 context.emit(rule='fetch', data=data)
 
 
-def parse_for_metadata(context, data, result):
+def parse_for_metadata(context, data, html):
     meta = context.params.get('meta', {})
-    date = context.params.get('meta_date', {})
+    meta_date = context.params.get('meta_date', {})
 
     meta_paths = meta
-    meta_paths.update(date)
+    meta_paths.update(meta_date)
 
     for key, xpaths in meta_paths.items():
-        meta = parse_xpaths(result.html, key, date.keys(), xpaths)
-        if meta is not None:
-            context.log.info("Metadata extracted [%s]: %s" % (
-                key, meta[key]))
-            data.update(meta)
+        for xpath in ensure_list(xpaths):
+            element = html.find(xpath)
+            if element is None:
+                continue
+            value = collapse_spaces(element.text_content())
+            if key in meta_date:
+                value = iso_date(value)
+            if value is not None:
+                data[key] = value
+            break
 
     return data
-
-
-def parse_xpaths(html, key, dates, xpaths):
-    data = {}
-    for xpath in ensure_list(xpaths):
-        if html.find(xpath) is not None:
-            value = collapse_spaces(html.find(xpath).text_content())
-            if key in dates:
-                value = iso_date(value)
-            data[key] = value
-            # Takes the value from the first xpath in the list that is present.
-            return data
-    return None
 
 
 def parse(context, data):
@@ -100,9 +92,7 @@ def parse(context, data):
             parse_html(context, data, result)
 
             # Get extra metadata from the DOM
-            if context.params.get('meta') is not None or context.params.get('meta_date') is not None:
-                meta = parse_for_metadata(context, data, result)
-                data.update(meta)
+            parse_for_metadata(context, data, result.html)
 
         rules = context.params.get('store') or {'match_all': {}}
         if Rule.get_rule(rules).apply(result):

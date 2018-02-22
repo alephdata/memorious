@@ -12,7 +12,6 @@ from memorious.model import Tag, Event, Result
 from memorious.reporting import get_last_run
 from memorious.logic.context import handle
 from memorious.logic.stage import CrawlerStage
-from memorious.helpers.dates import parse_date
 
 log = logging.getLogger(__name__)
 
