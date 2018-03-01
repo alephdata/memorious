@@ -91,6 +91,8 @@ def load_datastore():
         if not settings.DATASTORE_URI:
             raise RuntimeError("No $MEMORIOUS_DATASTORE_URI.")
         settings._datastore = dataset.connect(settings.DATASTORE_URI)
+        # Use bigint to store integers by default
+        settings._datastore.types.integer = settings._datastore.types.bigint
     return settings._datastore
 
 
