@@ -4,17 +4,27 @@ from banal import ensure_list
 from memorious.core import datastore
 
 
-def _recursive_upsert(context, params, data):
-    """Insert or update nested dicts recursively"""
+def _upsert(context, params, data):
+    """Insert or update data and add/update appropriate timestamps"""
     table = params.get("table")
     table = datastore.get_table(table, primary_id=False)
     unique_keys = ensure_list(params.get("unique"))
+    data["__last_seen"] = datetime.datetime.utcnow()
+    if len(unique_keys):
+        updated = table.update(data, unique_keys, return_count=True)
+        if updated:
+            return
+    data["__first_seen"] = data["__last_seen"]
+    table.insert(data)
 
+
+def _recursive_upsert(context, params, data):
+    """Insert or update nested dicts recursively into db tables"""
     children = params.get("children", {})
     nested_calls = []
     for child_params in children:
         key = child_params.get("key")
-        child_data_list = data.pop(key, [])
+        child_data_list = ensure_list(data.pop(key))
         if isinstance(child_data_list, dict):
             child_data_list = [child_data_list]
         if not (isinstance(child_data_list, list) and
@@ -26,20 +36,15 @@ def _recursive_upsert(context, params, data):
         if child_data_list:
             table_suffix = child_params.get("table_suffix", key)
             child_params["table"] = params.get("table") + "_" + table_suffix
-            parent_id = data.get(child_params.get("parent_id"))
+            parent_id = child_params.get("parent_id")
+            # new name for the parent_id
+            parent_id_key = child_params.get("parent_id_key", "__parent_id")
+            parent_id_val = data.get(parent_id)
             for child_data in child_data_list:
-                child_data["__parent_id"] = parent_id
+                child_data[parent_id_key] = parent_id_val
                 nested_calls.append((child_params, child_data))
-
-    data["__last_seen"] = datetime.datetime.utcnow()
-    if len(unique_keys):
-        updated = table.update(data, unique_keys, return_count=True)
-        if updated:
-            for child_params, child_data in nested_calls:
-                _recursive_upsert(context, child_params, child_data)
-            return
-    data["__first_seen"] = data["__last_seen"]
-    table.insert(data)
+    # Insert or update data
+    _upsert(context, params, data)
     for child_params, child_data in nested_calls:
         _recursive_upsert(context, child_params, child_data)
 
