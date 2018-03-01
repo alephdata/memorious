@@ -36,12 +36,11 @@ def _recursive_upsert(context, params, data):
         if child_data_list:
             table_suffix = child_params.get("table_suffix", key)
             child_params["table"] = params.get("table") + "_" + table_suffix
-            parent_id = child_params.get("parent_id")
-            # new name for the parent_id
-            parent_id_key = child_params.get("parent_id_key", "__parent_id")
-            parent_id_val = data.get(parent_id)
+            # copy some properties over from parent to child
+            inherit = child_params.get("inherit", {})
             for child_data in child_data_list:
-                child_data[parent_id_key] = parent_id_val
+                for dest, src in inherit.items():
+                    child_data[dest] = data.get(src)
                 nested_calls.append((child_params, child_data))
     # Insert or update data
     _upsert(context, params, data)
