@@ -9,7 +9,7 @@ from importlib import import_module
 from memorious import settings, signals
 from memorious.core import session, local_queue
 from memorious.model import Tag, Event, Result
-from memorious.reporting import get_last_run
+from memorious.reporting import get_last_run, is_running
 from memorious.logic.context import handle
 from memorious.logic.stage import CrawlerStage
 
@@ -108,13 +108,10 @@ class Crawler(object):
 
     def cleanup(self):
         """Run a cleanup method after the crawler finishes running"""
-        with connect_redis() as conn:
-            if conn:
-                active_ops = conn.get(self.name)
-                if not active_ops or int(active_ops) != 0:
-                    log.info("Clean up did not run: Crawler %s has not run or"
+        if is_running(self):
+            log.info("Clean up did not run: Crawler %s"
                              " is currently running" % self.name)
-                    return
+            return
         if self.cleanup_method:
             log.info("Running clean up for %s" % self.name)
             self.cleanup_method(self.cleanup_config["params"])
