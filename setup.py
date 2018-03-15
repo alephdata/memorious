@@ -23,6 +23,7 @@ setup(
     install_requires=[
         'banal',
         'requests[security] >= 2.5',
+        'requests_ftp',
         'click',
         'lxml >= 3',
         'PyYAML >= 3.10',
