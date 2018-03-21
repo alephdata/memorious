@@ -77,7 +77,6 @@ def extract(context, data):
     with context.http.rehash(data) as result:
         file_path = result.file_path
         content_type = result.content_type
-        content_hash = result.content_hash
         extract_dir = random_filename(context.work_path)
         if content_type in ZIP_MIME_TYPES:
             extracted_files = extract_zip(file_path, extract_dir)
@@ -95,5 +94,6 @@ def extract(context, data):
             relative_path = os.path.relpath(path, extract_dir)
             content_hash = context.store_file(path)
             extracted_content_hashes[relative_path] = content_hash
-        data["extracted_content_hashes"] = extracted_content_hashes
-        context.emit(data=data)
+            data['content_hash'] = content_hash
+            data['file_name'] = relative_path
+            context.emit(data=data)
