@@ -96,4 +96,4 @@ def extract(context, data):
             extracted_content_hashes[relative_path] = content_hash
             data['content_hash'] = content_hash
             data['file_name'] = relative_path
-            context.emit(data=data)
+            context.emit(data=data.copy())
