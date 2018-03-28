@@ -19,7 +19,7 @@ class CrawlerManager(object):
 
         for root, _, file_names in os.walk(path):
             for file_name in file_names:
-                if not (fnmatch(file_name, '*.yaml') or fnmatch(file_name, '*.yml')):
+                if not (fnmatch(file_name, '*.yaml') or fnmatch(file_name, '*.yml')):  # noqa
                     continue
                 source_file = os.path.join(root, file_name)
                 crawler = Crawler(self, source_file)
