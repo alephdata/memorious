@@ -4,6 +4,7 @@ all: clean test dists
 install: clean 
 	set -e; \
 	. ./env.sh; \
+	pip install -q nose twine; \
 	pip install -e . ; \
 	if [ -f $$MEMORIOUS_CONFIG_PATH/setup.py ]; \
 	then \

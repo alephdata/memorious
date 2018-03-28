@@ -1,5 +1,4 @@
 from urllib import urlencode
-import logging
 
 from flask import Flask, jsonify, request
 from flask import render_template, abort
@@ -7,7 +6,6 @@ from babel.numbers import format_number
 from babel.dates import format_date, format_datetime
 from raven.contrib.flask import Sentry
 
-from memorious import settings
 from memorious.core import session
 from memorious_ui.reporting import (
     crawlers_index, global_stats, get_crawler,
@@ -17,6 +15,7 @@ from memorious_ui.reporting import (
 
 app = Flask(__name__)
 sentry = Sentry()
+
 
 @app.after_request
 def cleanup(response):
