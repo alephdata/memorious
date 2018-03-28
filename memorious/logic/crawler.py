@@ -6,12 +6,10 @@ import time
 from datetime import timedelta, datetime
 from importlib import import_module
 
-import redis
-
 from memorious import settings, signals
-from memorious.core import session, local_queue, redis_pool
+from memorious.core import session, local_queue
 from memorious.model import Tag, Event, Result
-from memorious.reporting import get_last_run
+from memorious.reporting import get_last_run, is_running, cleanup_crawler
 from memorious.logic.context import handle
 from memorious.logic.stage import CrawlerStage
 
@@ -110,18 +108,26 @@ class Crawler(object):
 
     def cleanup(self):
         """Run a cleanup method after the crawler finishes running"""
-        if settings.REDIS_HOST:
-            conn = redis.Redis(connection_pool=redis_pool)
-            active_ops = conn.get(self.name)
-            if not active_ops or int(active_ops) != 0:
-                log.info("Clean up did not run: Crawler %s has not run or"
-                         " is currently running" % self.name)
-                return
-        if self.cleanup_method:
-            log.info("Running clean up for %s" % self.name)
-            self.cleanup_method(self.cleanup_config["params"])
-        else:
-            pass
+        should_run_cleanup = False
+        # Run cleanup if the crawler has finished running
+        if not is_running(self):
+            should_run_cleanup = True
+        # Run cleanup if the last operation of the crawler was more than half
+        # a day ago and it's just hanging in running state since then.
+        delta = timedelta(hours=12)
+        last_run = get_last_run(self)
+        if last_run is not None:
+            now = datetime.utcnow()
+            if now > last_run + delta:
+                should_run_cleanup = True
+
+        if should_run_cleanup:
+            cleanup_crawler(self)
+            if self.cleanup_method:
+                log.info("Running clean up for %s" % self.name)
+                self.cleanup_method(self.cleanup_config["params"])
+            else:
+                pass
 
     def get(self, name):
         return self.stages.get(name)
