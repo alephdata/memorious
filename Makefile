@@ -1,5 +1,5 @@
 
-all: clean test dists
+all: clean test
 
 install: clean 
 	set -e; \
@@ -14,13 +14,16 @@ install: clean
 test: install
 	# nosetests
 
-dists: install
-	python setup.py sdist
-	python setup.py bdist_wheel
 
-release: dists
-	pip install -q twine
-	twine upload dist/*
+# To release, run "bumpversion patch" or "bumpversion minor",
+# then push the newly created tag.
+# release: dists
+# 	pip install -q twine
+# 	twine upload dist/*
+# 
+# dists: install
+# 	python setup.py sdist
+# 	python setup.py bdist_wheel
 
 clean:
 	rm -rf dist build .eggs
