@@ -61,6 +61,14 @@ def flush_crawler(crawler):
         conn.delete(crawler_name + ":" + stage)
 
 
+def cleanup_crawler(crawler):
+    if not settings.REDIS_HOST:
+        return None
+    conn = connect_redis()
+    crawler_name = crawler.name
+    conn.delete(crawler_name)
+
+
 def get_last_run(crawler):
     if not settings.REDIS_HOST:
         return None
