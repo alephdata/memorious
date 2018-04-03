@@ -33,6 +33,9 @@ def submit_result(context, result, data):
     if collection_id is None:
         return
 
+    languages = context.params.get('languages', [])
+    countries = context.params.get('countries', [])
+    mime_type = context.params.get('mime_type', result.content_type)
     meta = {
         'crawler': context.crawler.name,
         'source_url': data.get('source_url', result.url),
@@ -40,14 +43,15 @@ def submit_result(context, result, data):
         'author': data.get('author'),
         'file_name': data.get('file_name'),
         'foreign_id': data.get('foreign_id', result.request_id),
-        'mime_type': data.get('mime_type', result.content_type),
-        'countries': data.get('countries'),
-        'languages': data.get('languages'),
+        'mime_type': data.get('mime_type', mime_type),
+        'countries': data.get('countries', countries),
+        'languages': data.get('languages', languages),
         'retrieved_at': data.get('retrieved_at', result.retrieved_at),
         'modified_at': data.get('modified_at', result.last_modified),
         'published_at': data.get('published_at'),
         'headers': dict(result.headers or {})
     }
+
     if data.get('parent_foreign_id'):
         meta['parent'] = {'foreign_id': data.get('parent_foreign_id')}
     if not data.get('file_name') and result.file_name:
@@ -90,6 +94,11 @@ def get_collection_id(context, session):
         'managed': True,
         'foreign_id': foreign_id
     })
+
+    if not res.ok:
+        context.log.info("Could not create collection: %s", foreign_id)
+        return
+
     context.stage._aleph_cid = res.json().get('id')
     return context.stage._aleph_cid
 
