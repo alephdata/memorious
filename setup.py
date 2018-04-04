@@ -31,7 +31,7 @@ setup(
         'celery',
         'tabulate',
         'sqlalchemy',
-        'dataset >= 1.0.6',
+        'dataset >= 1.0.8',
         'six',
         'storagelayer >= 0.3.2',
         'urlnormalizer >= 1.2.0',
