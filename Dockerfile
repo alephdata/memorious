@@ -1,13 +1,12 @@
 FROM python:2.7
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get -qq -y update && apt-get -qq -y dist-upgrade
-RUN apt-get -qq -y install python-pip build-essential python-dev \
+RUN apt-get -qq -y update && apt-get -qq -y dist-upgrade \
+    && apt-get -qq -y install python-pip build-essential python-dev \
         libxml2-dev libxslt1-dev libpq-dev apt-utils ca-certificates \
-        postgresql-client-9.4 libopenjpeg5 libtiff5-dev libjpeg-dev zlib1g-dev \
-        libtesseract-dev libicu-dev tesseract-ocr-eng p7zip-full
-
-RUN apt-get -qq -y autoremove && apt-get clean \
+        libopenjpeg5 libtiff5-dev libjpeg-dev zlib1g-dev \
+        libtesseract-dev libicu-dev tesseract-ocr-eng p7zip-full \
+    && apt-get -qq -y autoremove && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV TESSDATA_PREFIX /usr/share/tesseract-ocr
