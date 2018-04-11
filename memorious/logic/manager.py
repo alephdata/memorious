@@ -30,7 +30,7 @@ class CrawlerManager(object):
         for crawler in self:
             if crawler.delta is None:
                 log.info('[%s] has no schedule.', crawler.name)
-                return
+                continue
             if crawler.check_due():
                 log.info('[%s] due.', crawler.name)
                 crawler.run()
