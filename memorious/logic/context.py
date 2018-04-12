@@ -204,6 +204,9 @@ class Context(object):
 def handle(task, state, stage, data):
     """Execute the operation, rate limiting allowing."""
     context = Context.from_state(state, stage)
+    if context.crawler.disabled:
+        return
+
     if context.stage.rate_limit:
         try:
             with rate_limiter(context):

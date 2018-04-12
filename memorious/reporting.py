@@ -102,6 +102,8 @@ def is_running(crawler):
     """Is the crawler currently running?"""
     if not settings.REDIS_HOST:
         return False
+    if crawler.disabled:
+        return False
     conn = connect_redis()
     active_ops = conn.get(crawler.name)
     if active_ops and int(active_ops) > 0:
