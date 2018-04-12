@@ -8,7 +8,6 @@ from memorious import settings
 
 
 def aleph_emit(context, data):
-    context.log.info("Store [aleph]: %s", data.get('url'))
     if not settings.ALEPH_HOST:
         context.log.warning("No $MEMORIOUS_ALEPH_HOST, skipping upload...")
         return
@@ -16,62 +15,60 @@ def aleph_emit(context, data):
         context.log.warning("No $MEMORIOUS_ALEPH_API_KEY, skipping upload...")
         return
 
-    with context.http.rehash(data) as result:
-        if not result.ok:
-            return
-        submit_result(context, result, data)
-
-
-def submit_result(context, result, data):
-    if result.file_path is None:
-        context.log.info("Cannot ingest response: %s", result)
-        return
-
     session = requests.Session()
     session.headers['Authorization'] = 'apikey %s' % settings.ALEPH_API_KEY
     collection_id = get_collection_id(context, session)
     if collection_id is None:
+        context.log.warning("Cannot get aleph collection.")
         return
 
-    languages = context.params.get('languages', [])
-    countries = context.params.get('countries', [])
-    mime_type = context.params.get('mime_type', result.content_type)
+    content_hash = data.get('content_hash')
+    source_url = data.get('source_url', data.get('url'))
+    foreign_id = data.get('foreign_id', data.get('request_id', source_url))
+    if context.skip_incremental(collection_id, foreign_id, content_hash):
+        context.log.debug("Skip aleph upload: %s", foreign_id)
+        return
+
     meta = {
         'crawler': context.crawler.name,
-        'source_url': data.get('source_url', result.url),
+        'foreign_id': foreign_id,
+        'source_url': source_url,
         'title': data.get('title'),
         'author': data.get('author'),
         'file_name': data.get('file_name'),
-        'foreign_id': data.get('foreign_id', result.request_id),
-        'mime_type': data.get('mime_type', mime_type),
-        'countries': data.get('countries', countries),
-        'languages': data.get('languages', languages),
-        'retrieved_at': data.get('retrieved_at', result.retrieved_at),
-        'modified_at': data.get('modified_at', result.last_modified),
+        'retrieved_at': data.get('retrieved_at'),
+        'modified_at': data.get('modified_at'),
         'published_at': data.get('published_at'),
-        'headers': dict(result.headers or {})
+        'headers': data.get('headers', {})
     }
+
+    languages = context.params.get('languages')
+    meta['languages'] = data.get('languages', languages)
+    countries = context.params.get('countries')
+    meta['countries'] = data.get('countries', countries)
+    mime_type = context.params.get('mime_type')
+    meta['mime_type'] = data.get('mime_type', mime_type)
 
     if data.get('parent_foreign_id'):
         meta['parent'] = {'foreign_id': data.get('parent_foreign_id')}
-    if not data.get('file_name') and result.file_name:
-        meta['file_name'] = result.file_name
 
     meta = clean_dict(meta)
     # pprint(meta)
 
     url = make_url('collections/%s/ingest' % collection_id)
-    title = meta.get('title', meta.get('file_name', meta.get('source_url')))
-    context.log.info("Sending '%s' to %s", title, url)
-    file = open(result.file_path, 'rb')
-    res = session.post(url,
-                       data={'meta': json.dumps(meta)},
-                       files={'file': file})
-    if not res.ok:
-        context.emit_warning("Could not ingest '%s': %r" % (title, res.text))
-    else:
-        document = res.json().get('documents')[0]
-        context.log.info("Ingesting, document ID: %s", document['id'])
+    label = meta.get('file_name', meta.get('source_url'))
+    context.log.info("Upload: %s", label)
+    with context.load_file(content_hash) as fh:
+        if fh is None:
+            return
+        res = session.post(url,
+                           data={'meta': json.dumps(meta)},
+                           files={'file': fh})
+        if not res.ok:
+            context.emit_warning("Error: %r" % res.text)
+        else:
+            document = res.json().get('documents')[0]
+            context.log.info("Document ID: %s", document['id'])
 
 
 def get_collection_id(context, session):
@@ -83,6 +80,7 @@ def get_collection_id(context, session):
         'filter:foreign_id': foreign_id
     })
     data = res.json()
+    print data
     for coll in data.get('results'):
         if coll.get('foreign_id') == foreign_id:
             context.stage._aleph_cid = coll.get('id')
@@ -90,8 +88,7 @@ def get_collection_id(context, session):
 
     res = session.post(url, json={
         'label': context.crawler.description,
-        'category': context.crawler.category,
-        'managed': True,
+        'casefile': False,
         'foreign_id': foreign_id
     })
 

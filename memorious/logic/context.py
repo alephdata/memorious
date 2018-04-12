@@ -14,7 +14,6 @@ import time
 from memorious.core import manager, storage, celery, session
 from memorious.core import datastore, local_queue
 from memorious.model import Result, Tag, Event
-from memorious.exc import StorageFileMissing
 from memorious.logic.http import ContextHttp
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.util import make_key, random_filename
@@ -140,6 +139,7 @@ class Context(object):
 
         if Tag.exists(self.crawler, key, since=since):
             return True
+
         self.set_tag(key, None)
         return False
 
@@ -171,13 +171,14 @@ class Context(object):
                                       file_name=file_name,
                                       temp_path=self.work_path)
         if file_path is None:
-            raise StorageFileMissing(content_hash, file_name=file_name)
-
-        try:
-            with open(file_path, 'r') as fh:
-                yield fh
-        finally:
-            storage.cleanup_file(content_hash, temp_path=self.work_path)
+            yield None
+        else:
+            try:
+                with open(file_path, 'r') as fh:
+                    yield fh
+            finally:
+                storage.cleanup_file(content_hash,
+                                     temp_path=self.work_path)
 
     def dump_state(self):
         state = deepcopy(self.state)
