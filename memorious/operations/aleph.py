@@ -80,7 +80,6 @@ def get_collection_id(context, session):
         'filter:foreign_id': foreign_id
     })
     data = res.json()
-    print data
     for coll in data.get('results'):
         if coll.get('foreign_id') == foreign_id:
             context.stage._aleph_cid = coll.get('id')
