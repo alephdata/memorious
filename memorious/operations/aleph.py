@@ -26,7 +26,7 @@ def aleph_emit(context, data):
     source_url = data.get('source_url', data.get('url'))
     foreign_id = data.get('foreign_id', data.get('request_id', source_url))
     if context.skip_incremental(collection_id, foreign_id, content_hash):
-        context.log.debug("Skip aleph upload: %s", foreign_id)
+        context.log.info("Skip aleph upload: %s", foreign_id)
         return
 
     meta = {
