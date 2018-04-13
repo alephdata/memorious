@@ -79,24 +79,16 @@ class Crawler(object):
         }
         if incremental is not None:
             state['incremental'] = incremental
+
+        # Run the first task straight so that scheduled runs aren't summed
+        # up when queue runs get longer.
         stage = self.get(self.init_stage)
-        handle.delay(state, stage.name, {})
+        handle(state, stage.name, {})
 
         # If running in eager mode, we need to block until all the queued
         # tasks are finished.
         while not local_queue.is_empty:
             time.sleep(1)
-
-    def replay(self, stage):
-        """Re-run all tasks issued to a particular stage.
-
-        This sort of requires a degree of idempotence for each operation.
-        Usually used to re-parse a set of crawled documents.
-        """
-        query = Result.by_crawler_next_stage(self.name, stage)
-        for result in query:
-            state = {'crawler': self.name}
-            handle.delay(state, stage, result.data)
 
     @property
     def cleanup_method(self):

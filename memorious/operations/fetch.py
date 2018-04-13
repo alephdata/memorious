@@ -19,11 +19,13 @@ def fetch(context, data):
         if not result.ok:
             err = (result.url, result.status_code)
             context.emit_warning("Fetch fail [%s]: HTTP %s" % err)
-            return
+            if not context.params.get('emit_errors', False):
+                return
+        else:
+            context.log.info("Fetched [%s]: %r",
+                             result.status_code,
+                             result.url)
 
-        context.log.info("Fetched [%s]: %r",
-                         result.status_code,
-                         result.url)
         data.update(result.serialize())
         if url != result.url:
             tag = make_key(context.run_id, url)
