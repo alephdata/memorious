@@ -69,9 +69,11 @@ def sequence(context, data):
 
 def dates(context, data):
     format = context.params.get('format', '%Y-%m-%d')
-    delay = context.params.get('delay')
     delta = timedelta(days=context.params.get('days', 0),
                       weeks=context.params.get('weeks', 0))
+    if delta == timedelta():
+        context.log.error("No interval given: %r", context.params)
+        return
 
     if 'end' in context.params:
         current = context.params.get('end')
@@ -94,5 +96,6 @@ def dates(context, data):
         'date_iso': current.isoformat()
     })
     current = current - delta
-    data = {'current': current.strftime(format)}
-    context.recurse(data=data, delay=delay)
+    if current >= begin:
+        data = {'current': current.strftime(format)}
+        context.recurse(data=data)
