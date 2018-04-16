@@ -110,7 +110,7 @@ def test_dates(context, mocker):
     })
     assert context.recurse.call_count == 1
     context.recurse.assert_called_once_with(
-        data={"current": "17-12-2012"}, delay=None
+        data={"current": "17-12-2012"}
     )
 
 
