@@ -99,6 +99,13 @@ manager = LocalProxy(load_manager)
 datastore = LocalProxy(load_datastore)
 
 
+def connect_redis():
+    if not settings.REDIS_HOST:
+        # raise RuntimeError("No $MEMORIOUS_REDIS_HOST is set.")
+        return None
+    return redis.Redis(connection_pool=redis_pool)
+
+
 def ensure_db():
     if settings.DATABASE_FILE in settings.DATABASE_URI:
         try:

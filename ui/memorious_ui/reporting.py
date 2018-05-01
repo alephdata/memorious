@@ -1,12 +1,9 @@
 import math
-
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
 
 from memorious import settings
 from memorious.core import session, manager
-from memorious.reporting import get_crawler_op_count, get_stage_op_count
-from memorious.reporting import get_last_run, is_running, get_crawler_runs
 from memorious.model import Event
 
 
@@ -40,9 +37,9 @@ def crawlers_index():
     crawlers = []
     for crawler in manager:
         data = counts.get(crawler.name, {})
-        data['last_active'] = get_last_run(crawler)
-        data['total_ops'] = get_crawler_op_count(crawler)
-        data['running'] = is_running(crawler)
+        data['last_active'] = crawler.last_run
+        data['total_ops'] = crawler.op_count
+        data['running'] = crawler.is_running
         data['crawler'] = crawler
         crawlers.append(data)
     return crawlers
@@ -72,7 +69,7 @@ def crawler_stages(crawler):
     stages = []
     for stage in crawler:
         data = counts.get(stage.name, {})
-        data['total_ops'] = get_stage_op_count(stage)
+        data['total_ops'] = stage.op_count
         data['stage'] = stage
         stages.append(data)
     return stages
@@ -105,7 +102,7 @@ def crawler_events(crawler, run_id=None, level=None, stage=None,
 
 
 def crawler_runs(crawler):
-    runs = get_crawler_runs(crawler)
+    runs = list(crawler.runs)
 
     # events by level
     evt = aliased(Event)

@@ -4,15 +4,13 @@ import yaml
 import logging
 import time
 from datetime import timedelta, datetime
-from importlib import import_module
 
 from memorious import settings, signals
-from memorious.core import session, local_queue
+from memorious.core import session, local_queue, connect_redis
 from memorious.model import Tag, Event, Result
-from memorious.reporting import get_last_run
-from memorious.reporting import is_running, cleanup_crawler
 from memorious.logic.context import handle
 from memorious.logic.stage import CrawlerStage
+from memorious.helpers.dates import parse_date
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +53,7 @@ class Crawler(object):
             return False
         if self.delta is None:
             return False
-        last_run = get_last_run(self)
+        last_run = self.last_run
         if last_run is None:
             return True
         now = datetime.utcnow()
@@ -92,24 +90,60 @@ class Crawler(object):
             time.sleep(1)
 
     @property
-    def cleanup_method(self):
-        if self.cleanup_config:
-            method = self.cleanup_config["method"]
-            package = 'memorious.helpers.export'
-            module = import_module(package)
-            return getattr(module, method)
+    def is_running(self):
+        """Is the crawler currently running?"""
+        conn = connect_redis()
+        if conn is None or self.disabled:
+            return False
+        active_ops = conn.get(self.name)
+        return active_ops and int(active_ops) > 0
+
+    @property
+    def last_run(self):
+        conn = connect_redis()
+        if conn is None:
+            return Tag.latest(self.name)
+
+        last_run = conn.get(self.name+":last_run")
+        return parse_date(last_run)
+
+    @property
+    def op_count(self):
+        """Total operations performed for this crawler"""
+        conn = connect_redis()
+        if conn is None:
+            return None
+        total_ops = conn.get(self.name+":total_ops")
+        if total_ops:
+            return int(total_ops)
+
+    @property
+    def runs(self):
+        conn = connect_redis()
+        if conn is None:
+            return
+        for run_id in conn.smembers(self.name + ":runs"):
+            yield {
+                'run_id': run_id,
+                'total_ops': conn.get("run:" + run_id + ":total_ops"),
+                'start': parse_date(conn.get("run:" + run_id + ":start")),
+                'end': parse_date(conn.get("run:" + run_id + ":end"))
+            }
 
     def cleanup(self):
         """Run a cleanup method after the crawler finishes running"""
-        last_run = get_last_run(self)
-        if is_running(self):
+        if self.is_running:
             # Run cleanup if the last operation of the crawler was more than
             # half a day ago and it's just hanging in running state since.
             delta = timedelta(hours=12)
             timeout = datetime.utcnow() - delta
+            last_run = self.last_run
             if last_run is None or last_run > timeout:
                 return
-        cleanup_crawler(self)
+
+        conn = connect_redis()
+        if conn is not None:
+            conn.delete(self.name)
 
     def get(self, name):
         return self.stages.get(name)
