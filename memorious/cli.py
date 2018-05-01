@@ -45,6 +45,7 @@ def run(crawler):
     """Run a specified crawler."""
     crawler = get_crawler(crawler)
     crawler.run()
+    crawler.cleanup()
 
 
 @cli.command()

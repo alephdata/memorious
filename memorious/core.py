@@ -1,6 +1,5 @@
 import os
 import logging
-from contextlib import contextmanager
 from pkg_resources import iter_entry_points
 
 import redis

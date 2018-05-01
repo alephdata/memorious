@@ -1,10 +1,10 @@
 import logging
 import datetime
-
 import redis
 
 from memorious import settings
 from memorious.core import redis_pool
+from memorious.model import Tag
 from memorious.signals import operation_start
 from memorious.signals import operation_end
 from memorious.signals import crawler_flush
@@ -71,7 +71,7 @@ def cleanup_crawler(crawler):
 
 def get_last_run(crawler):
     if not settings.REDIS_HOST:
-        return None
+        return Tag.latest(crawler.name)
     conn = connect_redis()
     last_run = conn.get(crawler.name+":last_run")
     if last_run:
@@ -100,9 +100,7 @@ def get_stage_op_count(self):
 
 def is_running(crawler):
     """Is the crawler currently running?"""
-    if not settings.REDIS_HOST:
-        return False
-    if crawler.disabled:
+    if not settings.REDIS_HOST or crawler.disabled:
         return False
     conn = connect_redis()
     active_ops = conn.get(crawler.name)

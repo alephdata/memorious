@@ -1,11 +1,13 @@
 import logging
 from datetime import datetime
+from sqlalchemy import func
 from sqlalchemy import Column, String, Integer, DateTime
 
 from memorious.core import session
 from memorious.model.common import Base, JSON
 
 log = logging.getLogger(__name__)
+unset = type('Unset', (object,), {})
 
 
 class Tag(Base):
@@ -41,13 +43,22 @@ class Tag(Base):
         return q.first()
 
     @classmethod
-    def exists(cls, crawler, key, since=None):
+    def exists(cls, crawler, key, since=None, value=unset):
         q = session.query(cls)
         q = q.filter(cls.crawler == crawler.name)
         q = q.filter(cls.key == key)
         if since is not None:
             q = q.filter(cls.timestamp >= since)
+        if value is not unset:
+            q = q.filter(cls.value == value)
         return q.count() > 0
+
+    @classmethod
+    def latest(cls, crawler):
+        q = session.query(func.max(cls.timestamp))
+        q = q.filter(cls.crawler == crawler.name)
+        for (timestamp,) in q:
+            return timestamp
 
     @classmethod
     def delete(cls, crawler):

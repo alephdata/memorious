@@ -26,19 +26,18 @@ class CrawlerManager(object):
                 self.crawlers[crawler.name] = crawler
 
     def run_scheduled(self):
-        log.info('%s crawlers found' % len(self.crawlers))
+        log.info('Checking schedule: %s crawlers.' % len(self.crawlers))
         for crawler in self:
             if crawler.delta is None:
                 log.info('[%s] has no schedule.', crawler.name)
                 continue
-            if crawler.check_due():
-                log.info('[%s] due.', crawler.name)
-                crawler.run()
-            else:
-                log.info('[%s] not due.', crawler.name)
+            if not crawler.check_due():
+                continue
+            log.info('[%s] due.', crawler.name)
+            crawler.run()
 
     def run_cleanup(self):
-        log.info('%s crawlers found' % len(self.crawlers))
+        log.info('Cleanup: %s crawlers.' % len(self.crawlers))
         for crawler in self:
             crawler.cleanup()
 
