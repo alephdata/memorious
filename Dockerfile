@@ -1,4 +1,4 @@
-FROM python:2.7
+FROM python:3.6
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -qq -y update && apt-get -qq -y dist-upgrade \
