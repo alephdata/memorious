@@ -11,7 +11,7 @@ def parse_date(text, format_hint=None):
     else:
         # Strip things that don't belong in dates but websites like to wrap
         # their dates with them anyway
-        cleaned = text.strip('[] ')
+        cleaned = str(text).strip('[] ')
         parsed = dateparser.parse(cleaned)
     return naive_datetime(parsed)
 
