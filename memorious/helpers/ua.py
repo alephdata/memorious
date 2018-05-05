@@ -267,5 +267,5 @@ class UserAgent(object):
         }
 
     def random(self):
-        browser = random.choice(self.browsers.keys())
+        browser = random.choice(list(self.browsers.keys()))
         return random.choice(self.browsers[browser])
