@@ -48,7 +48,7 @@ class ContextHttp(object):
     def request(self, method, url, headers={}, auth=None, data=None,
                 params=None, json=None, allow_redirects=True, lazy=False):
         if is_mapping(params):
-            params = params.items()
+            params = list(params.items())
         url = normalize_url(url, extra_query_args=params)
         method = method.upper().strip()
         request = Request(method, url, data=data, headers=headers,
