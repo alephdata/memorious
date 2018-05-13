@@ -72,10 +72,10 @@ class TestContextHttpResponse(object):
         context_http_response = ContextHttpResponse(http, request)
         assert isinstance(context_http_response.raw, six.binary_type)
         assert (context_http_response.raw ==
-                b'{\n  "user-agent": "Memorious Test"\n}\n')
+                b'{"user-agent":"Memorious Test"}\n')
         assert isinstance(context_http_response.text, six.text_type)
         assert (context_http_response.text ==
-                '{\n  "user-agent": "Memorious Test"\n}\n')
+                '{"user-agent":"Memorious Test"}\n')
         assert context_http_response.json == {"user-agent": "Memorious Test"}
 
     def test_html(self, http):

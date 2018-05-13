@@ -150,4 +150,4 @@ def test_directory(context):
     with open(meta_file_path, "rb") as fh:
         assert json.load(fh) == data
     with open(raw_file_path, "rb") as fh:
-        assert fh.read() == b'{\n  "user-agent": "Memorious Test"\n}\n'
+        assert fh.read() == b'{"user-agent":"Memorious Test"}\n'
