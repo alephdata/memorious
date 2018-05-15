@@ -1,5 +1,6 @@
 import numbers
 import re
+from normality import stringify
 from dateutil.parser import parse
 
 
@@ -15,7 +16,8 @@ class ContextCheck(object):
         
     def is_not_empty(self, value, strict=False):
         """if p is not empty"""
-        if value:
+        value = stringify(value)
+        if value is not None:
             return
         self.shout('Value %r is not empty', strict, value)
         
@@ -29,6 +31,10 @@ class ContextCheck(object):
         """if p is an integer"""
         if isinstance(value, numbers.Number):
             return
+        value = stringify(value)
+        if value is not None:
+            if value.isnumeric():
+                return
         self.shout('value %r is not an integer', strict, value)
 
     def match_date(self, value, strict=False):
