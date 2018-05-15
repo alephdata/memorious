@@ -13,51 +13,60 @@ class ContextCheck(object):
             raise ValueError(msg % args)
         else:
             self.context.log.info(msg, *args)
-        
+
     def is_not_empty(self, value, strict=False):
-        """if p is not empty"""
+        """if value is not empty"""
         value = stringify(value)
         if value is not None:
             return
-        self.shout('Value %r is not empty', strict, value)
-        
-    def is_numeric(self, value, strict=False):
-        """if p is numeric"""
-        if value.isnumeric():
-            return
-        self.shout('value %r is not numeric', strict, value)
+        self.shout('Value %r is empty', strict, value)
 
-    def is_integer(self, value, strict=False):
-        """if p is an integer"""
-        if isinstance(value, numbers.Number):
-            return
+    def is_numeric(self, value, strict=False):
+        """if value is numeric"""
         value = stringify(value)
         if value is not None:
             if value.isnumeric():
                 return
+        self.shout('value %r is not numeric', strict, value)
+
+    def is_integer(self, value, strict=False):
+        """if value is an integer"""
+        if value is not None:
+            if isinstance(value, numbers.Number):
+                return
+        value = stringify(value)
+        if value is not None and value.isnumeric():
+            return
         self.shout('value %r is not an integer', strict, value)
 
     def match_date(self, value, strict=False):
-        """if p is a date"""
-        if parse(value):
-            return
-        self.shout('Value %r is not a valid date', strict, value)
+        """if value is a date"""
+        value = stringify(value)
+        try:
+            parse(value)
+        except:
+            self.shout('Value %r is not a valid date', strict, value)
 
     def match_regexp(self, value, q, strict=False):
-        """if p matches a regexp q"""
+        """if value matches a regexp q"""
+        value = stringify(value)
         mr = re.compile(q)
-        if mr.match(value):
-            return
+        if value is not None:
+            if mr.match(value):
+                return
         self.shout('%r not matching the regexp %r', strict, value, q)
 
     def has_length(self, value, q, strict=False):
-        """if p has a length of q"""
-        if len(value) == q:
-            return
+        """if value has a length of q"""
+        value = stringify(value)
+        if value is not None:
+            if len(value) == q:
+                return
         self.shout('Value %r not matching length %r', strict, value, q)
 
     def must_contain(self, value, q, strict=False):
-        """if p must contain q"""
-        if str(value).find(q):
-            return
+        """if value must contain q"""
+        if value is not None:
+            if value.find(q) != -1:
+                return
         self.shout('Value %r does not contain %r', strict, value, q)
