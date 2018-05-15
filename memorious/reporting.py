@@ -43,6 +43,7 @@ def flush_crawler(crawler):
     conn.delete(crawler_name + ":total_ops")
     conn.delete(crawler_name + ":last_run")
     for run_id in conn.smembers(crawler_name + ":runs"):
+        run_id = str(run_id)
         conn.delete("run:" + run_id + ":start")
         conn.delete("run:" + run_id + ":end")
         conn.delete("run:" + run_id + ":total_ops")

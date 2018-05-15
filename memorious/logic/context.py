@@ -16,6 +16,7 @@ from memorious.core import datastore, local_queue
 from memorious.model import Result, Tag, Event
 from memorious.logic.http import ContextHttp
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
+from memorious.logic.check import ContextCheck
 from memorious.util import make_key, random_filename
 from memorious import settings, signals
 
@@ -34,6 +35,7 @@ class Context(object):
         self.log = logging.getLogger('%s.%s' % (crawler.name, stage.name))
         self.http = ContextHttp(self)
         self.datastore = datastore
+        self.check = ContextCheck(self)
 
     def get(self, name, default=None):
         """Get a configuration value and expand environment variables."""

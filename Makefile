@@ -42,3 +42,6 @@ rebuild:
 
 shell:
 	docker-compose run --rm worker /bin/bash
+
+image:
+	docker build -t alephdata/memorious:latest .

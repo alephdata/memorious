@@ -1,6 +1,7 @@
 import cgi
 import json
 import pickle
+import codecs
 from lxml import html, etree
 from hashlib import sha1
 from banal import hash_data, is_mapping
@@ -34,7 +35,7 @@ class ContextHttp(object):
 
         if self.STATE_SESSION in self.context.state:
             session = self.context.state.get(self.STATE_SESSION)
-            self.session = pickle.loads(session)
+            self.session = pickle.loads(codecs.decode(session.encode(), 'base64'))
         else:
             self.reset()
 
@@ -71,6 +72,7 @@ class ContextHttp(object):
 
     def save(self):
         session = pickle.dumps(self.session)
+        session = codecs.encode(pickle.dumps(self.session), 'base64').decode()
         self.context.state[self.STATE_SESSION] = session
 
 

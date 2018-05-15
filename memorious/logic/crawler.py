@@ -123,6 +123,7 @@ class Crawler(object):
         if conn is None:
             return
         for run_id in conn.smembers(self.name + ":runs"):
+            run_id = str(run_id)
             yield {
                 'run_id': run_id,
                 'total_ops': conn.get("run:" + run_id + ":total_ops"),
