@@ -30,10 +30,7 @@ SEVENZIP_MIME_TYPES = [
 def extract_zip(file_path, extract_dir):
     with zipfile.ZipFile(file_path, "r") as zip_ref:
         if zip_ref.testzip() is not None:
-            context.log.warning(
-            "Bad zip file: %s",
-            file_path
-            )
+            context.log.warning("Bad zip file: %s", file_path)
         zip_ref.extractall(extract_dir)
         extracted_files = []
         for name in zip_ref.namelist():

@@ -290,7 +290,7 @@ class ContextHttpResponse(object):
             try:
                 self._html = html.fromstring(self.text)
             except ValueError as ve:
-                if 'encoding declaration' in ve:
+                if 'encoding declaration' in str(ve):
                     self._html = html.parse(self.file_path)
             except (etree.ParserError, etree.ParseError):
                 pass
