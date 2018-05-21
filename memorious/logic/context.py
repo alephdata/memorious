@@ -176,7 +176,7 @@ class Context(object):
             yield None
         else:
             try:
-                with open(file_path, 'r') as fh:
+                with open(file_path, 'rb') as fh:
                     yield fh
             finally:
                 storage.cleanup_file(content_hash,
