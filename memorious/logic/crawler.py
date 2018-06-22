@@ -10,7 +10,6 @@ from memorious.core import session, local_queue, connect_redis
 from memorious.model import Tag, Event, Result
 from memorious.logic.context import handle
 from memorious.logic.stage import CrawlerStage
-from memorious.helpers.dates import parse_date
 
 log = logging.getLogger(__name__)
 
@@ -105,7 +104,7 @@ class Crawler(object):
             return Tag.latest(self.name)
 
         last_run = conn.get(self.name+":last_run")
-        return parse_date(last_run)
+        return datetime.strptime(last_run, "%Y-%m-%d %H:%M:%S.%f")
 
     @property
     def op_count(self):
@@ -127,8 +126,12 @@ class Crawler(object):
             yield {
                 'run_id': run_id,
                 'total_ops': conn.get("run:" + run_id + ":total_ops"),
-                'start': parse_date(conn.get("run:" + run_id + ":start")),
-                'end': parse_date(conn.get("run:" + run_id + ":end"))
+                'start': datetime.strptime(
+                    conn.get("run:" + run_id + ":start"), "%Y-%m-%d %H:%M:%S.%f"
+                ),
+                'end': datetime.strptime(
+                    conn.get("run:" + run_id + ":end"), "%Y-%m-%d %H:%M:%S.%f"
+                )
             }
 
     def cleanup(self):
