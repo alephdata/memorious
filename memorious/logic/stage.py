@@ -1,6 +1,6 @@
 from importlib import import_module
 
-from memorious.core import connect_redis
+from memorious.model import CrawlerState
 
 
 class CrawlerStage(object):
@@ -29,12 +29,7 @@ class CrawlerStage(object):
     @property
     def op_count(self):
         """Total operations performed for this stage"""
-        conn = connect_redis()
-        if conn is None:
-            return None
-        total_ops = conn.get(self.crawler.name + ":" + self.name)
-        if total_ops:
-            return int(total_ops)
+        return CrawlerState.op_count(self.crawler, self)
 
     def __repr__(self):
         return '<CrawlerStage(%r, %s)>' % (self.crawler, self.name)

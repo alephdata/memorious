@@ -6,8 +6,8 @@ import time
 from datetime import timedelta, datetime
 
 from memorious import settings, signals
-from memorious.core import local_queue, connect_redis
-from memorious.model import Tag, Event
+from memorious.core import local_queue
+from memorious.model import Tag, Event, CrawlerState
 from memorious.logic.context import handle
 from memorious.logic.stage import CrawlerStage
 
@@ -44,8 +44,6 @@ class Crawler(object):
         self.stages = {}
         for name, stage in self.config.get('pipeline', {}).items():
             self.stages[name] = CrawlerStage(self, name, stage)
-
-        self.conn = connect_redis()
 
     def check_due(self):
         """Check if the last execution of this crawler is older than
@@ -91,57 +89,22 @@ class Crawler(object):
     @property
     def is_running(self):
         """Is the crawler currently running?"""
-        if self.conn is None or self.disabled:
+        if self.disabled:
             return False
-        active_ops = self.conn.get(self.name)
-        return active_ops and int(active_ops) > 0
+        return CrawlerState.is_running(self)
 
     @property
     def last_run(self):
-        last_run = self.conn.get(self.name + ":last_run")
-        if last_run:
-            return datetime.strptime(
-                last_run.decode('utf-8'), "%Y-%m-%d %H:%M:%S.%f"
-            )
+        return CrawlerState.last_run(self)
 
     @property
     def op_count(self):
         """Total operations performed for this crawler"""
-        total_ops = self.conn.get(self.name + ":total_ops")
-        if total_ops:
-            return int(total_ops)
+        return CrawlerState.op_count(self)
 
     @property
     def runs(self):
-        for run_id in self.conn.smembers(self.name + ":runs"):
-            run_id = run_id.decode('utf-8')
-            start = self.conn.get("run:" + run_id + ":start")
-            if start:
-                start = datetime.strptime(
-                            start.decode("utf-8"),
-                            "%Y-%m-%d %H:%M:%S.%f"
-                        )
-            else:
-                start = None
-            end = self.conn.get("run:" + run_id + ":end")
-            if end:
-                end = datetime.strptime(
-                            end.decode("utf-8"),
-                            "%Y-%m-%d %H:%M:%S.%f"
-                        )
-            else:
-                end = None
-            total_ops = self.conn.get("run:" + run_id + ":total_ops")
-            if total_ops:
-                total_ops = int(total_ops)
-            else:
-                total_ops = 0
-            yield {
-                'run_id': run_id,
-                'total_ops': total_ops,
-                'start': start,
-                'end': end
-            }
+        return CrawlerState.runs(self)
 
     def cleanup(self):
         """Run a cleanup method after the crawler finishes running"""
@@ -154,7 +117,7 @@ class Crawler(object):
             if last_run is None or last_run > timeout:
                 return
 
-        self.conn.delete(self.name)
+        CrawlerState.cleanup(self)
 
     def get(self, name):
         return self.stages.get(name)

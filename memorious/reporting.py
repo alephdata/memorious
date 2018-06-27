@@ -1,8 +1,7 @@
 import logging
-import datetime
 
 from memorious import settings
-from memorious.core import connect_redis
+from memorious.model import CrawlerState, CrawlerRun
 from memorious.signals import operation_start
 from memorious.signals import operation_end
 from memorious.signals import crawler_flush
@@ -11,46 +10,23 @@ log = logging.getLogger(__name__)
 
 
 def log_operation_start(context):
-    conn = connect_redis()
-    crawler_name = context.crawler.name
-    stage_name = context.stage.name
-    now = datetime.datetime.utcnow()
-    conn.incr(crawler_name)
-    conn.incr(crawler_name + ":" + stage_name)
-    conn.incr(crawler_name + ":total_ops")
-    conn.set(crawler_name + ":last_run", now)
-    if not conn.sismember(crawler_name + ":runs", context.run_id):
-        conn.sadd(crawler_name + ":runs", context.run_id)
-        conn.set("run:" + context.run_id + ":start", now)
-    conn.incr("run:" + context.run_id)
-    conn.incr("run:" + context.run_id + ":total_ops")
+    crawler = context.crawler
+    stage = context.stage
+    run_id = context.run_id
+    CrawlerState.record_operation_start(crawler, stage)
+    CrawlerRun.record_operation_start(crawler, run_id)
 
 
 def log_operation_end(context):
-    conn = connect_redis()
-    crawler_name = context.crawler.name
-    conn.decr(crawler_name)
-    conn.decr("run:" + context.run_id)
-    if int(conn.get("run:" + context.run_id)) == 0:
-        now = datetime.datetime.utcnow()
-        conn.set("run:" + context.run_id + ":end", now)
+    crawler = context.crawler
+    run_id = context.run_id
+    CrawlerState.record_operation_end(crawler)
+    CrawlerRun.record_operation_end(crawler, run_id)
 
 
 def flush_crawler(crawler):
-    conn = connect_redis()
-    crawler_name = crawler.name
-    conn.delete(crawler_name)
-    conn.delete(crawler_name + ":total_ops")
-    conn.delete(crawler_name + ":last_run")
-    for run_id in conn.smembers(crawler_name + ":runs"):
-        run_id = run_id.decode('utf-8')
-        conn.delete("run:" + run_id + ":start")
-        conn.delete("run:" + run_id + ":end")
-        conn.delete("run:" + run_id + ":total_ops")
-        conn.delete("run:" + run_id)
-    conn.delete(crawler_name + ":runs")
-    for stage in crawler.stages:
-        conn.delete(crawler_name + ":" + stage)
+    CrawlerState.flush(crawler)
+    CrawlerRun.flush(crawler)
 
 
 def init():

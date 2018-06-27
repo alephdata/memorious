@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 @attr.s
 class Event(Base):
-    """Document the start time, end time, type and outcome of a given task."""
+    """Document errors and warnings caused during tasks."""
     LEVEL_WARNING = 'warning'
     LEVEL_ERROR = 'error'
     LEVELS = [LEVEL_WARNING, LEVEL_ERROR]
