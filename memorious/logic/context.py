@@ -11,9 +11,9 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 import time
 
-from memorious.core import manager, storage, celery, session
+from memorious.core import manager, storage, celery
 from memorious.core import datastore, local_queue
-from memorious.model import Result, Tag, Event
+from memorious.model import Tag, Event
 from memorious.logic.http import ContextHttp
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.logic.check import ContextCheck
@@ -54,7 +54,6 @@ class Context(object):
             return
         state = self.dump_state()
         delay = delay or self.crawler.delay
-        Result.save(self.crawler, self.stage.name, stage, data)
         handle.apply_async((state, stage, data), countdown=delay)
 
     def recurse(self, data={}, delay=None):
@@ -69,25 +68,21 @@ class Context(object):
 
         try:
             signals.operation_start.send(self)
-            self.log.debug('Running: %s', self.stage.name)
+            self.log.info('Running stage %s of crawler %s with run_id: %s',
+                          self.stage.name, self.crawler.name, self.run_id)
             return self.stage.method(self, data)
         except Exception as exc:
-            # this should clear results and tags created by this op
-            # TODO: should we also use transactions on the datastore?
-            session.rollback()
             self.emit_exception(exc)
         finally:
             signals.operation_end.send(self)
             shutil.rmtree(self.work_path)
-            # Save the results and events created in this op
-            session.commit()
 
     def emit_warning(self, message, type=None, details=None, *args):
         if len(args):
             message = message % args
         self.log.warning(message)
-        return Event.save(self.crawler.name,
-                          self.stage.name,
+        return Event.save(self.crawler,
+                          self.stage,
                           Event.LEVEL_WARNING,
                           self.run_id,
                           error_type=type,
@@ -96,8 +91,8 @@ class Context(object):
 
     def emit_exception(self, exc):
         self.log.exception(exc)
-        return Event.save(self.crawler.name,
-                          self.stage.name,
+        return Event.save(self.crawler,
+                          self.stage,
                           Event.LEVEL_ERROR,
                           self.run_id,
                           error_type=exc.__class__.__name__,

@@ -3,14 +3,11 @@ import logging
 from pkg_resources import iter_entry_points
 
 import redis
+import fakeredis
 import dataset
 import storagelayer
 from celery import Celery
 from celery.schedules import crontab
-from alembic.config import Config
-from alembic import command
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.local import LocalProxy
 from raven import Client
 from raven.contrib.celery import register_signal, register_logger_signal
@@ -70,12 +67,6 @@ storage = storagelayer.init(settings.ARCHIVE_TYPE,
                             bucket=settings.ARCHIVE_BUCKET)
 
 
-# Configure the SQLAlechemy database connection engine
-engine = create_engine(settings.DATABASE_URI)
-session_factory = sessionmaker(bind=engine)
-session = scoped_session(session_factory)
-
-
 def load_manager():
     if not hasattr(settings, '_manager'):
         from memorious.logic.manager import CrawlerManager
@@ -101,8 +92,7 @@ datastore = LocalProxy(load_datastore)
 
 def connect_redis():
     if not settings.REDIS_HOST:
-        # raise RuntimeError("No $MEMORIOUS_REDIS_HOST is set.")
-        return None
+        return fakeredis.FakeRedis()
     return redis.Redis(connection_pool=redis_pool)
 
 
@@ -113,15 +103,6 @@ def ensure_db():
         except Exception:
             pass
         log.info("Built-in database: %s", settings.DATABASE_URI)
-        upgrade_db()
-
-
-def upgrade_db():
-    alembic_cfg = Config()
-    alembic_cfg.set_main_option("script_location", "memorious:migrate")
-    with session.bind.begin() as connection:
-        alembic_cfg.attributes['connection'] = connection
-        command.upgrade(alembic_cfg, "head")
 
 
 def load_extensions():

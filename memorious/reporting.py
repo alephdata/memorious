@@ -31,7 +31,7 @@ def log_operation_end(context):
     crawler_name = context.crawler.name
     conn.decr(crawler_name)
     conn.decr("run:" + context.run_id)
-    if conn.get("run:" + context.run_id) == "0":
+    if int(conn.get("run:" + context.run_id)) == 0:
         now = datetime.datetime.utcnow()
         conn.set("run:" + context.run_id + ":end", now)
 
@@ -43,7 +43,7 @@ def flush_crawler(crawler):
     conn.delete(crawler_name + ":total_ops")
     conn.delete(crawler_name + ":last_run")
     for run_id in conn.smembers(crawler_name + ":runs"):
-        run_id = str(run_id)
+        run_id = run_id.decode('utf-8')
         conn.delete("run:" + run_id + ":start")
         conn.delete("run:" + run_id + ":end")
         conn.delete("run:" + run_id + ":total_ops")

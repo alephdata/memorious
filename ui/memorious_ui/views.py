@@ -6,7 +6,6 @@ from babel.numbers import format_number
 from babel.dates import format_date, format_datetime
 from raven.contrib.flask import Sentry
 
-from memorious.core import session
 from memorious_ui.reporting import (
     crawlers_index, global_stats, get_crawler,
     crawler_stages, crawler_events,
@@ -17,10 +16,9 @@ app = Flask(__name__)
 sentry = Sentry()
 
 
-@app.after_request
-def cleanup(response):
-    session.remove()
-    return response
+# @app.after_request
+# def cleanup(response):
+#     return response
 
 
 @app.template_filter('number')
@@ -86,7 +84,7 @@ def events(name):
                             page=int(request.args.get('page', 1)),
                             run_id=request.args.get('run_id'),
                             level=request.args.get('level'),
-                            stage=request.args.get('stage'))
+                            stage_name=request.args.get('stage_name'))
     return render_template('events.html',
                            crawler=crawler,
                            events=events)
