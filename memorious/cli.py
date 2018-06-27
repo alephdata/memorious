@@ -3,7 +3,7 @@ import logging
 from tabulate import tabulate
 
 from memorious import settings
-from memorious.core import manager, init_memorious, upgrade_db
+from memorious.core import manager, init_memorious
 
 log = logging.getLogger(__name__)
 
@@ -23,12 +23,6 @@ def cli(debug, cache, incremental):
     if settings.DEBUG:
         logging.basicConfig(level=logging.DEBUG)
     init_memorious()
-
-
-@cli.command()
-def upgrade():
-    """Connect to the database and create or upgrade the tables."""
-    upgrade_db()
 
 
 def get_crawler(name):

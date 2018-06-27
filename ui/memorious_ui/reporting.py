@@ -1,10 +1,11 @@
 import math
-from sqlalchemy import func
-from sqlalchemy.orm import aliased
+import logging
 
 from memorious import settings
-from memorious.core import session, manager
+from memorious.core import manager
 from memorious.model import Event
+
+log = logging.getLogger(__name__)
 
 
 def global_stats():
@@ -19,24 +20,9 @@ def global_stats():
 def crawlers_index():
     """Generate a list of all crawlers, sorted alphabetically, with op
     counts."""
-    # query for error and warning events:
-    counts = {}
-    event = aliased(Event)
-    q = session.query(
-        event.crawler,
-        event.level,
-        func.count(event.id),
-    )
-    q = q.group_by(event.crawler, event.level)
-    for (name, level, count) in q:
-        if name not in counts:
-            counts[name] = {}
-        counts[name][level] = count
-
-    # make sure we're including crawlers that have never been run:
     crawlers = []
     for crawler in manager:
-        data = counts.get(crawler.name, {})
+        data = Event.get_counts(crawler)
         data['last_active'] = crawler.last_run
         data['total_ops'] = crawler.op_count
         data['running'] = crawler.is_running
@@ -51,70 +37,39 @@ def get_crawler(name):
 
 def crawler_stages(crawler):
     """See the number of executions of each stage."""
-    counts = {}
-    # events by level
-    evt = aliased(Event)
-    q = session.query(
-        evt.stage,
-        evt.level,
-        func.count(evt.id),
-    )
-    q = q.filter(evt.crawler == crawler.name)
-    q = q.group_by(evt.stage, evt.level)
-    for (stage_name, level, count) in q:
-        if stage_name not in counts:
-            counts[stage_name] = {}
-        counts[stage_name][level] = count
-
     stages = []
     for stage in crawler:
-        data = counts.get(stage.name, {})
+        data = Event.get_stage_counts(crawler, stage)
         data['total_ops'] = stage.op_count
         data['stage'] = stage
         stages.append(data)
     return stages
 
 
-def crawler_events(crawler, run_id=None, level=None, stage=None,
-                   page=1, per_page=15):
-    evt = aliased(Event)
-    q = session.query(evt)
-    q = q.filter(evt.crawler == crawler.name)
-    if level is not None:
-        q = q.filter(evt.level == level)
-    if run_id is not None:
-        q = q.filter(evt.run_id == run_id)
-    if stage is not None:
-        q = q.filter(evt.stage == stage)
+def crawler_events(crawler, level=None, stage_name=None,
+                   run_id=None, page=1, per_page=15):
+    start = (max(1, page) - 1) * per_page
+    end = start + per_page
 
-    total = q.count()
-    q = q.order_by(evt.timestamp.desc())
-    q = q.limit(per_page)
-    q = q.offset((max(1, page) - 1) * per_page)
+    if stage_name:
+        events = Event.get_stage_events(crawler, stage_name, start, end, level)
+    elif run_id:
+        events = Event.get_run_events(crawler, run_id, start, end, level)
+    else:
+        events = Event.get_crawler_events(crawler, start, end, level)
+    total = len(events)
 
     return {
         'page': page,
         'per_page': per_page,
         'pages': int(math.ceil((float(total) / per_page))),
         'total': total,
-        'results': list(q)
+        'results': events
     }
 
 
 def crawler_runs(crawler):
     runs = list(crawler.runs)
-
-    # events by level
-    evt = aliased(Event)
-    q = session.query(
-        evt.run_id,
-        evt.level,
-        func.count(evt.id),
-    )
-    q = q.filter(evt.crawler == crawler.name)
-    q = q.group_by(evt.run_id, evt.level)
-    for (run_id, level, count) in q:
-        for run in runs:
-            if run['run_id'] == run_id:
-                run[level] = count
+    for run in runs:
+        run.update(Event.get_run_counts(crawler, run['run_id']))
     return runs

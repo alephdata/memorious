@@ -1,70 +1,57 @@
 import logging
+import json
 from datetime import datetime
-from sqlalchemy import func
-from sqlalchemy import Column, String, Integer, DateTime
 
-from memorious.core import session
-from memorious.model.common import Base, JSON
+import attr
+
+from memorious.model.common import Base
 
 log = logging.getLogger(__name__)
 unset = type('Unset', (object,), {})
 
 
+@attr.s
 class Tag(Base):
     """A simple key/value table used to store interim results."""
-    __tablename__ = 'tag'
-
-    id = Column(Integer, primary_key=True)
-    crawler = Column(String(255), nullable=False, index=True)
-    key = Column(String, nullable=False, index=True)
-    value = Column(JSON, nullable=False, default={})
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    value = attr.ib(default=attr.Factory(dict))
 
     @classmethod
     def save(cls, crawler, key, value):
-        obj = cls.find(crawler, key)
-        if obj is None:
-            obj = cls()
-            obj.crawler = crawler.name
-            obj.key = key
+        obj = cls()
         obj.value = value
-        obj.timestamp = datetime.utcnow()
-        session.add(obj)
+        obj.crawler = crawler.name
+        obj.key = key
+        cls.conn.set(crawler.name + ":tag:" + key, json.dumps(value))
+        cls.conn.set(
+            crawler.name + ":tag:timestamp:" + key, datetime.now().timestamp()
+        )
         return obj
 
     @classmethod
-    def find(cls, crawler, key, since=None):
-        q = session.query(cls)
-        q = q.filter(cls.crawler == crawler.name)
-        q = q.filter(cls.key == key)
-        if since is not None:
-            q = q.filter(cls.timestamp >= since)
-        q = q.order_by(cls.timestamp.desc())
-        return q.first()
+    def find(cls, crawler, key):
+        obj = cls()
+        val = cls.conn.get(crawler.name + ":tag:" + key)
+        if val:
+            obj.value = json.loads(val)
+            obj.crawler = crawler.name
+            obj.key = key
+            return obj
 
     @classmethod
-    def exists(cls, crawler, key, since=None, value=unset):
-        q = session.query(cls)
-        q = q.filter(cls.crawler == crawler.name)
-        q = q.filter(cls.key == key)
-        if since is not None:
-            q = q.filter(cls.timestamp >= since)
-        if value is not unset:
-            q = q.filter(cls.value == value)
-        return q.count() > 0
-
-    @classmethod
-    def latest(cls, crawler):
-        q = session.query(func.max(cls.timestamp))
-        q = q.filter(cls.crawler == crawler.name)
-        for (timestamp,) in q:
-            return timestamp
+    def exists(cls, crawler, key, since=None):
+        tag = cls.conn.get(crawler.name + ":tag:" + key)
+        if tag is None:
+            return False
+        if since:
+            ts = float(cls.conn.get(crawler.name + ":tag:timestamp:" + key))
+            if ts < since.timestamp():
+                return False
+        return True
 
     @classmethod
     def delete(cls, crawler):
-        pq = session.query(cls)
-        pq = pq.filter(cls.crawler == crawler)
-        pq.delete(synchronize_session=False)
+        for key in cls.conn.scan_iter(crawler.name + ":tag:*"):
+            cls.conn.delete(key)
 
     def __repr__(self):
         return '<Tag(%s,%s)>' % (self.crawler, self.key)

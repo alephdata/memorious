@@ -6,7 +6,7 @@ import pytest
 from memorious.operations import (
     fetch, session, parse, seed, sequence, dates, enumerate, directory
 )
-from memorious.core import session as db_session
+from memorious.core import connect_redis
 
 
 @pytest.mark.parametrize("url,call_count", [
@@ -56,8 +56,9 @@ def test_parse(context, mocker):
             "url": "http://www.iana.org/domains/example"
         })
 
-    # Clear existing tags
-    db_session.rollback()
+    # cleanup tags
+    conn = connect_redis()
+    conn.flushall()
 
     with mocker.patch.object(context, "emit"):
         context.http.result = None

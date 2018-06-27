@@ -30,7 +30,6 @@ setup(
         'normality >= 0.5.7',
         'celery',
         'tabulate',
-        'sqlalchemy',
         'dataset >= 1.0.8',
         'six',
         'storagelayer >= 0.3.2',
@@ -46,6 +45,8 @@ setup(
         'redis == 2.10.6',
         'blinker == 1.4',
         'boto3 == 1.4.8',
+        'fakeredis',
+        'attrs',
     ],
     entry_points={
         'console_scripts': [
