@@ -106,6 +106,10 @@ class Crawler(object):
     def runs(self):
         return CrawlerState.runs(self)
 
+    @property
+    def latest_runid(self):
+        return CrawlerState.latest_runid(self)
+
     def cleanup(self):
         """Run a cleanup method after the crawler finishes running"""
         if self.is_running:

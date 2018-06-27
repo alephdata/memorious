@@ -72,7 +72,7 @@ class Event(Base):
             cls.conn.delete(crawler.name + ":events:" + level)
             for stage in crawler.stages:
                 cls.conn.delete(
-                    crawler.name + ":" + stage.name + ":events:" + level
+                    crawler.name + ":" + stage + ":events:" + level
                 )
 
     @classmethod
