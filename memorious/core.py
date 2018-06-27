@@ -45,7 +45,8 @@ celery.conf.update(
 )
 
 redis_pool = redis.ConnectionPool(
-    host=settings.REDIS_HOST, port=settings.REDIS_PORT
+    host=settings.REDIS_HOST, port=settings.REDIS_PORT,
+    decode_responses=True
 )
 
 # set up a task queue using a Queue if celery is set to eager mode.
@@ -92,8 +93,8 @@ datastore = LocalProxy(load_datastore)
 
 def connect_redis():
     if not settings.REDIS_HOST:
-        return fakeredis.FakeRedis()
-    return redis.Redis(connection_pool=redis_pool)
+        return fakeredis.FakeRedis(decode_responses=True)
+    return redis.Redis(connection_pool=redis_pool, decode_responses=True)
 
 
 def ensure_db():
