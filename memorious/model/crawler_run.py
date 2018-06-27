@@ -19,6 +19,7 @@ class CrawlerRun(Base):
         now = datetime.datetime.now()
         if not cls.conn.sismember(crawler.name + ":runs", run_id):
             cls.conn.sadd(crawler.name + ":runs", run_id)
+            cls.conn.lpush(crawler.name + ":runs_list", run_id)
             cls.conn.set("run:" + run_id + ":start", now)
         cls.conn.incr("run:" + run_id)
         cls.conn.incr("run:" + run_id + ":total_ops")
@@ -27,7 +28,7 @@ class CrawlerRun(Base):
     def record_operation_end(cls, crawler, run_id):
         cls.conn.decr("run:" + run_id)
         if int(cls.conn.get("run:" + run_id)) == 0:
-            now = datetime.datetime.utcnow()
+            now = datetime.datetime.now()
             cls.conn.set("run:" + run_id + ":end", now)
 
     @classmethod

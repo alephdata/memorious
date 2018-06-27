@@ -35,13 +35,14 @@
             </td>
             <th width="15%">Actions</th>
             <td>
-                <a class="invoke" href='#' data-crawler="{{ crawler.name }}" data-action="run">
-                    <i class="fa fa-play" aria-hidden="true"></i>    
-                    Run
-                </a>
+                {% if not crawler.is_running %}
+                    <a class="invoke" href='#' data-crawler="{{ crawler.name }}" data-action="run">
+                        <i class="fa fa-play" aria-hidden="true"></i>
+                        Run
+                    </a>
+                {% endif %}
                 <a class="invoke" href='#' data-crawler="{{ crawler.name }}" data-action="flush">
-                    <i class="fa fa-trash" aria-hidden="true"></i>    
-                    Flush
+                    <i class="fa fa-trash" aria-hidden="true"></i>
                 </a>
             </td>
         </tr>
@@ -111,8 +112,14 @@
                 <code>{{ item.run_id }}</code>
             </td>
             <td class="number">{{ item.total_ops | number }}</td>
-            <td class="number">{{ item.start | datetime}}</td>
-            <td class="number">{{ item.end | datetime}}</td>
+            <td class="number">{{ item.start | datetime }}</td>
+            <td class="number">
+                {% if item.run_id != crawler.latest_runid or not crawler.is_running %}
+                    {{ item.end | datetime }}
+                {% else %}
+                    running
+                {% endif %}
+            </td>
             <td class="number">
                 {% if item.error %}
                 <a href="{{ url_for('.events', name=crawler.name, run_id=item.run_id, level='error') }}" class="error">

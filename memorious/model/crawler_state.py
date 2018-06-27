@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import attr
 
@@ -17,7 +17,15 @@ class CrawlerState(Base):
     def is_running(cls, crawler):
         """Is the crawler currently running?"""
         active_ops = cls.conn.get(crawler.name)
-        return active_ops and int(active_ops) > 0
+        if active_ops is None:
+            return False
+        delta = timedelta(seconds=10)
+        # current active ops is 0 and there hasn't been any op in last 10 secs
+        if int(active_ops) <= 0:
+            now = datetime.now()
+            if crawler.last_run and (now - crawler.last_run > delta):
+                return False
+        return True
 
     @classmethod
     def last_run(cls, crawler):
@@ -38,7 +46,7 @@ class CrawlerState(Base):
 
     @classmethod
     def runs(cls, crawler):
-        for run_id in cls.conn.smembers(crawler.name + ":runs"):
+        for run_id in cls.conn.lrange(crawler.name + ":runs_list", 0, -1):
             start = cls.conn.get("run:" + run_id + ":start")
             if start:
                 start = datetime.strptime(start, "%Y-%m-%d %H:%M:%S.%f")
@@ -76,6 +84,10 @@ class CrawlerState(Base):
     @classmethod
     def record_operation_end(cls, crawler):
         cls.conn.decr(crawler.name)
+
+    @classmethod
+    def latest_runid(cls, crawler):
+        return cls.conn.lindex(crawler.name + ":runs_list", 0)
 
     @classmethod
     def flush(cls, crawler):
