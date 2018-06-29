@@ -1,8 +1,7 @@
 # Example scraper to demonstrate extending Memorious
 name: quote_scraper
 description: Quotes to scraper
-# Uncomment to run this scraper automatically:
-# schedule: weekly
+schedule: weekly
 pipeline:
   init:
     # The first stage logs in and creates an HTTP session which is used for subsequent requests.

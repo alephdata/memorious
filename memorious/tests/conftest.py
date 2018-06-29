@@ -1,5 +1,5 @@
 import os
-from random import randint
+import uuid
 
 import pytest
 
@@ -42,9 +42,7 @@ def stage():
 @pytest.fixture(scope="module")
 def context():
     ctx = Context(crawler(), stage(), {"foo": "bar"})
-    # Assign a fake operation id, so that the DB doesn't complain about
-    # NotNullContraint while saving events etc.
-    ctx.operation_id = randint(1, 99999)
+    ctx.run_id = str(uuid.uuid4())
     return ctx
 
 
