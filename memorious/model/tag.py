@@ -23,7 +23,7 @@ class Tag(Base):
         obj.key = key
         cls.conn.set(crawler.name + ":tag:" + key, json.dumps(value))
         cls.conn.set(
-            crawler.name + ":tag:timestamp:" + key, datetime.now().timestamp()
+            crawler.name + ":tag:timestamp:" + key, datetime.utcnow().timestamp()
         )
         return obj
 
