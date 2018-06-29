@@ -28,8 +28,8 @@ def rate_limiter(context):
     else:
         if resource in global_call_log:
             last_called = global_call_log[resource]
-            diff = (datetime.datetime.now() - last_called).total_seconds()
+            diff = (datetime.datetime.utcnow() - last_called).total_seconds()
             if diff < (1.0/rate_limit):
                 raise RateLimitException
-        global_call_log[resource] = datetime.datetime.now()
+        global_call_log[resource] = datetime.datetime.utcnow()
         yield

@@ -23,7 +23,7 @@ class Event(Base):
     error_type = attr.ib(default=None)
     error_message = attr.ib(default=None)
     error_details = attr.ib(default=None)
-    timestamp = attr.ib(default=attr.Factory(datetime.now))
+    timestamp = attr.ib(default=attr.Factory(datetime.utcnow))
 
     @classmethod
     def deserialize(cls, event_json):

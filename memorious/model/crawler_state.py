@@ -22,7 +22,7 @@ class CrawlerState(Base):
         delta = timedelta(seconds=10)
         # current active ops is 0 and there hasn't been any op in last 10 secs
         if int(active_ops) <= 0:
-            now = datetime.now()
+            now = datetime.utcnow()
             if crawler.last_run and (now - crawler.last_run > delta):
                 return False
         return True
