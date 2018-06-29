@@ -37,9 +37,9 @@ class TestContextHttpResponse(object):
 
     def test_attachment(self, http):
         request = Request(
-            "GET", "https://httpbin.org/response-headers?Content-Type=text/plain;"
-            "%20charset=UTF-8&Content-Disposition=attachment;%20filename%3d%22"
-            "test.json%22"
+            "GET", "https://httpbin.org/response-headers?Content-Type="
+            "text/plain;%20charset=UTF-8&Content-Disposition=attachment;"
+            "%20filename%3d%22test.json%22"
         )
         context_http_response = ContextHttpResponse(http, request)
         assert context_http_response.file_name == "test.json"

@@ -39,6 +39,7 @@ class CrawlerRun(Base):
             cls.conn.delete("run:" + run_id + ":total_ops")
             cls.conn.delete("run:" + run_id)
         cls.conn.delete(crawler.name + ":runs")
+        cls.conn.delete(crawler.name + ":runs_list")
 
     def __repr__(self):
         return '<CrawlerRun(%s, %s)>' % (self.crawler, self.run_id)
