@@ -45,7 +45,8 @@ celery.conf.update(
 )
 
 redis_pool = redis.ConnectionPool(
-    host=settings.REDIS_HOST, port=settings.REDIS_PORT,
+    host=settings.REDIS_HOST,
+    port=settings.REDIS_PORT,
     decode_responses=True
 )
 
@@ -97,15 +98,6 @@ def connect_redis():
     return redis.Redis(connection_pool=redis_pool, decode_responses=True)
 
 
-def ensure_db():
-    if settings.DATABASE_FILE in settings.DATABASE_URI:
-        try:
-            os.makedirs(os.path.dirname(settings.DATABASE_FILE))
-        except Exception:
-            pass
-        log.info("Built-in database: %s", settings.DATABASE_URI)
-
-
 def load_extensions():
     for ep in iter_entry_points('memorious.plugins'):
         func = ep.load()
@@ -113,5 +105,4 @@ def load_extensions():
 
 
 def init_memorious():
-    ensure_db()
     load_extensions()

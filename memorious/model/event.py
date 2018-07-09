@@ -1,54 +1,30 @@
+import json
 import logging
 from datetime import datetime
-import json
-
-import attr
 
 from memorious.model.common import Base
 
 log = logging.getLogger(__name__)
 
 
-@attr.s
 class Event(Base):
     """Document errors and warnings caused during tasks."""
     LEVEL_WARNING = 'warning'
     LEVEL_ERROR = 'error'
     LEVELS = [LEVEL_WARNING, LEVEL_ERROR]
 
-    level = attr.ib(default=None)
-    crawler = attr.ib(default=None)
-    stage = attr.ib(default=None)
-    run_id = attr.ib(default=None)
-    error_type = attr.ib(default=None)
-    error_message = attr.ib(default=None)
-    error_details = attr.ib(default=None)
-    timestamp = attr.ib(default=attr.Factory(datetime.utcnow))
-
     @classmethod
-    def deserialize(cls, event_json):
-        event_data = json.loads(event_json)
-        event_data["timestamp"] = datetime.strptime(
-            event_data["timestamp"], "%Y-%m-%d %H:%M:%S.%f"
-        )
-        return event_data
-
-    @classmethod
-    def save(cls, crawler, stage, level, run_id, error_type=None,
-             error_message=None, error_details=None):
+    def save(cls, crawler, stage, level, run_id, error=None, message=None):
         """Create an event, possibly based on an exception."""
-        event = cls()
-        event.crawler = crawler.name
-        event.stage = stage.name
         assert level in cls.LEVELS
-        event.level = level
-        event.run_id = run_id
-        event.error_type = error_type
-        event.error_message = error_message
-        event.error_details = error_details
-        event_data = attr.asdict(event)
-        event_data['timestamp'] = str(event_data['timestamp'])
-        event_data = json.dumps(event_data)
+        event_data = json.dumps({
+            'stage': stage.name,
+            'level': level,
+            'run_id': run_id,
+            'timestamp': str(datetime.utcnow()),
+            'error': error,
+            'message': message
+        })
         cls.conn.lpush(crawler.name + ":events", event_data)
         cls.conn.lpush(crawler.name + ":events:" + level, event_data)
         cls.conn.lpush(
@@ -63,7 +39,6 @@ class Event(Base):
         cls.conn.lpush(
             crawler.name + ":" + run_id + ":events:" + level, event_data
         )
-        return event
 
     @classmethod
     def delete(cls, crawler):
@@ -103,6 +78,17 @@ class Event(Base):
         return counts
 
     @classmethod
+    def event_list(cls, events):
+        results = []
+        if events is None:
+            return results
+        for event in events:
+            result = json.loads(event)
+            result["timestamp"] = cls.unpack_datetime(result['timestamp'])
+            results.append(result)
+        return results
+
+    @classmethod
     def get_crawler_events(cls, crawler, start, end, level=None):
         if level:
             events = cls.conn.lrange(
@@ -112,9 +98,7 @@ class Event(Base):
             events = cls.conn.lrange(
                 crawler.name + ":events", start, end
             )
-        if not events:
-            events = []
-        return [cls.deserialize(event) for event in events]
+        return cls.event_list(events)
 
     @classmethod
     def get_stage_events(cls, crawler, stage_name, start, end, level=None):
@@ -128,9 +112,7 @@ class Event(Base):
             events = cls.conn.lrange(
                 crawler.name + ":" + stage_name + ":events", start, end
             )
-        if not events:
-            events = []
-        return [cls.deserialize(event) for event in events]
+        return cls.event_list(events)
 
     @classmethod
     def get_run_events(cls, crawler, run_id, start, end, level=None):
@@ -143,10 +125,4 @@ class Event(Base):
             events = cls.conn.lrange(
                 crawler.name + ":" + run_id + ":events", start, end
             )
-        if not events:
-            events = []
-        return [cls.deserialize(event) for event in events]
-
-    def __repr__(self):
-        return '<Event(%s,%s,%s,%s)>' % \
-            (self.crawler, self.stage, self.error_type, self.level)
+        return cls.event_list(events)

@@ -28,10 +28,6 @@ DEBUG = env_bool('DEBUG', default=False)
 # Base operating path
 BASE_PATH = env('BASE_PATH', os.path.join(six.moves.getcwd(), 'data'))
 
-# Database connection string
-DATABASE_FILE = os.path.join(BASE_PATH, 'memorious.sqlite3')
-DATABASE_URI = env('DATABASE_URI', 'sqlite:///%s' % DATABASE_FILE)
-
 # Directory which contains crawler pipeline YAML specs
 CONFIG_PATH = env('CONFIG_PATH')
 
@@ -39,7 +35,7 @@ CONFIG_PATH = env('CONFIG_PATH')
 INCREMENTAL = env_bool('INCREMENTAL', default=True)
 
 # How many days until an incremental crawl expires
-EXPIRE = int(env('EXPIRE', 100))
+EXPIRE = int(env('EXPIRE', 60))
 
 # HTTP request configuration
 HTTP_CACHE = env_bool('HTTP_CACHE', default=True)

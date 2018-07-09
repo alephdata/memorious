@@ -4,10 +4,8 @@ import uuid
 import shutil
 import random
 import logging
-import traceback
 from copy import deepcopy
 from tempfile import mkdtemp
-from datetime import datetime, timedelta
 from contextlib import contextmanager
 import time
 
@@ -77,7 +75,7 @@ class Context(object):
             signals.operation_end.send(self)
             shutil.rmtree(self.work_path)
 
-    def emit_warning(self, message, type=None, details=None, *args):
+    def emit_warning(self, message, type=None, *args):
         if len(args):
             message = message % args
         self.log.warning(message)
@@ -85,9 +83,8 @@ class Context(object):
                           self.stage,
                           Event.LEVEL_WARNING,
                           self.run_id,
-                          error_type=type,
-                          error_message=message,
-                          error_details=details)
+                          error=type,
+                          message=message)
 
     def emit_exception(self, exc):
         self.log.exception(exc)
@@ -95,17 +92,14 @@ class Context(object):
                           self.stage,
                           Event.LEVEL_ERROR,
                           self.run_id,
-                          error_type=exc.__class__.__name__,
-                          error_message=six.text_type(exc),
-                          error_details=traceback.format_exc())
+                          error=exc.__class__.__name__,
+                          message=six.text_type(exc))
 
     def set_tag(self, key, value):
         return Tag.save(self.crawler, key, value)
 
     def get_tag(self, key):
-        tag = Tag.find(self.crawler, key)
-        if tag is not None:
-            return tag.value
+        return Tag.find(self.crawler, key)
 
     def check_tag(self, key):
         return Tag.exists(self.crawler, key)
@@ -127,14 +121,7 @@ class Context(object):
         if key is None:
             return False
 
-        # this is used to re-run parts of a scrape after a certain interval,
-        # e.g. half a year, or a year
-        since = None
-        if self.crawler.expire > 0:
-            delta = timedelta(days=self.crawler.expire)
-            since = datetime.utcnow() - delta
-
-        if Tag.exists(self.crawler, key, since=since):
+        if Tag.exists(self.crawler, key):
             return True
 
         self.set_tag(key, None)

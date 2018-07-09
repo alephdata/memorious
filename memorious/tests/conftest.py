@@ -6,10 +6,6 @@ import pytest
 from memorious.logic.manager import CrawlerManager
 from memorious.logic.context import Context
 from memorious.logic.http import ContextHttp
-from memorious.core import ensure_db
-
-
-ensure_db()
 
 
 @pytest.fixture(scope="module")

@@ -38,7 +38,7 @@ class Crawler(object):
         self.init_stage = self.config.get('init', 'init')
         self.delta = Crawler.SCHEDULES.get(self.schedule)
         self.delay = int(self.config.get('delay', 0))
-        self.expire = int(self.config.get('expire', settings.EXPIRE))
+        self.expire = int(self.config.get('expire', settings.EXPIRE)) * 84600
         self.stealthy = self.config.get('stealthy', False)
 
         self.stages = {}
