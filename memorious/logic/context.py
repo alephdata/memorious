@@ -63,7 +63,6 @@ class Context(object):
     def execute(self, data):
         """Execute the crawler and create a database record of having done
         so."""
-
         try:
             signals.operation_start.send(self)
             self.log.info('Running stage %s of crawler %s with run_id: %s',

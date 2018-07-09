@@ -1,4 +1,4 @@
-from tesserocr import PyTessBaseAPI # Requires Tesseract 0.3.4+
+from tesserocr import PyTessBaseAPI  # Requires Tesseract 0.3.4+
 
 
 def read_word(image, whitelist=None, chars=None, spaces=False):
@@ -7,8 +7,7 @@ def read_word(image, whitelist=None, chars=None, spaces=False):
     api = PyTessBaseAPI()
     api.SetPageSegMode(8)
     if whitelist is not None:
-        api.SetVariable("tessedit_char_whitelist",
-                            whitelist)
+        api.SetVariable("tessedit_char_whitelist", whitelist)
     api.SetImage(image)
     api.Recognize()
     guess = api.GetUTF8Text()

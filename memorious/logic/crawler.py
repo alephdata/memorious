@@ -127,6 +127,9 @@ class Crawler(object):
     def get(self, name):
         return self.stages.get(name)
 
+    def __str__(self):
+        return self.name
+
     def __iter__(self):
         return iter(self.stages.values())
 

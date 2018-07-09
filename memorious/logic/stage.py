@@ -31,5 +31,8 @@ class CrawlerStage(object):
         """Total operations performed for this stage"""
         return CrawlerState.op_count(self.crawler, self)
 
+    def __str__(self):
+        return self.name
+
     def __repr__(self):
         return '<CrawlerStage(%r, %s)>' % (self.crawler, self.name)
