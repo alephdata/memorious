@@ -1,7 +1,6 @@
 import logging
-import datetime
 
-from memorious.model.common import Base
+from memorious.model.common import Base, unpack_int, pack_now
 
 log = logging.getLogger(__name__)
 
@@ -11,20 +10,18 @@ class CrawlerRun(Base):
 
     @classmethod
     def record_operation_start(cls, crawler, run_id):
-        now = datetime.datetime.utcnow()
         if not cls.conn.sismember(crawler.name + ":runs", run_id):
             cls.conn.sadd(crawler.name + ":runs", run_id)
             cls.conn.lpush(crawler.name + ":runs_list", run_id)
-            cls.conn.set("run:" + run_id + ":start", now)
+            cls.conn.set("run:" + run_id + ":start", pack_now())
         cls.conn.incr("run:" + run_id)
         cls.conn.incr("run:" + run_id + ":total_ops")
 
     @classmethod
     def record_operation_end(cls, crawler, run_id):
         cls.conn.decr("run:" + run_id)
-        if int(cls.conn.get("run:" + run_id)) == 0:
-            now = datetime.datetime.utcnow()
-            cls.conn.set("run:" + run_id + ":end", now)
+        if unpack_int(cls.conn.get("run:" + run_id)) == 0:
+            cls.conn.set("run:" + run_id + ":end", pack_now())
 
     @classmethod
     def flush(cls, crawler):
