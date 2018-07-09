@@ -30,8 +30,6 @@ def flush_crawler(crawler):
 
 
 def init():
-    if settings.REDIS_HOST:
-        log.info("redis available, configuring reporting...")
-        operation_start.connect(log_operation_start)
-        operation_end.connect(log_operation_end)
-        crawler_flush.connect(flush_crawler)
+    operation_start.connect(log_operation_start)
+    operation_end.connect(log_operation_end)
+    crawler_flush.connect(flush_crawler)

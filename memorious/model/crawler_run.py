@@ -1,18 +1,13 @@
 import logging
 import datetime
 
-import attr
-
 from memorious.model.common import Base
 
 log = logging.getLogger(__name__)
 
 
-@attr.s
 class CrawlerRun(Base):
     """The current state of a running crawler instance"""
-    crawler = attr.ib(default=None)
-    run_id = attr.ib(default=None)
 
     @classmethod
     def record_operation_start(cls, crawler, run_id):
@@ -40,6 +35,3 @@ class CrawlerRun(Base):
             cls.conn.delete("run:" + run_id)
         cls.conn.delete(crawler.name + ":runs")
         cls.conn.delete(crawler.name + ":runs_list")
-
-    def __repr__(self):
-        return '<CrawlerRun(%s, %s)>' % (self.crawler, self.run_id)

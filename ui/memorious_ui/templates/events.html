@@ -35,12 +35,12 @@
                     <span class="{{res.level}}">
                         <i class="fa fa-warning" aria-hidden="true"></i>
                         <code>
-                            {{ res.error_type or '' }}
+                            {{ res.error or '' }}
                         </code>
                     </span>
                 </td>
                 <td>
-                    {{res.error_message}}
+                    {{res.message}}
                 </td>
                 <td class="number nobreak">
                     {{res.timestamp | datetime}}

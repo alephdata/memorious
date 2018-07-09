@@ -6,6 +6,7 @@ from memorious.core import local_queue
 
 
 class TestContext(object):
+
     def test_context(self, context):
         assert isinstance(context.run_id, six.string_types)
 
