@@ -26,8 +26,8 @@ after_success:
   - if [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
       python setup.py sdist bdist_wheel ;
       twine upload dist/* ;
-      docker build -t alephdata/memorious:latest . ;
-      docker tag alephdata/memorious:latest alephdata/memorious:$TRAVIS_TAG ;
+      docker build -t alephdata/memorious . ;
+      docker tag alephdata/memorious alephdata/memorious:$TRAVIS_TAG ;
       docker push alephdata/memorious:$TRAVIS_TAG ;
-      docker push alephdata/memorious:latest ;
+      docker push alephdata/memorious ;
     fi
