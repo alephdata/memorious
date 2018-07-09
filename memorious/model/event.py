@@ -1,8 +1,7 @@
 import json
 import logging
-from datetime import datetime
 
-from memorious.model.common import Base
+from memorious.model.common import Base, pack_now, unpack_datetime
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ class Event(Base):
             'stage': stage.name,
             'level': level,
             'run_id': run_id,
-            'timestamp': str(datetime.utcnow()),
+            'timestamp': pack_now(),
             'error': error,
             'message': message
         }
@@ -48,83 +47,67 @@ class Event(Base):
         for level in cls.LEVELS:
             cls.conn.delete(crawler.name + ":events:" + level)
             for stage in crawler.stages:
-                cls.conn.delete(
-                    crawler.name + ":" + stage + ":events:" + level
-                )
+                key = crawler.name + ":" + stage + ":events:" + level
+                cls.conn.delete(key)
 
     @classmethod
     def get_counts(cls, crawler):
         counts = {}
         for level in cls.LEVELS:
-            counts[level] = cls.conn.llen(
-                crawler.name + ":events:" + level
-            ) or 0
+            key = crawler.name + ":events:" + level
+            counts[level] = cls.conn.llen(key) or 0
         return counts
 
     @classmethod
     def get_stage_counts(cls, crawler, stage):
         counts = {}
         for level in cls.LEVELS:
-            counts[level] = cls.conn.llen(
-                crawler.name + ":" + stage.name + ":events:" + level
-            ) or 0
+            key = crawler.name + ":" + stage.name + ":events:" + level
+            counts[level] = cls.conn.llen(key) or 0
         return counts
 
     @classmethod
     def get_run_counts(cls, crawler, run_id):
         counts = {}
         for level in cls.LEVELS:
-            counts[level] = cls.conn.llen(
-                crawler.name + ":" + run_id + ":events:" + level
-            ) or 0
+            key = crawler.name + ":" + run_id + ":events:" + level
+            counts[level] = cls.conn.llen(key) or 0
         return counts
 
     @classmethod
-    def event_list(cls, events):
+    def event_list(cls, key, start, end):
         results = []
+        events = cls.conn.lrange(key, start, end)
         if events is None:
             return results
         for event in events:
             result = json.loads(event)
-            result["timestamp"] = cls.unpack_datetime(result['timestamp'])
+            result["timestamp"] = unpack_datetime(result['timestamp'])
             results.append(result)
         return results
 
     @classmethod
     def get_crawler_events(cls, crawler, start, end, level=None):
         if level:
-            events = cls.conn.lrange(
-                crawler.name + ":events:" + level, start, end
-            )
+            key = crawler.name + ":events:" + level
         else:
-            events = cls.conn.lrange(
-                crawler.name + ":events", start, end
-            )
-        return cls.event_list(events)
+            key = crawler.name + ":events"
+        return cls.event_list(key, start, end)
 
     @classmethod
     def get_stage_events(cls, crawler, stage_name, start, end, level=None):
         """events from a particular stage"""
         if level:
-            events = cls.conn.lrange(
-                crawler.name + ":" + stage_name + ":events:" + level,
-                start, end
-            )
+            key = crawler.name + ":" + stage_name + ":events:" + level
         else:
-            events = cls.conn.lrange(
-                crawler.name + ":" + stage_name + ":events", start, end
-            )
-        return cls.event_list(events)
+            key = crawler.name + ":" + stage_name + ":events"
+        return cls.event_list(key, start, end)
 
     @classmethod
     def get_run_events(cls, crawler, run_id, start, end, level=None):
         """Events from a particular run"""
         if level:
-            events = cls.conn.lrange(
-                crawler.name + ":" + run_id + ":events:" + level, start, end
-            )
+            key = crawler.name + ":" + run_id + ":events:" + level
         else:
-            events = cls.conn.lrange(
-                crawler.name + ":" + run_id + ":events", start, end
-            )
-        return cls.event_list(events)
+            key = crawler.name + ":" + run_id + ":events"
+        return cls.event_list(key, start, end)

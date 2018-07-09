@@ -10,22 +10,25 @@ class Tag(Base):
     """A simple key/value table used to store interim results."""
 
     @classmethod
+    def tag(cls, crawler, key):
+        return crawler.name + ":tag:" + key
+
+    @classmethod
     def save(cls, crawler, key, value):
-        cls.conn.set(crawler.name + ":tag:" + key,
-                     json.dumps(value),
-                     ex=crawler.expire)
+        data = json.dumps(value)
+        cls.conn.set(cls.tag(crawler, key), data, ex=crawler.expire)
 
     @classmethod
     def find(cls, crawler, key):
-        value = cls.conn.get(crawler.name + ":tag:" + key)
+        value = cls.conn.get(cls.tag(crawler, key))
         if value is not None:
             return json.loads(value)
 
     @classmethod
     def exists(cls, crawler, key):
-        return cls.conn.exists(crawler.name + ":tag:" + key)
+        return cls.conn.exists(cls.tag(crawler, key))
 
     @classmethod
     def delete(cls, crawler):
-        for key in cls.conn.scan_iter(crawler.name + ":tag:*"):
+        for key in cls.conn.scan_iter(cls.tag(crawler, '*')):
             cls.conn.delete(key)

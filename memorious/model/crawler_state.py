@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
-from memorious.model.common import Base
+from memorious.model.common import Base, unpack_int, unpack_datetime
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class CrawlerState(Base):
     @classmethod
     def last_run(cls, crawler):
         last_run = cls.conn.get(crawler.name + ":last_run")
-        return cls.unpack_datetime(last_run)
+        return unpack_datetime(last_run)
 
     @classmethod
     def op_count(cls, crawler, stage=None):
@@ -35,9 +35,7 @@ class CrawlerState(Base):
             total_ops = cls.conn.get(crawler.name + ":" + stage.name)
         else:
             total_ops = cls.conn.get(crawler.name + ":total_ops")
-        if total_ops:
-            return int(total_ops)
-        return 0
+        return unpack_int(total_ops)
 
     @classmethod
     def runs(cls, crawler):
@@ -45,15 +43,11 @@ class CrawlerState(Base):
             start = cls.conn.get("run:" + run_id + ":start")
             end = cls.conn.get("run:" + run_id + ":end")
             total_ops = cls.conn.get("run:" + run_id + ":total_ops")
-            if total_ops:
-                total_ops = int(total_ops)
-            else:
-                total_ops = 0
             yield {
                 'run_id': run_id,
-                'total_ops': total_ops,
-                'start': cls.unpack_datetime(start),
-                'end': cls.unpack_datetime(end)
+                'total_ops': unpack_int(total_ops),
+                'start': unpack_datetime(start),
+                'end': unpack_datetime(end)
             }
 
     @classmethod
