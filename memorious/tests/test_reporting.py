@@ -1,9 +1,7 @@
 import datetime
 import time
 
-from memorious.reporting import (
-    log_operation_start, log_operation_end, flush_crawler
-)
+from memorious.reporting import log_operation_start, log_operation_end
 
 
 class TestReporting(object):
@@ -25,6 +23,5 @@ class TestReporting(object):
         time.sleep(10)
         assert crawler.is_running is False
         crawler.flush()
-        flush_crawler(crawler)
         assert crawler.op_count == 0
         assert len(list(crawler.runs)) == 0
