@@ -30,7 +30,7 @@ celery.conf.update(
     task_default_routing_key='%s.process' % settings.APP_NAME,
     result_persistent=False,
     worker_max_tasks_per_child=1000,
-    worker_prefetch_multiplier=10,
+    # worker_prefetch_multiplier=10,
     # worker_hijack_root_logger=False,
     beat_schedule={
         'scheduled-crawlers': {
