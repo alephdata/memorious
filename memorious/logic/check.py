@@ -5,6 +5,7 @@ from dateutil.parser import parse
 
 
 class ContextCheck(object):
+
     def __init__(self, context):
         self.context = context
 
@@ -44,7 +45,7 @@ class ContextCheck(object):
         value = stringify(value)
         try:
             parse(value)
-        except:
+        except Exception:
             self.shout('Value %r is not a valid date', strict, value)
 
     def match_regexp(self, value, q, strict=False):
