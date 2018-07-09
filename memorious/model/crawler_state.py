@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime, timedelta
 
-from memorious.model.common import Base, unpack_int, unpack_datetime
+from memorious.model.common import Base, unpack_int, unpack_datetime, pack_now
+from memorious.util import make_key
 
 log = logging.getLogger(__name__)
 
@@ -25,24 +26,24 @@ class CrawlerState(Base):
 
     @classmethod
     def last_run(cls, crawler):
-        last_run = cls.conn.get(crawler.name + ":last_run")
+        last_run = cls.conn.get(make_key(crawler, "last_run"))
         return unpack_datetime(last_run)
 
     @classmethod
     def op_count(cls, crawler, stage=None):
         """Total operations performed for this crawler"""
         if stage:
-            total_ops = cls.conn.get(crawler.name + ":" + stage.name)
+            total_ops = cls.conn.get(make_key(crawler, stage))
         else:
-            total_ops = cls.conn.get(crawler.name + ":total_ops")
+            total_ops = cls.conn.get(make_key(crawler, "total_ops"))
         return unpack_int(total_ops)
 
     @classmethod
     def runs(cls, crawler):
-        for run_id in cls.conn.lrange(crawler.name + ":runs_list", 0, -1):
-            start = cls.conn.get("run:" + run_id + ":start")
-            end = cls.conn.get("run:" + run_id + ":end")
-            total_ops = cls.conn.get("run:" + run_id + ":total_ops")
+        for run_id in cls.conn.lrange(make_key(crawler, "runs_list"), 0, -1):
+            start = cls.conn.get(make_key("run", run_id, "start"))
+            end = cls.conn.get(make_key("run", run_id, "end"))
+            total_ops = cls.conn.get(make_key("run", run_id, "total_ops"))
             yield {
                 'run_id': run_id,
                 'total_ops': unpack_int(total_ops),
@@ -56,27 +57,23 @@ class CrawlerState(Base):
 
     @classmethod
     def record_operation_start(cls, crawler, stage):
-        now = datetime.utcnow()
-        cls.conn.incr(crawler.name)
-        cls.conn.incr(crawler.name + ":" + stage.name)
-        cls.conn.incr(crawler.name + ":total_ops")
-        cls.conn.set(crawler.name + ":last_run", now)
+        cls.conn.incr(make_key(crawler))
+        cls.conn.incr(make_key(crawler, stage))
+        cls.conn.incr(make_key(crawler, "total_ops"))
+        cls.conn.set(make_key(crawler, "last_run"), pack_now())
 
     @classmethod
     def record_operation_end(cls, crawler):
-        cls.conn.decr(crawler.name)
+        cls.conn.decr(make_key(crawler))
 
     @classmethod
     def latest_runid(cls, crawler):
-        return cls.conn.lindex(crawler.name + ":runs_list", 0)
+        return cls.conn.lindex(make_key(crawler, "runs_list"), 0)
 
     @classmethod
     def flush(cls, crawler):
-        cls.conn.delete(crawler.name)
-        cls.conn.delete(crawler.name + ":total_ops")
-        cls.conn.delete(crawler.name + ":last_run")
+        cls.conn.delete(make_key(crawler))
+        cls.conn.delete(make_key(crawler, "total_ops"))
+        cls.conn.delete(make_key(crawler, "last_run"))
         for stage in crawler.stages:
-            cls.conn.delete(crawler.name + ":" + stage)
-
-    def __repr__(self):
-        return '<CrawlerState(%s)>' % (self.crawler)
+            cls.conn.delete(make_key(crawler, stage))

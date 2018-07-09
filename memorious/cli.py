@@ -38,15 +38,8 @@ def get_crawler(name):
 def run(crawler):
     """Run a specified crawler."""
     crawler = get_crawler(crawler)
-    crawler.run()
     crawler.cleanup()
-
-
-@cli.command()
-@click.argument('crawler')
-def cleanup(crawler):
-    """Run clean up method of a crawler."""
-    crawler = get_crawler(crawler)
+    crawler.run()
     crawler.cleanup()
 
 
@@ -72,6 +65,12 @@ def list():
                              is_due])
     headers = ['Name', 'Description', 'Schedule', 'Due']
     print(tabulate(crawler_list, headers=headers))
+
+
+@cli.command()
+def cleanup():
+    """Run clean up all crawlers."""
+    manager.run_cleanup()
 
 
 @cli.command()
