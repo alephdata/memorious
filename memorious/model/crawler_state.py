@@ -13,6 +13,8 @@ class CrawlerState(Base):
     @classmethod
     def is_running(cls, crawler):
         """Is the crawler currently running?"""
+        if crawler.disabled:
+            return False
         active_ops = cls.conn.get(crawler.name)
         if active_ops is None:
             return False

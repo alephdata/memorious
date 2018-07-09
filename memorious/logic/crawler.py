@@ -90,8 +90,6 @@ class Crawler(object):
     @property
     def is_running(self):
         """Is the crawler currently running?"""
-        if self.disabled:
-            return False
         return CrawlerState.is_running(self)
 
     @property
