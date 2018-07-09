@@ -17,14 +17,15 @@ class Event(Base):
     def save(cls, crawler, stage, level, run_id, error=None, message=None):
         """Create an event, possibly based on an exception."""
         assert level in cls.LEVELS
-        event_data = json.dumps({
+        event = {
             'stage': stage.name,
             'level': level,
             'run_id': run_id,
             'timestamp': str(datetime.utcnow()),
             'error': error,
             'message': message
-        })
+        }
+        event_data = json.dumps(event)
         cls.conn.lpush(crawler.name + ":events", event_data)
         cls.conn.lpush(crawler.name + ":events:" + level, event_data)
         cls.conn.lpush(
@@ -39,6 +40,7 @@ class Event(Base):
         cls.conn.lpush(
             crawler.name + ":" + run_id + ":events:" + level, event_data
         )
+        return event
 
     @classmethod
     def delete(cls, crawler):

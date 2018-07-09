@@ -35,7 +35,7 @@ class ContextHttp(object):
 
         if self.STATE_SESSION in self.context.state:
             session = self.context.state.get(self.STATE_SESSION)
-            session = codecs.decode(session.encode(), 'base64')
+            session = codecs.decode(session, 'base64')
             self.session = pickle.loads(session)
         else:
             self.reset()
