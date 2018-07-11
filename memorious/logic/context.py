@@ -65,7 +65,11 @@ class Context(object):
         so."""
         try:
             signals.operation_start.send(self)
-            self.log.info('[%s] run_id: %s', self.stage.name, self.run_id)
+            self.log.info('[%s->%s(%s)]: %s',
+                          self.crawler.name,
+                          self.stage.name,
+                          self.stage.method_name,
+                          self.run_id)
             return self.stage.method(self, data)
         except Exception as exc:
             self.emit_exception(exc)
