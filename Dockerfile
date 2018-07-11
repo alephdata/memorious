@@ -12,7 +12,7 @@ RUN apt-get -qq -y update && apt-get -qq -y dist-upgrade \
 ENV TESSDATA_PREFIX /usr/share/tesseract-ocr
 
 RUN pip install -q --upgrade pip && pip install -q --upgrade setuptools
-RUN pip install -q --upgrade psycopg2-binary pyicu lxml requests[security] gunicorn
+RUN pip install -q --upgrade psycopg2-binary pyicu lxml pillow requests[security] gunicorn
 
 COPY setup.py /memorious/
 COPY memorious /memorious/memorious
