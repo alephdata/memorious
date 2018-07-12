@@ -2,14 +2,12 @@ import os
 import io
 import yaml
 import logging
-import time
 from datetime import timedelta, datetime
 
 from memorious import settings
-from memorious.core import local_queue
 from memorious.model import Tag, Event, CrawlerState, CrawlerRun
-from memorious.logic.context import handle
 from memorious.logic.stage import CrawlerStage
+from memorious.task_runner import TaskRunner
 
 log = logging.getLogger(__name__)
 
@@ -80,12 +78,10 @@ class Crawler(object):
         # Run the first task straight so that scheduled runs aren't summed
         # up when queue runs get longer.
         stage = self.get(self.init_stage)
-        handle(state, stage.name, {})
+        TaskRunner.execute(stage.name, state, {})
 
-        # If running in eager mode, we need to block until all the queued
-        # tasks are finished.
-        while not local_queue.is_empty:
-            time.sleep(1)
+        if not settings.REDIS_HOST:
+            TaskRunner.run()
 
     @property
     def is_running(self):
