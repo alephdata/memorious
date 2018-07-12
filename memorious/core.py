@@ -12,7 +12,6 @@ from raven import Client
 from raven.contrib.celery import register_signal, register_logger_signal
 
 from memorious import settings
-from memorious.logic.queue import CrawlerExecutionQueue
 
 
 log = logging.getLogger(__name__)
@@ -49,8 +48,6 @@ redis_pool = redis.ConnectionPool(
     decode_responses=True
 )
 
-# set up a task queue using a Queue if celery is set to eager mode.
-local_queue = CrawlerExecutionQueue()
 
 # set up raven for error reporting
 if settings.SENTRY_DSN:
