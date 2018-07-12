@@ -37,6 +37,9 @@ INCREMENTAL = env_bool('INCREMENTAL', default=True)
 # How many days until an incremental crawl expires
 EXPIRE = int(env('EXPIRE', 60))
 
+# How many seconds to wait before trying to run scheduled crawlers
+BEAT_INTERVAL = int(env('BEAT_INTERVAL', 60))
+
 # HTTP request configuration
 HTTP_CACHE = env_bool('HTTP_CACHE', default=True)
 

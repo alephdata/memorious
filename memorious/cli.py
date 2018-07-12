@@ -1,5 +1,6 @@
 import click
 import logging
+import time
 from tabulate import tabulate
 
 from memorious import settings
@@ -54,8 +55,16 @@ def flush(crawler):
 
 @cli.command()
 def process():
-    """Start the queue and process tasks as they come"""
+    """Start the queue and process tasks as they come. Blocks while waiting"""
     TaskRunner.run()
+
+
+@cli.command()
+def beat():
+    """Loop and try to run scheduled crawlers at short intervals"""
+    while True:
+        manager.run_scheduled()
+        time.sleep(settings.BEAT_INTERVAL)
 
 
 @cli.command()
