@@ -28,7 +28,6 @@ setup(
         'lxml >= 3',
         'PyYAML >= 3.10',
         'normality >= 0.5.7',
-        'celery',
         'tabulate',
         'dataset >= 1.0.8',
         'six',
