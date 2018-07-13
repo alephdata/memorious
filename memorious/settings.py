@@ -59,9 +59,6 @@ DATASTORE_URI = env('DATASTORE_URI', 'sqlite:///%s' % DATASTORE_FILE)
 BROKER_URI = 'amqp://guest:guest@localhost:5672//'
 BROKER_URI = env('BROKER_URI', BROKER_URI)
 
-# Enable delayed processing via queue
-EAGER = env_bool('EAGER', True)
-
 
 ###############################################################################
 # Data storage

@@ -11,7 +11,7 @@ setup(
     namespace_packages=[],
     include_package_data=True,
     zip_safe=False,
-    install_requires=['memorious',],
+    install_requires=['memorious', ],
     entry_points={},
     tests_require=[]
 )
