@@ -5,3 +5,4 @@ memorious.env
 docker-compose.*
 .git
 .gitignore
+__pycache__

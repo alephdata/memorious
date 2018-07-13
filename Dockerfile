@@ -15,7 +15,7 @@ ENV TESSDATA_PREFIX /usr/share/tesseract-ocr \
     C_FORCE_ROOT=true
 
 RUN pip install -q --upgrade pip && pip install -q --upgrade setuptools \
-    && pip install -q --upgrade pyicu lxml requests[security] gunicorn
+    && pip install -q --upgrade pyicu lxml pillow requests[security] gunicorn
 
 COPY setup.py /memorious/
 COPY memorious /memorious/memorious

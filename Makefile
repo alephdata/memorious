@@ -1,5 +1,5 @@
 
-all: clean test
+all: clean
 
 clean:
 	rm -rf dist build .eggs
