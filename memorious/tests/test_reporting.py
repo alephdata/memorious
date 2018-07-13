@@ -1,5 +1,4 @@
 import datetime
-import time
 
 from memorious.reporting import log_operation_start, log_operation_end
 

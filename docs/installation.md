@@ -35,14 +35,11 @@ See [Usage](https://memorious.readthedocs.io/en/latest/usage.html) (or run `memo
 
 Your Memorious instance is configured by a set of environment variables that control database connectivity and general principles of how the sytem operates. You can set all of these in the `Dockerfile`.
 
-* ``MEMORIOUS_DATABASE_URI``
 * ``MEMORIOUS_CONFIG_PATH``
 * ``MEMORIOUS_DEBUG``
 * ``MEMORIOUS_INCREMENTAL``
 * ``MEMORIOUS_HTTP_CACHE``
 * ``MEMORIOUS_DATASTORE_URI``
-* ``MEMORIOUS_BROKER_URI``
-* ``MEMORIOUS_EAGER``
 
 * ``MEMORIOUS_ARCHIVE_TYPE``, either ``file`` or ``s3``
 * ``MEMORIOUS_ARCHIVE_PATH``
@@ -59,7 +56,7 @@ Your Memorious instance is configured by a set of environment variables that con
 
 To gracefully exit, run `docker-compose down`.
 
-Files which were downloaded by crawlers you ran, Memorious progress data from the Postgres database, and the RabbitMQ queue, are all persisted in the `build` directory, and will be reused next time you start it up. (If you need a completely fresh start, you can delete this directory).
+Files which were downloaded by crawlers you ran, Memorious progress data from the Redis database, and the Redis task queue, are all persisted in the `build` directory, and will be reused next time you start it up. (If you need a completely fresh start, you can delete this directory).
 
 ## Building a crawler
 
@@ -69,10 +66,8 @@ To understand what goes into your `config` and `src` directories, check out the 
 
 When you're working on your crawlers, it's not convenient to rebuild your Docker containers all the time. To run without Docker:
 
-* Copy the environment variables from the `Dockerfile` to `env.sh`.
+* Copy the environment variables from the `env.sh.tmpl` to `env.sh`.
 * Run `source env.sh`.
-
-If you leave ``MEMORIOUS_DATABASE_URI`` unset, it will use SQLite. Otherwise you need to set it to match a local Postgres database.
 
 Make sure ``MEMORIOUS_CONFIG_PATH`` points to your crawler YAML files, wherever they may be.
 
