@@ -6,7 +6,7 @@ import fakeredis
 import dataset
 import storagelayer
 from werkzeug.local import LocalProxy
-from raven import Client
+from raven.handlers.logging import SentryHandler
 
 from memorious import settings
 
@@ -23,9 +23,8 @@ redis_pool = redis.ConnectionPool(
 
 # set up raven for error reporting
 if settings.SENTRY_DSN:
-    client = Client(settings.SENTRY_DSN)
-    # TODO: send stuff to sentry?
-
+    handler = SentryHandler(settings.SENTRY_DSN)
+    handler.setLevel(logging.ERROR)
 
 # File storage layer for blobs on local file system or S3
 storage = storagelayer.init(settings.ARCHIVE_TYPE,
