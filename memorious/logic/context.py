@@ -9,12 +9,11 @@ from contextlib import contextmanager
 
 from memorious.core import manager, storage
 from memorious.core import datastore
-from memorious.model import Tag, Event
+from memorious.model import Tag, Event, Queue
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
 from memorious.util import make_key, random_filename
 from memorious import signals
-from memorious.task_runner import TaskRunner
 
 
 class Context(object):
@@ -50,7 +49,7 @@ class Context(object):
             return
         state = self.dump_state()
         delay = delay or self.crawler.delay
-        TaskRunner.queue(stage, state, data, delay)
+        Queue.queue(stage, state, data, delay)
 
     def recurse(self, data={}, delay=None):
         """Have a stage invoke itself with a modified set of arguments."""

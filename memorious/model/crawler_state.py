@@ -10,13 +10,6 @@ class CrawlerState(Base):
     """The current state of a running crawler instance"""
 
     @classmethod
-    def is_running(cls, crawler):
-        """Is the crawler currently running?"""
-        if crawler.disabled:
-            return False
-        return len(list(cls.conn.scan_iter(f"queue:{crawler.name}:*"))) > 0
-
-    @classmethod
     def last_run(cls, crawler):
         last_run = cls.conn.get(make_key(crawler, "last_run"))
         return unpack_datetime(last_run)

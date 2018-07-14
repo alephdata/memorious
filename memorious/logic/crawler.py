@@ -5,7 +5,7 @@ import logging
 from datetime import timedelta, datetime
 
 from memorious import settings
-from memorious.model import Tag, Event, CrawlerState, CrawlerRun
+from memorious.model import Tag, Event, CrawlerState, CrawlerRun, Queue
 from memorious.logic.stage import CrawlerStage
 from memorious.task_runner import TaskRunner
 
@@ -64,6 +64,7 @@ class Crawler(object):
         Event.delete(self)
         CrawlerState.flush(self)
         CrawlerRun.flush(self)
+        Queue.flush(self)
 
     def run(self, incremental=None, run_id=None):
         """Queue the execution of a particular crawler."""
@@ -86,7 +87,7 @@ class Crawler(object):
     @property
     def is_running(self):
         """Is the crawler currently running?"""
-        return CrawlerState.is_running(self)
+        return Queue.is_running(self)
 
     @property
     def last_run(self):
