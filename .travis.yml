@@ -3,11 +3,6 @@ services:
   - docker
 
 language: python
-
-env:
-  global:
-    - DOCKER_IMAGE_NAME=alephdata/memorious
-
 matrix:
   include:
     - python: "3.6"
@@ -22,12 +17,16 @@ script:
 
 after_success:
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-  # push tag as well
+  - docker build -t alephdata/memorious .
+  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then
+      docker tag alephdata/memorious alephdata/memorious:master ;
+      docker push alephdata/memorious:master ;
+    fi
   - if [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
       python setup.py sdist bdist_wheel ;
       twine upload dist/* ;
-      docker build -t alephdata/memorious . ;
       docker tag alephdata/memorious alephdata/memorious:$TRAVIS_TAG ;
       docker push alephdata/memorious:$TRAVIS_TAG ;
       docker push alephdata/memorious ;
     fi
+  
