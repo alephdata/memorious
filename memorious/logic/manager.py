@@ -35,6 +35,12 @@ class CrawlerManager(object):
             log.info('[%s] due, queueing...', crawler.name)
             crawler.run()
 
+    @property
+    def stages(self):
+        for crawler in self:
+            for stage in crawler:
+                yield crawler, stage
+
     def __getitem__(self, name):
         return self.crawlers.get(name)
 

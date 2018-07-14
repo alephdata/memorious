@@ -94,6 +94,14 @@ def scheduled(wait=False):
         time.sleep(settings.SCHEDULER_INTERVAL)
 
 
+@cli.command()
+def killthekitten():
+    """Completely kill redis contents."""
+    from memorious.core import connect_redis
+    conn = connect_redis()
+    conn.flushall()
+
+
 def main():
     cli(obj={})
 

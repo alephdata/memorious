@@ -48,7 +48,8 @@ class TaskRunner(object):
         while True:
             item = q.get()
             if item is None:
-                break
+                q.task_done()
+                return
             try:
                 cls.execute(*item)
             except Exception:
@@ -68,14 +69,26 @@ class TaskRunner(object):
         threads = []
         for i in range(settings.THREADS):
             t = threading.Thread(target=cls.process, args=(q,))
+            t.daemon = True
             t.start()
             threads.append(t)
 
-        for item in Queue.tasks():
-            q.put(item)
+        while True:
+            # This is to handle fakeredis. It terminates the iterator
+            # in Queue.tasks() when it "temporarily" runs out of tasks
+            # during the execution of the initial task. So we have to
+            # restart Queue.tasks() after q.join() to make sure that
+            # no child tasks were queued.
+            tasks_processed = 0
+            for item in Queue.tasks():
+                tasks_processed += 1
+                q.put(item)
 
-        # block until all tasks are done
-        q.join()
+            # block until all tasks are done
+            q.join()
+
+            if tasks_processed == 0:
+                break
 
         # stop workers
         for i in range(settings.THREADS):

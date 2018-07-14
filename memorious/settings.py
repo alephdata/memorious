@@ -42,7 +42,7 @@ EXPIRE = int(env('EXPIRE', 60))
 SCHEDULER_INTERVAL = int(env('SCHEDULER_INTERVAL', 60))
 
 # How many threads to use for execution
-THREADS = int(env('THREADS', multiprocessing.cpu_count() * 2))
+THREADS = int(env('THREADS', min(8, multiprocessing.cpu_count())))
 
 # HTTP request configuration
 HTTP_CACHE = env_bool('HTTP_CACHE', default=True)
