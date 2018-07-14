@@ -25,7 +25,7 @@ services:
 
   beat:
     build: .
-    command: memorious beat
+    command: memorious scheduled --wait
     links:
       - redis
     volumes:
