@@ -112,7 +112,15 @@ class TaskRunner(object):
         context.execute(data)
 
     @classmethod
+    def cleanup(cls):
+        # make sure that queues and queues_set are identical.
+        cls.conn.ltrim("queues", 0, -1)
+        for queue in cls.conn.sscan("queues_set"):
+            cls.conn.rpush("queues", queue)
+
+    @classmethod
     def run(cls):
+        cls.cleanup()
         while True:
             try:
                 task = cls.next()
