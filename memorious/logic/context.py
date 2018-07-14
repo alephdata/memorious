@@ -2,21 +2,18 @@ import os
 import six
 import uuid
 import shutil
-import random
 import logging
 from copy import deepcopy
 from tempfile import mkdtemp
 from contextlib import contextmanager
-import time
 
-from memorious.core import manager, storage, celery
-from memorious.core import datastore, local_queue
-from memorious.model import Tag, Event
+from memorious.core import manager, storage
+from memorious.core import datastore
+from memorious.model import Tag, Event, Queue
 from memorious.logic.http import ContextHttp
-from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.logic.check import ContextCheck
 from memorious.util import make_key, random_filename
-from memorious import settings, signals
+from memorious import signals
 
 
 class Context(object):
@@ -52,7 +49,7 @@ class Context(object):
             return
         state = self.dump_state()
         delay = delay or self.crawler.delay
-        handle.apply_async((state, stage, data), countdown=delay)
+        Queue.queue(stage, state, data, delay)
 
     def recurse(self, data={}, delay=None):
         """Have a stage invoke itself with a modified set of arguments."""
@@ -185,33 +182,3 @@ class Context(object):
 
     def __repr__(self):
         return '<Context(%r, %r)>' % (self.crawler, self.stage)
-
-
-@celery.task(bind=True, max_retries=None)
-def handle(task, state, stage, data):
-    """Execute the operation, rate limiting allowing."""
-    context = Context.from_state(state, stage)
-    if context.crawler.disabled:
-        return
-
-    if context.stage.rate_limit:
-        try:
-            with rate_limiter(context):
-                if settings.EAGER:
-                    local_queue.queue_operation(context, data)
-                else:
-                    context.execute(data)
-                return
-        except RateLimitException:
-            delay = max(1, 1.0/context.stage.rate_limit)
-            delay = random.randint(1, int(delay))
-            context.log.info("Rate limit exceeded, delaying %d sec.", delay)
-            time.sleep(delay)
-
-    if settings.EAGER:
-        # If celery is running in eager mode, put the crawler in a
-        # Queue. Then we get to execute them sequentially and avoid
-        # recursion errors.
-        local_queue.queue_operation(context, data)
-    else:
-        context.execute(data)

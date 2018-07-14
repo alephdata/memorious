@@ -1,6 +1,7 @@
 import os
 import pkg_resources
 import six
+import multiprocessing
 from banal import as_bool
 
 
@@ -37,6 +38,12 @@ INCREMENTAL = env_bool('INCREMENTAL', default=True)
 # How many days until an incremental crawl expires
 EXPIRE = int(env('EXPIRE', 60))
 
+# How many seconds to wait before trying to run scheduled crawlers
+SCHEDULER_INTERVAL = int(env('SCHEDULER_INTERVAL', 60))
+
+# How many threads to use for execution
+THREADS = int(env('THREADS', multiprocessing.cpu_count() * 2))
+
 # HTTP request configuration
 HTTP_CACHE = env_bool('HTTP_CACHE', default=True)
 
@@ -48,16 +55,6 @@ USER_AGENT = env('USER_AGENT', USER_AGENT)
 # Datastore: operational data store (ODS) database connection
 DATASTORE_FILE = os.path.join(BASE_PATH, 'datastore.sqlite3')
 DATASTORE_URI = env('DATASTORE_URI', 'sqlite:///%s' % DATASTORE_FILE)
-
-
-###############################################################################
-# Queue processing
-
-BROKER_URI = 'amqp://guest:guest@localhost:5672//'
-BROKER_URI = env('BROKER_URI', BROKER_URI)
-
-# Enable delayed processing via queue
-EAGER = env_bool('EAGER', True)
 
 
 ###############################################################################

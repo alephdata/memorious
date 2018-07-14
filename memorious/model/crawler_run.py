@@ -20,8 +20,8 @@ class CrawlerRun(Base):
 
     @classmethod
     def record_operation_end(cls, crawler, run_id):
-        cls.conn.decr(make_key("run", run_id))
-        if unpack_int(cls.conn.get(make_key("run", run_id))) == 0:
+        pending = cls.conn.decr(make_key("run", run_id))
+        if unpack_int(pending) == 0:
             cls.conn.set(make_key("run", run_id, "end"), pack_now())
 
     @classmethod
