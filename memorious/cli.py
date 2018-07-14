@@ -91,7 +91,7 @@ def scheduled(wait=False):
     while wait:
         # Loop and try to run scheduled crawlers at short intervals
         manager.run_scheduled()
-        time.sleep(settings.BEAT_INTERVAL)
+        time.sleep(settings.SCHEDULER_INTERVAL)
 
 
 def main():

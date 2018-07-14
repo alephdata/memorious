@@ -1,7 +1,10 @@
-import logging
+import queue
 import random
+import logging
+import threading
 from datetime import datetime
 
+from memorious import settings
 from memorious.logic.rate_limit import rate_limiter, RateLimitException
 from memorious.logic.context import Context
 from memorious.model.queue import Queue
@@ -37,18 +40,45 @@ class TaskRunner(object):
                     "Rate limit exceeded, delaying %d sec.", delay
                 )
                 Queue.queue(stage, state, data, delay=delay)
+
         context.execute(data)
 
     @classmethod
-    def run(cls):
-        Queue.cleanup()
+    def process(cls, q):
         while True:
+            item = q.get()
+            if item is None:
+                break
             try:
-                task = Queue.next()
-                # Exit when done clause for fakeredis backed runs.
-                # In case of actual redis, this condition should never arise
-                if not task:
-                    break
+                cls.execute(*item)
+            except Exception:
+                log.exception("Task failed to execute:")
+            q.task_done()
+
+    @classmethod
+    def run(cls):
+        if settings.DEBUG:
+            log.info("DEBUG mode. Disabling task threading.")
+            for task in Queue.tasks():
                 cls.execute(*task)
-            except Exception as exc:
-                log.exception(exc)
+            return
+
+        log.info("Processing queue (%s threads)", settings.THREADS)
+        q = queue.Queue(maxsize=settings.THREADS)
+        threads = []
+        for i in range(settings.THREADS):
+            t = threading.Thread(target=cls.process, args=(q,))
+            t.start()
+            threads.append(t)
+
+        for item in Queue.tasks():
+            q.put(item)
+
+        # block until all tasks are done
+        q.join()
+
+        # stop workers
+        for i in range(settings.THREADS):
+            q.put(None)
+        for t in threads:
+            t.join()

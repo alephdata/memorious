@@ -20,6 +20,7 @@ def rate_limiter(context):
         try:
             with RateLimit(resource=resource,
                            client='memorious',
+                           expire=120,
                            max_requests=rate_limit,
                            redis_pool=redis_pool):
                 yield

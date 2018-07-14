@@ -64,6 +64,16 @@ class Queue(Base):
         return (stage, state, data, next_time)
 
     @classmethod
+    def tasks(cls):
+        while True:
+            task = cls.next()
+            # Exit when done clause for fakeredis backed runs.
+            # In case of actual redis, this condition should never arise
+            if not task:
+                break
+            yield task
+
+    @classmethod
     def queue(cls, stage, state, data, delay=None):
         crawler = state.get('crawler')
         queue_name = make_key('queue', crawler, stage)
