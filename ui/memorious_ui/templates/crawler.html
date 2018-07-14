@@ -130,7 +130,7 @@
             </td>
             <td class="number">
                 {% if item.warning %}
-                <a href="{{ url_for('.events', name=crawler.name, run_id=item.run_id, level='error') }}" class="warning">
+                <a href="{{ url_for('.events', name=crawler.name, run_id=item.run_id, level='warning') }}" class="warning">
                     {{item.warning | number}}
                     <i class="fa fa-warning" aria-hidden="true"></i>
                 </a>
