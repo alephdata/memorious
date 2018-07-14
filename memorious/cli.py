@@ -5,6 +5,7 @@ from tabulate import tabulate
 
 from memorious import settings
 from memorious.core import manager, init_memorious
+from memorious.model import Queue
 from memorious.task_runner import TaskRunner
 
 log = logging.getLogger(__name__)
@@ -40,9 +41,15 @@ def get_crawler(name):
 def run(crawler):
     """Run a specified crawler."""
     crawler = get_crawler(crawler)
-    crawler.cleanup()
     crawler.run()
-    crawler.cleanup()
+
+
+@cli.command()
+@click.argument('crawler')
+def cancel(crawler):
+    """Abort execution of a specified crawler."""
+    crawler = get_crawler(crawler)
+    crawler.cancel()
 
 
 @cli.command()
@@ -60,14 +67,6 @@ def process():
 
 
 @cli.command()
-def beat():
-    """Loop and try to run scheduled crawlers at short intervals"""
-    while True:
-        manager.run_scheduled()
-        time.sleep(settings.BEAT_INTERVAL)
-
-
-@cli.command()
 def list():
     """List the available crawlers."""
     crawler_list = []
@@ -78,21 +77,21 @@ def list():
         crawler_list.append([crawler.name,
                              crawler.description,
                              crawler.schedule,
-                             is_due])
-    headers = ['Name', 'Description', 'Schedule', 'Due']
+                             is_due,
+                             Queue.size(crawler)])
+    headers = ['Name', 'Description', 'Schedule', 'Due', 'Pending']
     print(tabulate(crawler_list, headers=headers))
 
 
 @cli.command()
-def cleanup():
-    """Run clean up all crawlers."""
-    manager.run_cleanup()
-
-
-@cli.command()
-def scheduled():
+@click.option('--wait/--no-wait', default=False)
+def scheduled(wait=False):
     """Run crawlers that are due."""
     manager.run_scheduled()
+    while wait:
+        # Loop and try to run scheduled crawlers at short intervals
+        manager.run_scheduled()
+        time.sleep(settings.BEAT_INTERVAL)
 
 
 def main():

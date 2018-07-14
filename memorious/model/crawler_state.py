@@ -37,10 +37,6 @@ class CrawlerState(Base):
             }
 
     @classmethod
-    def cleanup(cls, crawler):
-        cls.conn.delete(crawler.name)
-
-    @classmethod
     def record_operation_start(cls, crawler, stage):
         cls.conn.incr(make_key(crawler, stage))
         cls.conn.incr(make_key(crawler, "total_ops"))
@@ -56,7 +52,6 @@ class CrawlerState(Base):
 
     @classmethod
     def flush(cls, crawler):
-        cls.conn.delete(make_key(crawler))
         cls.conn.delete(make_key(crawler, "total_ops"))
         cls.conn.delete(make_key(crawler, "last_run"))
         for stage in crawler.stages:

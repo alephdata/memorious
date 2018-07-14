@@ -4,6 +4,7 @@ import logging
 from datetime import datetime, timedelta
 
 from memorious.model.common import Base, pack_datetime, unpack_datetime
+from memorious.model.common import unpack_int
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -31,16 +32,6 @@ class Queue(Base):
         return json.dumps(task_data)
 
     @classmethod
-    def deserialize_task_data(cls, task_data):
-        task_data = json.loads(task_data)
-        stage = task_data["stage"]
-        state = task_data["state"]
-        data = task_data["data"]
-        next_time = task_data.get("next_allowed_exec_time")
-        next_time = unpack_datetime(next_time)
-        return (stage, state, data, next_time)
-
-    @classmethod
     def next(cls):
         """Get the next task to execute or block.
 
@@ -62,7 +53,15 @@ class Queue(Base):
             return
         # we only need the data, not the list name
         _, next_task_data = task_data_tuple
-        return cls.deserialize_task_data(next_task_data)
+        task_data = json.loads(next_task_data)
+        stage = task_data["stage"]
+        state = task_data["state"]
+        data = task_data["data"]
+        next_time = task_data.get("next_allowed_exec_time")
+        next_time = unpack_datetime(next_time)
+        crawler = state.get('crawler')
+        cls.conn.decr(make_key('queue_pending', crawler))
+        return (stage, state, data, next_time)
 
     @classmethod
     def queue(cls, stage, state, data, delay=None):
@@ -73,22 +72,30 @@ class Queue(Base):
             cls.conn.sadd("queues_set", queue_name)
         task_data = cls.serialize_task_data(stage, state, data, delay)
         cls.conn.rpush(queue_name, task_data)
+        cls.conn.incr(make_key('queue_pending', crawler))
         # log.debug(f"Queues we have now: {cls.conn.lrange('queues', 0, -1)}")
+
+    @classmethod
+    def size(cls, crawler):
+        """Total operations pending for this crawler"""
+        key = make_key('queue_pending', crawler)
+        return unpack_int(cls.conn.get(key))
 
     @classmethod
     def is_running(cls, crawler):
         """Is the crawler currently running?"""
         if crawler.disabled:
             return False
-        prefix = make_key('queue', crawler.name, '*')
-        return len(list(cls.conn.scan_iter(prefix))) > 0
+        return cls.size(crawler) > 0
 
     @classmethod
     def flush(cls, crawler):
-        prefix = make_key('queue', crawler.name, '*')
+        prefix = make_key('queue', crawler, '*')
         for key in cls.conn.scan_iter(prefix):
+            cls.conn.delete(key)
             cls.conn.ltrim(key, 0, -1)
-            cls.comm.srem(key)
+            cls.conn.srem("queues_set", key)
+        cls.conn.delete(make_key('queue_pending', crawler))
         cls.cleanup()
 
     @classmethod
