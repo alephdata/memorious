@@ -67,6 +67,11 @@
                             <i class="fa fa-play" aria-hidden="true"></i>    
                             Run
                         </a>
+                    {% else %}
+                        <a class="invoke" href='#' data-crawler="{{ item.crawler.name }}" data-action="cancel">
+                            <i class="fa fa-ban" aria-hidden="true"></i>
+                            Cancel
+                        </a>
                     {% endif %}
                 </td>
             </tr>
