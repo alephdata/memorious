@@ -68,7 +68,6 @@ class Queue(Base):
         task_data = cls.serialize_task_data(stage, state, data, delay)
         cls.conn.rpush(make_key('queue', crawler, stage), task_data)
         cls.conn.incr(make_key('queue_pending', crawler))
-        # log.debug(f"Queues we have now: {cls.conn.lrange('queues', 0, -1)}")
 
     @classmethod
     def size(cls, crawler):
