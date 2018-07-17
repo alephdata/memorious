@@ -20,3 +20,14 @@ def read_word(image, whitelist=None, chars=None, spaces=False):
         return guess, None
 
     return guess, api.MeanTextConf()
+
+
+def read_char(image, whitelist=None):
+    """ OCR a single character from an image. Useful for captchas."""
+    api = PyTessBaseAPI()
+    api.SetPageSegMode(10)
+    if whitelist is not None:
+        api.SetVariable("tessedit_char_whitelist", whitelist)
+    api.SetImage(image)
+    api.Recognize()
+    return api.GetUTF8Text().strip()

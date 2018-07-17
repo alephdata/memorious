@@ -263,6 +263,8 @@ class ContextHttpResponse(object):
 
     @property
     def ok(self):
+        if self.status_code is None:
+            return False
         return self.status_code < 400
 
     @property

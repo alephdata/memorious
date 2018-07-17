@@ -13,7 +13,8 @@ class Tag(Base):
     @classmethod
     def save(cls, crawler, key, value):
         data = json.dumps(value)
-        cls.conn.set(make_key(crawler, "tag", key), data, ex=crawler.expire)
+        key = make_key(crawler, "tag", key)
+        cls.conn.set(key, data, ex=crawler.expire)
 
     @classmethod
     def find(cls, crawler, key):
