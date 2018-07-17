@@ -68,6 +68,9 @@ class Crawler(object):
         CrawlerState.flush(self)
         CrawlerRun.flush(self)
 
+    def flush_events(self):
+        Event.delete(self)
+
     def run(self, incremental=None, run_id=None):
         """Queue the execution of a particular crawler."""
         state = {

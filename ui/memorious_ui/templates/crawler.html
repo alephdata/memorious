@@ -40,9 +40,19 @@
                         <i class="fa fa-play" aria-hidden="true"></i>
                         Run
                     </a>
+                {% else %}
+                    <a class="invoke" href='#' data-crawler="{{ crawler.name }}" data-action="cancel">
+                        <i class="fa fa-ban" aria-hidden="true"></i>
+                        Cancel
+                    </a>
                 {% endif %}
+                <a class="invoke" href='#' data-crawler="{{ crawler.name }}" data-action="flush-events">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    Flush events
+                </a>
                 <a class="invoke" href='#' data-crawler="{{ crawler.name }}" data-action="flush">
                     <i class="fa fa-trash" aria-hidden="true"></i>
+                    Flush everything
                 </a>
             </td>
         </tr>

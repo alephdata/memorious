@@ -26,19 +26,16 @@ class Event(Base):
         data = json.dumps(event)
         cls.conn.lpush(make_key(crawler, "events"), data)
         cls.conn.lpush(make_key(crawler, "events", level), data)
-        cls.conn.lpush(make_key(crawler, stage, "events"), data)
-        cls.conn.lpush(make_key(crawler, stage.name, "events", level), data)
-        cls.conn.lpush(make_key(crawler, run_id, "events"), data)
-        cls.conn.lpush(make_key(crawler, run_id, "events", level), data)
+        cls.conn.lpush(make_key(crawler, "events", stage), data)
+        cls.conn.lpush(make_key(crawler, "events", stage, level), data)
+        cls.conn.lpush(make_key(crawler, "events", run_id), data)
+        cls.conn.lpush(make_key(crawler, "events", run_id, level), data)
         return event
 
     @classmethod
     def delete(cls, crawler):
-        cls.conn.delete(make_key(crawler, "events"))
-        for level in cls.LEVELS:
-            cls.conn.delete(make_key(crawler, "events", level))
-            for stage in crawler.stages:
-                cls.conn.delete(make_key(crawler, stage, "events", level))
+        for key in cls.conn.scan_iter(make_key(crawler, "events", "*")):
+            cls.conn.delete(key)
 
     @classmethod
     def get_counts(cls, crawler):
@@ -52,7 +49,7 @@ class Event(Base):
     def get_stage_counts(cls, crawler, stage):
         counts = {}
         for level in cls.LEVELS:
-            key = make_key(crawler, stage, "events", level)
+            key = make_key(crawler, "events", stage, level)
             counts[level] = cls.conn.llen(key) or 0
         return counts
 
@@ -60,7 +57,7 @@ class Event(Base):
     def get_run_counts(cls, crawler, run_id):
         counts = {}
         for level in cls.LEVELS:
-            key = make_key(crawler, run_id, "events", level)
+            key = make_key(crawler, "events", run_id, level)
             counts[level] = cls.conn.llen(key) or 0
         return counts
 
@@ -84,11 +81,11 @@ class Event(Base):
     @classmethod
     def get_stage_events(cls, crawler, stage_name, start, end, level=None):
         """events from a particular stage"""
-        key = make_key(crawler, stage_name, "events", level)
+        key = make_key(crawler, "events", stage_name, level)
         return cls.event_list(key, start, end)
 
     @classmethod
     def get_run_events(cls, crawler, run_id, start, end, level=None):
         """Events from a particular run"""
-        key = make_key(crawler, run_id, "events", level)
+        key = make_key(crawler, "events", run_id, level)
         return cls.event_list(key, start, end)

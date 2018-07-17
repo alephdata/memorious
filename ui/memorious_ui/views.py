@@ -112,5 +112,8 @@ def invoke(crawler, action):
     if action == 'flush':
         crawler.flush()
         return jsonify({'status': 'ok'})
+    if action == 'flush-events':
+        crawler.flush_events()
+        return jsonify({'status': 'ok'})
     else:
         abort(400)
