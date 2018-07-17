@@ -44,6 +44,9 @@ SCHEDULER_INTERVAL = int(env('SCHEDULER_INTERVAL', 60))
 # How many threads to use for execution
 THREADS = int(env('THREADS', min(8, multiprocessing.cpu_count())))
 
+# Max scheduled tasks at the same time
+MAX_SCHEDULED = int(env('MAX_SCHEDULED', THREADS))
+
 # HTTP request configuration
 HTTP_CACHE = env_bool('HTTP_CACHE', default=True)
 
