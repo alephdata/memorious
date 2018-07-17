@@ -1,10 +1,10 @@
-import json
 import requests
 from pprint import pprint  # noqa
 from banal import clean_dict
 from six.moves.urllib.parse import urljoin
 
 from memorious import settings
+from memorious.model.common import dump_json
 
 
 def aleph_emit(context, data):
@@ -62,7 +62,7 @@ def aleph_emit(context, data):
         if fh is None:
             return
         res = session.post(url,
-                           data={'meta': json.dumps(meta)},
+                           data={'meta': dump_json(meta)},
                            files={'file': fh})
         if not res.ok:
             context.emit_warning("Error: %r" % res.text)

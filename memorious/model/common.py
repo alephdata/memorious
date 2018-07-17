@@ -1,6 +1,11 @@
-from datetime import datetime
+import json
+from datetime import datetime, date
 
 from memorious.core import connect_redis
+
+
+class Base(object):
+    conn = connect_redis()
 
 
 def unpack_int(value):
@@ -24,5 +29,25 @@ def unpack_datetime(value):
         return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f")
 
 
-class Base(object):
-    conn = connect_redis()
+class JSONEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        if isinstance(obj, bytes):
+            return obj.decode('utf-8')
+        if isinstance(obj, set):
+            return [o for o in obj]
+        return json.JSONEncoder.default(self, obj)
+
+
+def dump_json(data):
+    if data is None:
+        return
+    return JSONEncoder().encode(data)
+
+
+def load_json(encoded):
+    if encoded is None:
+        return
+    return json.loads(encoded)

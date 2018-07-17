@@ -1,4 +1,3 @@
-import json
 import random
 import logging
 from collections import deque
@@ -6,7 +5,7 @@ from datetime import datetime, timedelta
 
 from memorious.core import manager
 from memorious.model.common import Base, pack_datetime, unpack_datetime
-from memorious.model.common import unpack_int
+from memorious.model.common import unpack_int, load_json, dump_json
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ class Queue(Base):
             if isinstance(delay, datetime):
                 task_data["next_allowed_exec_time"] = pack_datetime(delay)
 
-        return json.dumps(task_data)
+        return dump_json(task_data)
 
     @classmethod
     def tasks(cls):
@@ -52,7 +51,7 @@ class Queue(Base):
             deq.rotate((queues.index(key) * -1) - 1)
             queues = list(deq)
 
-            task_data = json.loads(json_data)
+            task_data = load_json(json_data)
             stage = task_data["stage"]
             state = task_data["state"]
             data = task_data["data"]

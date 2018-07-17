@@ -1,7 +1,7 @@
-import json
 import logging
 
 from memorious.model.common import Base, pack_now, unpack_datetime
+from memorious.model.common import dump_json, load_json
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class Event(Base):
             'error': error,
             'message': message
         }
-        data = json.dumps(event)
+        data = dump_json(event)
         cls.conn.lpush(make_key(crawler, "events"), data)
         cls.conn.lpush(make_key(crawler, "events", level), data)
         cls.conn.lpush(make_key(crawler, "events", stage), data)
@@ -68,7 +68,7 @@ class Event(Base):
         if events is None:
             return results
         for event in events:
-            result = json.loads(event)
+            result = load_json(event)
             result["timestamp"] = unpack_datetime(result['timestamp'])
             results.append(result)
         return results
