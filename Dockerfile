@@ -9,10 +9,8 @@ RUN apt-get -qq -y update && apt-get -qq -y dist-upgrade \
     && apt-get -qq -y autoremove && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV TESSDATA_PREFIX /usr/share/tesseract-ocr \
-    MEMORIOUS_BASE_PATH=/data \
-    MEMORIOUS_INCREMENTAL=true \
-    C_FORCE_ROOT=true
+ENV MEMORIOUS_BASE_PATH=/data \
+    MEMORIOUS_INCREMENTAL=true
 
 RUN pip install -q --upgrade pip && pip install -q --upgrade setuptools \
     && pip install -q --upgrade pyicu lxml pillow requests[security] gunicorn
