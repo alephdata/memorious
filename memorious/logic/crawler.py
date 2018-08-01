@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 class Crawler(object):
     """A processing graph that constitutes a crawler."""
     SCHEDULES = {
+        'hourly': timedelta(hours=1),
         'daily': timedelta(days=1),
         'weekly': timedelta(weeks=1),
         'monthly': timedelta(weeks=4)

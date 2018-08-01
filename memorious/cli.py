@@ -25,6 +25,8 @@ def cli(debug, cache, incremental):
     settings.DEBUG = debug
     if settings.DEBUG:
         logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
     init_memorious()
 
 
