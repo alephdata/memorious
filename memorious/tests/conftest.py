@@ -3,6 +3,7 @@ import uuid
 
 import pytest
 
+from memorious import settings
 from memorious.logic.manager import CrawlerManager
 from memorious.logic.context import Context
 from memorious.logic.http import ContextHttp
@@ -21,6 +22,7 @@ def crawler_dir():
 def manager():
     manager = CrawlerManager()
     manager.load_path(crawler_dir())
+    settings._manager = manager
     return manager
 
 

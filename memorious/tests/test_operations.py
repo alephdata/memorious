@@ -149,6 +149,6 @@ def test_directory(context):
     assert os.path.exists(raw_file_path)
 
     with open(meta_file_path, "rb") as fh:
-        assert json.load(fh) == data
+        assert json.load(fh)['content_hash'] == data['content_hash']
     with open(raw_file_path, "rb") as fh:
-        assert fh.read() == b'{"user-agent":"Memorious Test"}\n'
+        assert b'"user-agent": "Memorious Test"' in fh.read()
