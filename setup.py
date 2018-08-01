@@ -18,7 +18,14 @@ setup(
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     namespace_packages=[],
     include_package_data=True,
-    package_data={'memorious': ['migrate/*', 'migrate/versions/*']},
+    package_data={
+        'memorious': [
+            'migrate/*',
+            'migrate/versions/*',
+            'migrate/ui/static/*',
+            'migrate/ui/templates/*'
+        ]
+    },
     zip_safe=False,
     install_requires=[
         'banal',
@@ -39,13 +46,15 @@ setup(
         'countrynames',
         'dateparser',
         'stringcase',
-        'raven',
+        'raven[flask]',
         'python-redis-rate-limit == 0.0.5',
         'redis == 2.10.6',
         'blinker == 1.4',
         'boto3 == 1.4.8',
         'fakeredis',
         'attrs',
+        'flask',
+        'babel'
     ],
     entry_points={
         'console_scripts': [

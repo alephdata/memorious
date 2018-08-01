@@ -6,7 +6,7 @@ from babel.numbers import format_number
 from babel.dates import format_date, format_datetime
 from raven.contrib.flask import Sentry
 
-from memorious_ui.reporting import (
+from memorious.ui.reporting import (
     crawlers_index, global_stats, get_crawler,
     crawler_stages, crawler_events,
     crawler_runs

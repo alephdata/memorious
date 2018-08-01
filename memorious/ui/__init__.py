@@ -2,7 +2,7 @@ import logging
 
 from memorious import settings
 from memorious.core import init_memorious
-from memorious_ui.views import app, sentry
+from memorious.ui.views import app, sentry
 
 
 init_memorious()

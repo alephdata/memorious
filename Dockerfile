@@ -17,6 +17,5 @@ RUN pip install -q --upgrade pip && pip install -q --upgrade setuptools \
 
 COPY setup.py /memorious/
 COPY memorious /memorious/memorious
-COPY ui /memorious/ui
 WORKDIR /memorious
-RUN pip install -q -e . && pip install -q -e ./ui
+RUN pip install -q -e .
