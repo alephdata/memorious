@@ -5,6 +5,7 @@ import redis
 import fakeredis
 import dataset
 import storagelayer
+from sqlalchemy.pool import NullPool
 from werkzeug.local import LocalProxy
 from raven.handlers.logging import SentryHandler
 
@@ -48,7 +49,10 @@ def load_datastore():
     if not hasattr(settings, '_datastore'):
         if not settings.DATASTORE_URI:
             raise RuntimeError("No $MEMORIOUS_DATASTORE_URI.")
-        settings._datastore = dataset.connect(settings.DATASTORE_URI)
+        # do not pool connections for the datastore
+        engine_kwargs = {'poolclass': NullPool}
+        settings._datastore = dataset.connect(settings.DATASTORE_URI,
+                                              engine_kwargs=engine_kwargs)
         # Use bigint to store integers by default
         settings._datastore.types.integer = settings._datastore.types.bigint
     return settings._datastore
