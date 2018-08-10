@@ -1,10 +1,9 @@
-import requests
 from pprint import pprint  # noqa
 from banal import clean_dict
-from six.moves.urllib.parse import urljoin
+from alephclient.api import AlephAPI
+from alephclient.tasks.util import to_path
 
 from memorious import settings
-from memorious.model.common import dump_json
 
 
 def aleph_emit(context, data):
@@ -15,9 +14,8 @@ def aleph_emit(context, data):
         context.log.warning("No $MEMORIOUS_ALEPH_API_KEY, skipping upload...")
         return
 
-    session = requests.Session()
-    session.headers['Authorization'] = 'apikey %s' % settings.ALEPH_API_KEY
-    collection_id = get_collection_id(context, session)
+    api = AlephAPI(settings.ALEPH_HOST, settings.ALEPH_API_KEY)
+    collection_id = get_collection_id(context, api)
     if collection_id is None:
         context.log.warning("Cannot get aleph collection.")
         return
@@ -55,50 +53,34 @@ def aleph_emit(context, data):
     meta = clean_dict(meta)
     # pprint(meta)
 
-    url = make_url('collections/%s/ingest' % collection_id)
     label = meta.get('file_name', meta.get('source_url'))
     context.log.info("Upload: %s", label)
     with context.load_file(content_hash) as fh:
         if fh is None:
             return
-        res = session.post(url,
-                           data={'meta': dump_json(meta)},
-                           files={'file': fh})
-        if not res.ok:
-            context.emit_warning("Error: %r" % res.text)
-        else:
-            document = res.json().get('documents')[0]
+        file_path = to_path(fh.name)
+        res = api.ingest_upload(collection_id, file_path, meta)
+        if res.get('status') == 'ok':
+            document = res.get('documents')[0]
             context.log.info("Document ID: %s", document['id'])
+        else:
+            context.emit_warning("Error: %r" % res)
 
 
-def get_collection_id(context, session):
-    url = make_url('collections')
+def get_collection_id(context, api):
     if hasattr(context.stage, '_aleph_cid'):
         return context.stage._aleph_cid
     foreign_id = context.get('collection', context.crawler.name)
-    res = session.get(url, params={
-        'filter:foreign_id': foreign_id
-    })
-    data = res.json()
-    for coll in data.get('results'):
+    filters = [('filter:foreign_id', foreign_id)]
+    for coll in api.filter_collections(filters=filters):
         if coll.get('foreign_id') == foreign_id:
             context.stage._aleph_cid = coll.get('id')
             return context.stage._aleph_cid
 
-    res = session.post(url, json={
+    coll = api.create_collection({
         'label': context.crawler.description,
         'casefile': False,
         'foreign_id': foreign_id
     })
-
-    if not res.ok:
-        context.log.info("Could not create collection: %s", foreign_id)
-        return
-
-    context.stage._aleph_cid = res.json().get('id')
+    context.stage._aleph_cid = coll.get('id')
     return context.stage._aleph_cid
-
-
-def make_url(path):
-    prefix = urljoin(settings.ALEPH_HOST, '/api/2/')
-    return urljoin(prefix, path)
