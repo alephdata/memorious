@@ -88,9 +88,15 @@ def session(context, data):
     user_agent = context.get('user_agent')
     if user_agent is not None:
         context.http.session.headers['User-Agent'] = user_agent
+
     referer = context.get('url')
     if referer is not None:
         context.http.session.headers['Referer'] = referer
+
+    proxy = context.get('proxy')
+    if proxy is not None:
+        proxies = {'http': proxy, 'https': proxy}
+        context.http.session.proxies = proxies
 
     # Explictly save the session because no actual HTTP requests were made.
     context.http.save()
