@@ -20,3 +20,4 @@ docs/_templates
 memorious/tests/testdata/data/*
 .tox
 .pytest_cache/*
+.idea/
