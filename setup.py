@@ -31,7 +31,7 @@ setup(
         'banal',
         'requests[security] >= 2.5',
         'requests_ftp',
-        'alephclient',
+        'alephclient >= 0.6.9',
         'click',
         'lxml >= 3',
         'PyYAML >= 3.10',

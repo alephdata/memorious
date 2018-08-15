@@ -14,7 +14,9 @@ def aleph_emit(context, data):
         context.log.warning("No $MEMORIOUS_ALEPH_API_KEY, skipping upload...")
         return
 
-    api = AlephAPI(settings.ALEPH_HOST, settings.ALEPH_API_KEY)
+    session_id = 'memorious:%s' % context.crawler.name
+    api = AlephAPI(settings.ALEPH_HOST, settings.ALEPH_API_KEY,
+                   session_id=session_id)
     collection_id = get_collection_id(context, api)
     if collection_id is None:
         context.log.warning("Cannot get aleph collection.")
