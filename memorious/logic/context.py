@@ -149,7 +149,7 @@ class Context(object):
                 pass
 
     @contextmanager
-    def load_file(self, content_hash, file_name=None):
+    def load_file(self, content_hash, file_name=None, read_mode='rb'):
         file_path = storage.load_file(content_hash,
                                       file_name=file_name,
                                       temp_path=self.work_path)
@@ -157,7 +157,7 @@ class Context(object):
             yield None
         else:
             try:
-                with open(file_path, 'rb') as fh:
+                with open(file_path, mode=read_mode) as fh:
                     yield fh
             finally:
                 storage.cleanup_file(content_hash,
