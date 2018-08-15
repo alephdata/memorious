@@ -19,6 +19,7 @@ TAR_MIME_TYPES = [
     'application/x-tgz',
     'application/x-gtar',
     'application/x-gzip',
+    'application/gzip',
 ]
 
 SEVENZIP_MIME_TYPES = [
