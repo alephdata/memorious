@@ -13,7 +13,7 @@ services:
 
   ui:
     build: .
-    command: gunicorn -t 900 -w 8 -b 0.0.0.0:8000 --log-level info --log-file - memorious_ui:app 
+    command: gunicorn -t 900 -w 8 -b 0.0.0.0:8000 --log-level info --log-file - memorious.ui:app
     links:
       - redis
     volumes:
