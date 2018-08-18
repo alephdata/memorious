@@ -7,7 +7,6 @@ import dataset
 import storagelayer
 from sqlalchemy.pool import NullPool
 from werkzeug.local import LocalProxy
-from raven.handlers.logging import SentryHandler
 
 from memorious import settings
 
@@ -20,12 +19,6 @@ redis_pool = redis.ConnectionPool(
     port=settings.REDIS_PORT,
     decode_responses=True
 )
-
-
-# set up raven for error reporting
-if settings.SENTRY_DSN:
-    handler = SentryHandler(settings.SENTRY_DSN)
-    handler.setLevel(logging.ERROR)
 
 # File storage layer for blobs on local file system or S3
 storage = storagelayer.init(settings.ARCHIVE_TYPE,
