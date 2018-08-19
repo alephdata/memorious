@@ -10,7 +10,7 @@ matrix:
 
 install:
   - "sudo apt-get install p7zip-full libicu-dev"
-  - "pip install -q tox twine pyicu"
+  - "pip install -q tox twine"
 
 script:
   - tox
