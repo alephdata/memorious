@@ -1,3 +1,4 @@
+DOCKER=docker run -v $(PWD)/dist:/ingestors/dist -ti alephdata/memorious
 
 all: clean
 
@@ -9,15 +10,16 @@ clean:
 	find . -name '*.pyo' -exec rm -f {} +
 
 build:
-	docker-compose build --pull
-	docker-compose run --rm worker memorious upgrade
+	docker build -t alephdata/memorious .
 
 rebuild:
-	docker-compose build --pull --no-cache
-	docker-compose run --rm worker memorious upgrade
+	docker build --pull --no-cache -t alephdata/memorious .
+
+test:
+	tox
 
 shell:
-	docker-compose run --rm worker /bin/bash
+	$(DOCKER) /bin/bash
 
 image:
-	docker build -t alephdata/memorious:latest .
+	docker build -t alephdata/memorious .

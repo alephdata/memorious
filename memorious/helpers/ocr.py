@@ -1,9 +1,9 @@
-from tesserocr import PyTessBaseAPI  # Requires Tesseract 0.3.4+
 
 
 def read_word(image, whitelist=None, chars=None, spaces=False):
     """ OCR a single word from an image. Useful for captchas.
         Image should be pre-processed to remove noise etc. """
+    from tesserocr import PyTessBaseAPI
     api = PyTessBaseAPI()
     api.SetPageSegMode(8)
     if whitelist is not None:
@@ -24,6 +24,7 @@ def read_word(image, whitelist=None, chars=None, spaces=False):
 
 def read_char(image, whitelist=None):
     """ OCR a single character from an image. Useful for captchas."""
+    from tesserocr import PyTessBaseAPI
     api = PyTessBaseAPI()
     api.SetPageSegMode(10)
     if whitelist is not None:

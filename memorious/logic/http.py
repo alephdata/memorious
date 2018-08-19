@@ -1,9 +1,8 @@
 import cgi
 import json
-import pickle
-import codecs
-from lxml import html, etree
 from hashlib import sha1
+from lxml import html, etree
+from urllib.parse import unquote
 from banal import hash_data, is_mapping
 from urlnormalizer import normalize_url
 from celestial import parse_mimetype, normalize_mimetype
@@ -12,10 +11,9 @@ from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
 from datetime import datetime, timedelta
 
-from six.moves.urllib.parse import unquote
-
 from memorious import settings
 from memorious.core import storage
+from memorious.model.session import SessionState
 from memorious.logic.mime import NON_HTML
 from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
@@ -24,7 +22,7 @@ from memorious.util import random_filename
 
 
 class ContextHttp(object):
-    STATE_SESSION = '_http_session'
+    STATE_SESSION = '_http'
 
     def __init__(self, context):
         self.context = context
@@ -33,11 +31,11 @@ class ContextHttp(object):
         if 'cache' in context.params:
             self.cache = context.params.get('cache')
 
+        self.session = None
         if self.STATE_SESSION in self.context.state:
-            session = self.context.state.get(self.STATE_SESSION)
-            session = codecs.decode(bytes(session, 'utf-8'), 'base64')
-            self.session = pickle.loads(session)
-        else:
+            key = self.context.state.get(self.STATE_SESSION)
+            self.session = SessionState.get(context.crawler, key)
+        if self.session is None:
             self.reset()
 
     def reset(self):
@@ -72,9 +70,8 @@ class ContextHttp(object):
         return ContextHttpResponse.deserialize(self, data)
 
     def save(self):
-        session = pickle.dumps(self.session)
-        session = codecs.encode(session, 'base64').decode()
-        self.context.state[self.STATE_SESSION] = session
+        key = SessionState.get(self.context.crawler, self.session)
+        self.context.state[self.STATE_SESSION] = key
 
 
 class ContextHttpResponse(object):

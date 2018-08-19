@@ -1,4 +1,5 @@
 import json
+from banal.dicts import clean_dict
 from datetime import datetime, date
 
 from memorious.core import connect_redis
@@ -44,6 +45,7 @@ class JSONEncoder(json.JSONEncoder):
 def dump_json(data):
     if data is None:
         return
+    data = clean_dict(data)
     return JSONEncoder().encode(data)
 
 

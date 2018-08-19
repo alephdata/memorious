@@ -1,4 +1,3 @@
-import random
 import logging
 from collections import deque
 from datetime import datetime, timedelta
@@ -35,7 +34,6 @@ class Queue(Base):
     @classmethod
     def tasks(cls):
         queues = [make_key('queue', c, s) for c, s in manager.stages]
-        random.shuffle(queues)
         while True:
             task_data_tuple = cls.conn.blpop(queues)
             # blpop blocks until it finds something. But fakeredis has no

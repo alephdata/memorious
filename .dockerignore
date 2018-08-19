@@ -4,5 +4,6 @@ data*
 memorious.env
 docker-compose.*
 .git
+.tox
 .gitignore
 __pycache__

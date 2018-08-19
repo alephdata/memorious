@@ -1,5 +1,6 @@
 import random
 
+
 class UserAgent(object):
 
     def __init__(self):
