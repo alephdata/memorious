@@ -18,6 +18,9 @@ rebuild:
 test:
 	tox
 
+ui:
+	python memorious/ui/__init__.py
+
 shell:
 	$(DOCKER) /bin/bash
 

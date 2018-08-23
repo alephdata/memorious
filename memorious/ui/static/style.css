@@ -81,30 +81,25 @@ th.heading {
 
 /* Button */
 
+form {
+    display: inline-block;
+}
+
 .invoke {
-    background-color: #222;
-    color: #999;
-    padding: 0.2em 0.5em 0.2em 0.5em;
-    font-size: 0.8em;
-    border-radius: 0.1em;
+    background-color: #444;
+    color: #ddd;
+    padding: 0.1em 0.5em 0.1em 0.5em;
+    font-size: 0.9em;
+    border-radius: 0.2em;
     display: inline-block;
     font-weight: bolder;
     text-decoration: none;
+    cursor: pointer;
 }
 
 .invoke:hover {
     text-decoration: none;
     background-color: #000;
-}
-
-.invoke i {
-    color: #999;
-    margin-right: 0.2em;
-}
-
-.invoke.done, .invoke.done i {
-    background-color: #111;
-    color: #555;
 }
 
 /* Utility */

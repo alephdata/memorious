@@ -1,7 +1,7 @@
 from urllib.parse import urlencode
 
-from flask import Flask, jsonify, request
-from flask import render_template, abort
+from flask import Flask, request, redirect
+from flask import render_template, abort, url_for
 from babel.numbers import format_number
 from babel.dates import format_date, format_datetime
 
@@ -95,18 +95,15 @@ def config(name):
 def invoke(crawler, action):
     crawler = get_crawler(crawler)
     if crawler is None:
-        abort(400)
+        abort(404)
     if action == 'run':
         crawler.run()
-        return jsonify({'status': 'ok'})
     if action == 'cancel':
         crawler.cancel()
-        return jsonify({'status': 'ok'})
     if action == 'flush':
         crawler.flush()
-        return jsonify({'status': 'ok'})
     if action == 'flush-events':
         crawler.flush_events()
-        return jsonify({'status': 'ok'})
-    else:
-        abort(400)
+    if request.form.get('return') == 'index':
+        return redirect(url_for('.index'))
+    return redirect(url_for('.crawler', name=crawler.name))

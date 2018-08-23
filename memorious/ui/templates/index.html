@@ -63,15 +63,15 @@
                 </td>
                 <td class="number">
                     {% if not item.running %}
-                        <a class="invoke" href='#' data-crawler="{{ item.crawler.name }}" data-action="run">
-                            <i class="fa fa-play" aria-hidden="true"></i>
-                            Run
-                        </a>
+                        <form action="{{ url_for('.invoke', crawler=item.crawler.name, action='run') }}" method="POST">
+                            <input class="invoke" type="submit" value="Run" />
+                            <input type="hidden" name="return" value="index" />
+                        </form>
                     {% else %}
-                        <a class="invoke" href='#' data-crawler="{{ item.crawler.name }}" data-action="cancel">
-                            <i class="fa fa-ban" aria-hidden="true"></i>
-                            Cancel
-                        </a>
+                        <form action="{{ url_for('.invoke', crawler=item.crawler.name, action='cancel') }}" method="POST">
+                            <input class="invoke" type="submit" value="Cancel" />
+                            <input type="hidden" name="return" value="index" />
+                        </form>
                     {% endif %}
                 </td>
             </tr>
