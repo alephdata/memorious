@@ -82,7 +82,10 @@ class Crawler(object):
         if incremental is not None:
             state['incremental'] = incremental
 
-        # TaskRunner.execute(stage.name, state, {})
+        # Cancel previous runs:
+        Queue.flush(self)
+        # Flush out previous events:
+        Event.delete(self)
         Queue.queue(self.init_stage, state, {})
 
         if not settings.REDIS_HOST:
