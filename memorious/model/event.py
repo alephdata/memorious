@@ -1,7 +1,7 @@
 import logging
 
 from memorious.model.common import Base, pack_now, unpack_datetime
-from memorious.model.common import dump_json, load_json
+from memorious.model.common import dump_json, load_json, delete_prefix
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -34,10 +34,7 @@ class Event(Base):
 
     @classmethod
     def delete(cls, crawler):
-        pipe = cls.conn.pipeline()
-        for key in cls.conn.scan_iter(make_key(crawler, "events", "*")):
-            pipe.delete(key)
-        pipe.execute()
+        delete_prefix(cls.conn, make_key(crawler, "events", "*"))
 
     @classmethod
     def get_counts(cls, crawler):

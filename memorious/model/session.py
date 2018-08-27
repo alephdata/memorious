@@ -3,7 +3,7 @@ import codecs
 import logging
 from hashlib import sha1
 
-from memorious.model.common import Base, QUEUE_EXPIRE
+from memorious.model.common import Base, delete_prefix, QUEUE_EXPIRE
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -30,7 +30,4 @@ class SessionState(Base):
 
     @classmethod
     def delete(cls, crawler):
-        pipe = cls.conn.pipeline()
-        for key in cls.conn.scan_iter(make_key(crawler, "session", "*")):
-            pipe.delete(key)
-        pipe.execute()
+        delete_prefix(cls.conn, make_key(crawler, "session", "*"))

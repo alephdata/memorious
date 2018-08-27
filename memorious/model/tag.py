@@ -1,6 +1,7 @@
 import logging
 
 from memorious.model.common import Base, dump_json, load_json
+from memorious.model.common import delete_prefix
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -27,7 +28,4 @@ class Tag(Base):
 
     @classmethod
     def delete(cls, crawler):
-        pipe = cls.conn.pipeline()
-        for key in cls.conn.scan_iter(make_key(crawler, "tag", "*")):
-            pipe.delete(key)
-        pipe.execute()
+        delete_prefix(cls.conn, make_key(crawler, "tag", "*"))

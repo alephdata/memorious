@@ -1,10 +1,12 @@
 import json
+import logging
 from banal.dicts import clean_dict
 from datetime import datetime, date
 
 from memorious.core import connect_redis
 
 QUEUE_EXPIRE = 84600 * 14
+log = logging.getLogger(__name__)
 
 
 class Base(object):
@@ -30,6 +32,29 @@ def pack_now():
 def unpack_datetime(value):
     if value is not None:
         return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f")
+
+
+def delete_prefix(conn, prefix):
+    # pipe = cls.conn.pipeline()
+    # keys = cls.conn.scan_iter(make_key(crawler, "tag", "*"))
+    # for idx, key in enumerate(keys):
+    #     pipe.delete(key)
+    #     if idx % 1000 == 0:
+    #         log.info("Delete tags: %s...", idx)
+    #         pipe.execute()
+    #         pipe = cls.conn.pipeline()
+    # pipe.execute()
+    # log.info("Deleted %s tags", idx)
+    keys = conn.scan_iter(prefix)
+    batch = []
+    for idx, key in enumerate(keys):
+        batch.append(key)
+        if len(batch) > 500:
+            conn.delete(*batch)
+            batch = []
+    if len(batch):
+        conn.delete(*batch)
+    log.info("Delete prefix %s: %s", prefix, idx)
 
 
 class JSONEncoder(json.JSONEncoder):
