@@ -7,7 +7,7 @@ from memorious.util import make_key
 log = logging.getLogger(__name__)
 
 
-class CrawlerState(Base):
+class Crawl(Base):
     """The current state of a running crawler instance"""
 
     @classmethod

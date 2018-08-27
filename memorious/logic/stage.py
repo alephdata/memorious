@@ -1,6 +1,6 @@
 from importlib import import_module
 
-from memorious.model import CrawlerState
+from memorious.model import Crawl
 
 
 class CrawlerStage(object):
@@ -29,7 +29,7 @@ class CrawlerStage(object):
     @property
     def op_count(self):
         """Total operations performed for this stage"""
-        return CrawlerState.op_count(self.crawler, self)
+        return Crawl.op_count(self.crawler, self)
 
     def __str__(self):
         return self.name
