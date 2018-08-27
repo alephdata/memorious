@@ -56,9 +56,6 @@ setup(
     entry_points={
         'console_scripts': [
             'memorious = memorious.cli:main'
-        ],
-        'memorious.plugins': [
-            'reporting = memorious.reporting:init'
         ]
     },
     extras_require={

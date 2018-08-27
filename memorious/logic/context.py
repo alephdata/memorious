@@ -9,11 +9,10 @@ from contextlib import contextmanager
 
 from memorious.core import manager, storage
 from memorious.core import datastore
-from memorious.model import Tag, Event, Queue
+from memorious.model import Tag, Event, Queue, CrawlerState
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
 from memorious.util import make_key, random_filename
-from memorious import signals
 
 
 class Context(object):
@@ -60,8 +59,13 @@ class Context(object):
     def execute(self, data):
         """Execute the crawler and create a database record of having done
         so."""
+        if CrawlerState.is_aborted(self.crawler, self.run_id):
+            return
+
         try:
-            signals.operation_start.send(self)
+            CrawlerState.operation_start(self.crawler,
+                                         self.stage,
+                                         self.run_id)
             self.log.info('[%s->%s(%s)]: %s',
                           self.crawler.name,
                           self.stage.name,
@@ -71,7 +75,7 @@ class Context(object):
         except Exception as exc:
             self.emit_exception(exc)
         finally:
-            signals.operation_end.send(self)
+            CrawlerState.operation_end(self.crawler, self.run_id)
             shutil.rmtree(self.work_path)
 
     def emit_warning(self, message, type=None, *args):
