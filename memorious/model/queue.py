@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from memorious.core import manager
 from memorious.model.common import Base, pack_datetime, unpack_datetime
 from memorious.model.common import unpack_int, load_json, dump_json
+from memorious.model.common import QUEUE_EXPIRE
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -64,6 +65,7 @@ class Queue(Base):
         crawler = state.get('crawler')
         task_data = cls.serialize_task_data(stage, state, data, delay)
         cls.conn.rpush(make_key('queue', crawler, stage), task_data)
+        cls.conn.expire(make_key('queue', crawler, stage), QUEUE_EXPIRE)
         cls.conn.incr(make_key('queue_pending', crawler))
 
     @classmethod
@@ -82,8 +84,8 @@ class Queue(Base):
     @classmethod
     def flush(cls, crawler):
         prefix = make_key('queue', crawler, '*')
+        pipe = cls.conn.pipeline()
         for key in cls.conn.scan_iter(prefix):
-            cls.conn.delete(key)
-            cls.conn.ltrim(key, 0, -1)
-            cls.conn.srem("queues_set", key)
-        cls.conn.delete(make_key('queue_pending', crawler))
+            pipe.delete(key)
+        pipe.delete(make_key('queue_pending', crawler))
+        pipe.execute()

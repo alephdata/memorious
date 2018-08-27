@@ -4,6 +4,8 @@ from datetime import datetime, date
 
 from memorious.core import connect_redis
 
+QUEUE_EXPIRE = 84600 * 14
+
 
 class Base(object):
     conn = connect_redis()

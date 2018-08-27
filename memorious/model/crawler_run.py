@@ -26,10 +26,12 @@ class CrawlerRun(Base):
 
     @classmethod
     def flush(cls, crawler):
+        pipe = cls.conn.pipeline()
         for run_id in cls.conn.smembers(make_key(crawler, "runs")):
-            cls.conn.delete(make_key("run", run_id, "start"))
-            cls.conn.delete(make_key("run", run_id, "end"))
-            cls.conn.delete(make_key("run", run_id, "total_ops"))
-            cls.conn.delete(make_key("run", run_id))
-        cls.conn.delete(make_key(crawler, "runs"))
-        cls.conn.delete(make_key(crawler, "runs_list"))
+            pipe.delete(make_key("run", run_id, "start"))
+            pipe.delete(make_key("run", run_id, "end"))
+            pipe.delete(make_key("run", run_id, "total_ops"))
+            pipe.delete(make_key("run", run_id))
+        pipe.delete(make_key(crawler, "runs"))
+        pipe.delete(make_key(crawler, "runs_list"))
+        pipe.execute()

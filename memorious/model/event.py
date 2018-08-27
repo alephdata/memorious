@@ -34,8 +34,10 @@ class Event(Base):
 
     @classmethod
     def delete(cls, crawler):
+        pipe = cls.conn.pipeline()
         for key in cls.conn.scan_iter(make_key(crawler, "events", "*")):
-            cls.conn.delete(key)
+            pipe.delete(key)
+        pipe.execute()
 
     @classmethod
     def get_counts(cls, crawler):
