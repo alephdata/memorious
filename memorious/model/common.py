@@ -45,6 +45,7 @@ def delete_prefix(conn, prefix):
     #         pipe = cls.conn.pipeline()
     # pipe.execute()
     # log.info("Deleted %s tags", idx)
+    idx = 0
     keys = conn.scan_iter(prefix)
     batch = []
     for idx, key in enumerate(keys):
