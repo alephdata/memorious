@@ -35,22 +35,12 @@ def unpack_datetime(value):
 
 
 def delete_prefix(conn, prefix):
-    # pipe = conn.pipeline()
-    # keys = conn.scan_iter(make_key(crawler, "tag", "*"))
-    # for idx, key in enumerate(keys):
-    #     pipe.delete(key)
-    #     if idx % 1000 == 0:
-    #         log.info("Delete tags: %s...", idx)
-    #         pipe.execute()
-    #         pipe = conn.pipeline()
-    # pipe.execute()
-    # log.info("Deleted %s tags", idx)
     idx = 0
     keys = conn.scan_iter(prefix)
     batch = []
     for idx, key in enumerate(keys):
         batch.append(key)
-        if len(batch) > 500:
+        if len(batch) > 100:
             conn.delete(*batch)
             batch = []
     if len(batch):

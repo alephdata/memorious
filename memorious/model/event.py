@@ -1,7 +1,8 @@
 import logging
 
+from memorious.model.crawl import Crawl
 from memorious.model.common import Base, pack_now, unpack_datetime
-from memorious.model.common import dump_json, load_json, delete_prefix
+from memorious.model.common import dump_json, load_json
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -34,7 +35,17 @@ class Event(Base):
 
     @classmethod
     def delete(cls, crawler):
-        delete_prefix(cls.conn, make_key(crawler, "events", "*"))
+        cls.conn.delete(make_key(crawler, "events"))
+        for level in cls.LEVELS:
+            cls.conn.delete(make_key(crawler, "events", level))
+        for run_id in Crawl.run_ids(crawler):
+            cls.conn.delete(make_key(crawler, "events", run_id))
+            for level in cls.LEVELS:
+                cls.conn.delete(make_key(crawler, "events", run_id, level))
+        for stage in crawler.stages.keys():
+            cls.conn.delete(make_key(crawler, "events", stage))
+            for level in cls.LEVELS:
+                cls.conn.delete(make_key(crawler, "events", stage, level))
 
     @classmethod
     def get_counts(cls, crawler):
