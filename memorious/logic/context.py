@@ -64,8 +64,8 @@ class Context(object):
 
         try:
             Crawl.operation_start(self.crawler,
-                                         self.stage,
-                                         self.run_id)
+                                  self.stage,
+                                  self.run_id)
             self.log.info('[%s->%s(%s)]: %s',
                           self.crawler.name,
                           self.stage.name,
