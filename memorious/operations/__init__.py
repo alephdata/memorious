@@ -10,7 +10,8 @@ from memorious.operations.store import directory
 from memorious.operations.extract import extract
 from memorious.operations.db import db
 from memorious.operations.ftp import ftp_fetch
+from memorious.operations.balkhash import balkhash_emit
 
 __all__ = [fetch, parse, aleph_emit, seed, sequence, inspect, dates,
            documentcloud_query, dav_index, session, directory,
-           enumerate, clean_html, extract, db, ftp_fetch]
+           enumerate, clean_html, extract, db, ftp_fetch, balkhash_emit]
