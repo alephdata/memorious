@@ -46,7 +46,7 @@ setup(
         'dateparser',
         'stringcase',
         'python-redis-rate-limit>=0.0.5',
-        'redis>=2.10.6',
+        'redis>=2.10.6,<3',
         'blinker>=1.4',
         'boto3>=1.4.8',
         'fakeredis',
