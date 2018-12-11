@@ -145,8 +145,8 @@ The `ftp_fetch` method does an FTP `NLIST` on the value of `url` in data passed 
 
 Parameters:
 
-* `username`: for FTP username authentication.
-* `password`: for FTP password authentication.
+* `username`: for FTP username authentication, defaults to `Anonymous`.
+* `password`: for FTP password authentication, defaults to `anonymous@ftp`.
 
 Output data:
 
@@ -348,6 +348,16 @@ The HTTP session:
   * `retrieved_at`: the date the GET request was made.
   * `modified_at`: from the `Last-Modified` header, provided it wasn't in the last 16 seconds.
 
+Data validation:
+As part of the context logic the following data validation helpers are available:
+* `is_not_empty`: whether value is not empty.
+* `is_numeric`: whether value is numeric.
+* `is_integer`: whether value is an integer.
+* `match_date`: whether value is a date.
+* `match_regexp`: whether value matches a regexp.
+* `has_length`: whether value has a given length.
+* `must_contain`: whether value contains a string.
+
 The datastore:
 
 * Create and access tables in the Memorious database to store intermediary useful crawler data: `table = context.datastore['my_table']`.
@@ -374,7 +384,10 @@ from memorious.helpers import ...
 * `ViewForm`: Helper for VIEWSTATE in ASP-driven web sites.
 * `convert_snakecase`
 * `soviet_checksum`: Ensure a company code from [TODO: countries] is valid.
-* `search_results_total`: Extracts the total search results count from a search index page. Pass it the page as an html object, an xpath route to the element containing the results text, a string to check that you're looking in the right element, and a string delimiter which occurs immediately before the actual number. 
+* `search_results_total`: Extracts the total search results count from a search index page. Pass it the page as an html object, an xpath route to the element containing the results text, a string to check that you're looking in the right element, and a string delimiter which occurs immediately before the actual number.
+* `parse_date`: Parse a string and return a string representing the date and time. Optional: use format codes.
+* `iso_date`: Return a date string in ISO 8601 format.
+* `make_id`: Make a string key out of many criteria.
 
 #### OCR
 
@@ -383,6 +396,9 @@ from memorious.helpers.ocr import ...
 ```
 
 Memorious contains some helpers that use [Tesseract](https://github.com/tesseract-ocr) to OCR images. This depends on [tesserocr](https://github.com/sirfz/tesserocr), which depends on Tesseract version 0.3.4+. If you wish to use these helpers you need to install an up to date version of Tesseract (and *its* dependencies), *then* `pip install tesserocr`.
+
+* `read_word`: OCR a single word from an image.
+* `read_char`: OCR a single character from an image.
 
 [See the Tesseract wiki](https://github.com/tesseract-ocr/tesseract/wiki/Compiling) for more installation details.
 
