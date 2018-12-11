@@ -28,7 +28,7 @@ def ftp_fetch(context, data):
         context.emit(rule='pass', data=data)
     else:
         resp = session.nlst(url, auth=(username, password))
-        for child in resp.iter_lines():
+        for child in resp.iter_lines(decode_unicode=True):
             child_data = data.copy()
             child_data['url'] = os.path.join(url, child)
             # context.log.info("FTP directory child: %(url)s", child_data)
