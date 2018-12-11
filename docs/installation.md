@@ -35,17 +35,17 @@ See [Usage](https://memorious.readthedocs.io/en/latest/usage.html) (or run `memo
 
 Your Memorious instance is configured by a set of environment variables that control database connectivity and general principles of how the sytem operates. You can set all of these in the `Dockerfile`.
 
-* ``MEMORIOUS_CONFIG_PATH``
-* ``MEMORIOUS_DEBUG``
-* ``MEMORIOUS_INCREMENTAL``
-* ``MEMORIOUS_HTTP_CACHE``
-* ``MEMORIOUS_DATASTORE_URI``
+* ``MEMORIOUS_CONFIG_PATH``: a path to crawler pipeline YAML configurations.
+* ``MEMORIOUS_DEBUG``: whether to go into a simple mode with task threading disabled. Defaults to `False`.
+* ``MEMORIOUS_INCREMENTAL``: executing part of a crawler only once per an interval. Defaults to `True`.
+* ``MEMORIOUS_HTTP_CACHE``: HTTP request configuration.
+* ``MEMORIOUS_DATASTORE_URI``: a datastore connection path.
 
-* ``MEMORIOUS_ARCHIVE_TYPE``, either ``file`` or ``s3``
-* ``MEMORIOUS_ARCHIVE_PATH``
-* ``MEMORIOUS_ARCHIVE_AWS_KEY_ID``
-* ``MEMORIOUS_ARCHIVE_AWS_SECRET``
-* ``MEMORIOUS_ARCHIVE_AWS_REGION``
+* ``MEMORIOUS_ARCHIVE_TYPE``: either ``file`` or ``s3``.
+* ``MEMORIOUS_ARCHIVE_PATH``: 
+* ``MEMORIOUS_ARCHIVE_AWS_KEY_ID``: AWS Access Key ID.
+* ``MEMORIOUS_ARCHIVE_AWS_SECRET``: AWS Secret Access Key.
+* ``MEMORIOUS_ARCHIVE_AWS_REGION``: a regional AWS endpoint.
 * ``MEMORIOUS_ARCHIVE_BUCKET``
 
 * ``ALEPH_HOST``, default is ``https://data.occrp.org/``, but any instance
