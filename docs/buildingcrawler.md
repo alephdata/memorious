@@ -8,7 +8,7 @@ The first few lines of your config are to set up your crawler:
 
 * `name`: A unique slug, eg. "my_crawler", which you can pass to `memorious run` to start your crawler.
 * `description`: An optional description, will be shown when you run `list`.
-* `schedule`: one of `daily`, `weekly` or `monthly`
+* `schedule`: one of `hourly`, `daily`, `weekly` or `monthly`
 
 ## The Pipeline
 
@@ -136,7 +136,22 @@ Parameters (optional):
 
 Output data:
 
-* TODO: the serialized result of the GET response
+* The serialized result of the HTTP `GET` response.
+
+
+#### Ftp Fetch
+
+The `ftp_fetch` method does an FTP `NLIST` on the value of `url` in data passed from the previous stage.
+
+Parameters:
+
+* `username`: for FTP username authentication.
+* `password`: for FTP password authentication.
+
+Output data:
+
+* The serialized result of the FTP `NLIST` response.
+
 
 #### Clean
 
@@ -153,11 +168,11 @@ Output data:
 
 #### DAV index
 
-The `dav_index` method lists the files in a WebDAV directory; the directory is passed via the `url` of the previous stage data.
+The `dav_index` method lists the files in a WebDAV directory and does nad HTTP `get` on them; the directory is passed via the `url` of the previous stage data.
 
 Output data:
 
-* TODO
+* The serialized result of the HTTP `GET` response.
 
 #### Session
 
@@ -168,6 +183,7 @@ Parameters:
 * `user`: for HTTP Basic authentication.
 * `password`: for HTTP Basic authentication.
 * `user_agent`: the User-Agent HTTP header.
+* `proxy`: proxy server address for HTTP tunneling.
 
 Output data: 
 
@@ -283,10 +299,10 @@ Parameters:
 
 ### Rules
 
-You can configure rules per stage to tell certain methods which inputs to process or skip. You can nest them, and apply `not`,  `and` and `or` for the combinations you desire.
+You can configure rules per stage to tell certain methods which inputs to process or skip. You can nest them, and apply `not`, `and` and `or` for the combinations you desire.
 
 * `mime_type`: Match the MIME type string.
-* `mime_group`: See [mime.py](https://github.com/alephdata/memorious/blob/master/memorious/helpers/mime.py) for handy MIME type groupings (`web`, `images`, `documents`, `archives` and `assets`).
+* `mime_group`: See [mime.py](https://github.com/alephdata/memorious/blob/master/memorious/logic/mime.py) for handy MIME type groupings (`web`, `images`, `media`, `documents`, `archives` and `assets`).
 * `domain`: URL contains this domain.
 * `pattern`: URL matches this regex.
 
