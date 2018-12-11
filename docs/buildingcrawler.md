@@ -382,9 +382,10 @@ from memorious.helpers import ...
 ```
 
 * `ViewForm`: Helper for VIEWSTATE in ASP-driven web sites.
-* `convert_snakecase`
+* `convert_snakecase`: Convert a given string to 'snake_case'.
 * `soviet_checksum`: Ensure a company code from [TODO: countries] is valid.
 * `search_results_total`: Extracts the total search results count from a search index page. Pass it the page as an html object, an xpath route to the element containing the results text, a string to check that you're looking in the right element, and a string delimiter which occurs immediately before the actual number.
+* `search_results_last_url`: Get the URL for the 'last' button in search results listing.
 * `parse_date`: Parse a string and return a string representing the date and time. Optional: use format codes.
 * `iso_date`: Return a date string in ISO 8601 format.
 * `make_id`: Make a string key out of many criteria.

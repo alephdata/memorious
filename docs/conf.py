@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Memorious'
-copyright = u'2017, Friedrich Lindenberg'
+copyright = u'2018, Friedrich Lindenberg'
 author = u'Friedrich Lindenberg'
 
 # The version info for the project you're documenting, acts as replacement for
