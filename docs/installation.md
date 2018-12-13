@@ -39,7 +39,11 @@ Your Memorious instance is configured by a set of environment variables that con
 * ``MEMORIOUS_DEBUG``: whether to go into a simple mode with task threading disabled. Defaults to `False`.
 * ``MEMORIOUS_INCREMENTAL``: executing part of a crawler only once per an interval. Defaults to `True`.
 * ``MEMORIOUS_HTTP_CACHE``: HTTP request configuration.
-* ``MEMORIOUS_DATASTORE_URI``: a datastore connection path.
+* ``MEMORIOUS_DATASTORE_URI``: connection path for an operational database (which crawlers can send data to using the `db` method). Defaults to a local `datastore.sqllite3`.
+
+* ``MEMORIOUS_REDIS_HOST``: address of Redis instance to use for crawler logs (uses a temporary FakeRedis if missing).
+* ``MEMORIOUS_THREADS``: how many threads to use for execution.
+* ``MEMORIOUS_MAX_SCHEDULED``: maximum number of scheduled tasks at the same time. Defaults to the same as the number of threads.
 
 * ``MEMORIOUS_ARCHIVE_TYPE``: either ``file`` or ``s3``.
 * ``MEMORIOUS_ARCHIVE_PATH``: 
@@ -50,7 +54,7 @@ Your Memorious instance is configured by a set of environment variables that con
 
 * ``ALEPH_HOST``, default is ``https://data.occrp.org/``, but any instance
   of Aleph 2.0 or greater should work.
-* ``ALEPH_API_KEY``, a valid API key for use by the upload operation.
+* ``ALEPH_API_KEY``, a valid API key for use by the upload operation. 
 
 ## Shut it down
 
