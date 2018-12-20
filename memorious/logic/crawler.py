@@ -7,7 +7,6 @@ from datetime import timedelta, datetime
 from memorious import settings
 from memorious.model import Tag, Event, Crawl, Queue
 from memorious.logic.stage import CrawlerStage
-from memorious.task_runner import TaskRunner
 
 log = logging.getLogger(__name__)
 
@@ -90,9 +89,6 @@ class Crawler(object):
         # Flush out previous events:
         Event.delete(self)
         Queue.queue(self.init_stage, state, {})
-
-        if not settings.REDIS_HOST:
-            TaskRunner.run()
 
     @property
     def is_running(self):

@@ -2,7 +2,7 @@ import logging
 from collections import deque
 from datetime import datetime, timedelta
 
-from memorious.core import manager
+from memorious.core import manager, settings
 from memorious.model.common import Base, pack_datetime, unpack_datetime
 from memorious.model.common import unpack_int, load_json, dump_json
 from memorious.model.common import QUEUE_EXPIRE
@@ -36,10 +36,11 @@ class Queue(Base):
     def tasks(cls):
         queues = [make_key('queue', c, s) for c, s in manager.stages]
         while True:
-            task_data_tuple = cls.conn.blpop(queues)
+            timeout = 1 if settings.DEBUG else 0
+            task_data_tuple = cls.conn.blpop(queues, timeout=timeout)
             # blpop blocks until it finds something. But fakeredis has no
             # blocking support. So it justs returns None.
-            if not task_data_tuple:
+            if task_data_tuple is None:
                 return
 
             key, json_data = task_data_tuple

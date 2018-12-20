@@ -44,6 +44,8 @@ def run(crawler):
     """Run a specified crawler."""
     crawler = get_crawler(crawler)
     crawler.run()
+    if settings.DEBUG:
+        TaskRunner.run_sync()
 
 
 @cli.command()
@@ -68,8 +70,8 @@ def process():
     TaskRunner.run()
 
 
-@cli.command()
-def list():
+@cli.command('list')
+def index():
     """List the available crawlers."""
     crawler_list = []
     for crawler in manager:

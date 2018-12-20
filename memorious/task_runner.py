@@ -57,13 +57,12 @@ class TaskRunner(object):
             q.task_done()
 
     @classmethod
-    def run(cls):
-        if settings.DEBUG:
-            log.info("DEBUG mode. Disabling task threading.")
-            for task in Queue.tasks():
-                cls.execute(*task)
-            return
+    def run_sync(cls):
+        for task in Queue.tasks():
+            cls.execute(*task)
 
+    @classmethod
+    def run(cls):
         log.info("Processing queue (%s threads)", settings.THREADS)
         q = queue.Queue(maxsize=settings.THREADS)
         threads = []
@@ -86,7 +85,6 @@ class TaskRunner(object):
 
             # block until all tasks are done
             q.join()
-
             if tasks_processed == 0:
                 break
 
