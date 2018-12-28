@@ -10,6 +10,7 @@ from memorious.ui.reporting import (
     crawler_stages, crawler_events,
     crawler_runs
 )
+from memorious.core import init_memorious
 
 app = Flask(__name__)
 
@@ -107,3 +108,8 @@ def invoke(crawler, action):
     if request.form.get('return') == 'index':
         return redirect(url_for('.index'))
     return redirect(url_for('.crawler', name=crawler.name))
+
+
+if __name__ == '__main__':
+    init_memorious()
+    app.run(host='0.0.0.0', port=4000, debug=True)

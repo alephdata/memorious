@@ -19,7 +19,7 @@ test:
 	tox
 
 ui:
-	python memorious/ui/__init__.py
+	python memorious/ui/views.py
 
 shell:
 	$(DOCKER) /bin/bash
