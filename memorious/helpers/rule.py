@@ -1,6 +1,5 @@
 import re
-import six
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 from celestial import normalize_mimetype
 
 from memorious.logic.mime import GROUPS
@@ -114,7 +113,7 @@ class DomainRule(Rule):
         return domain
 
     def configure(self):
-        if not isinstance(self.value, six.string_types):
+        if not isinstance(self.value, str):
             raise Exception("Not a domain: %r", self.value)
         self.domain = self.clean_domain(self.value)
         self.sub_domain = '.%s' % self.domain
@@ -133,7 +132,7 @@ class DomainRule(Rule):
 class UrlPatternRule(Rule):
 
     def configure(self):
-        if not isinstance(self.value, six.string_types):
+        if not isinstance(self.value, str):
             raise Exception("Not a regex: %r", self.value)
         self.pattern = re.compile(self.value, re.I | re.U)
 

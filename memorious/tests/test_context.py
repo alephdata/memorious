@@ -1,5 +1,4 @@
 import json
-import six
 from memorious.logic.context import Context
 from memorious.model import Event
 
@@ -7,11 +6,11 @@ from memorious.model import Event
 class TestContext(object):
 
     def test_context(self, context):
-        assert isinstance(context.run_id, six.string_types)
+        assert isinstance(context.run_id, str)
 
     def test_content_hash(self, context):
         content_hash = context.store_data(json.dumps({"hello": "world"}))
-        assert isinstance(content_hash, six.string_types)
+        assert isinstance(content_hash, str)
         with context.load_file(content_hash) as fh:
             assert hasattr(fh, "read")
 

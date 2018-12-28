@@ -1,4 +1,4 @@
-from six.moves.urllib.parse import urljoin
+from urllib.parse import urljoin
 from requests.exceptions import RequestException
 
 from memorious.helpers.rule import Rule

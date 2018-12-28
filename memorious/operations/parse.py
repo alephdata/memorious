@@ -1,6 +1,6 @@
 import logging
-from six.moves.urllib.parse import urljoin
 from banal import ensure_list
+from urllib.parse import urljoin
 from urlnormalizer import normalize_url
 from normality import collapse_spaces
 

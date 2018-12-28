@@ -1,5 +1,4 @@
 import os
-import six
 import uuid
 import shutil
 import logging
@@ -34,7 +33,7 @@ class Context(object):
     def get(self, name, default=None):
         """Get a configuration value and expand environment variables."""
         value = self.params.get(name, default)
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             value = os.path.expandvars(value)
         return value
 
@@ -94,7 +93,7 @@ class Context(object):
                           Event.LEVEL_ERROR,
                           self.run_id,
                           error=exc.__class__.__name__,
-                          message=six.text_type(exc))
+                          message=str(exc))
 
     def set_tag(self, key, value):
         return Tag.save(self.crawler, key, value)
@@ -139,7 +138,7 @@ class Context(object):
         path = random_filename(self.work_path)
         try:
             with open(path, 'wb') as fh:
-                if isinstance(data, six.text_type):
+                if isinstance(data, str):
                     data = data.encode(encoding)
                 if data is not None:
                     fh.write(data)

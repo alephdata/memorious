@@ -1,6 +1,5 @@
 import os
 import pkg_resources
-import six
 import multiprocessing
 from banal import as_bool
 
@@ -27,7 +26,7 @@ APP_NAME = env('APP_NAME', 'memorious')
 DEBUG = env_bool('DEBUG', default=False)
 
 # Base operating path
-BASE_PATH = env('BASE_PATH', os.path.join(six.moves.getcwd(), 'data'))
+BASE_PATH = env('BASE_PATH', os.path.join(os.getcwd(), 'data'))
 
 # Directory which contains crawler pipeline YAML specs
 CONFIG_PATH = env('CONFIG_PATH')

@@ -1,6 +1,4 @@
 import os
-
-import six
 import pytest
 from requests import Session, Response, Request
 from lxml import html, etree
@@ -62,7 +60,7 @@ class TestContextHttpResponse(object):
         )
         context_http_response = ContextHttpResponse(http, request)
         assert context_http_response._request_id is None
-        assert isinstance(context_http_response.request_id, six.string_types)
+        assert isinstance(context_http_response.request_id, str)
 
     def test_content(self, http):
         request = Request(
@@ -70,8 +68,8 @@ class TestContextHttpResponse(object):
             headers={"User-Agent": "Memorious Test"}
         )
         context_http_response = ContextHttpResponse(http, request)
-        assert isinstance(context_http_response.raw, six.binary_type)
-        assert isinstance(context_http_response.text, six.text_type)
+        assert isinstance(context_http_response.raw, bytes)
+        assert isinstance(context_http_response.text, str)
         assert context_http_response.json == {"user-agent": "Memorious Test"}
 
     def test_html(self, http):

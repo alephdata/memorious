@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from six.moves.urllib.parse import urljoin
+from urllib.parse import urljoin
 
 DEFAULT_HOST = 'https://documentcloud.org/'
 DEFAULT_INSTANCE = 'documentcloud'
