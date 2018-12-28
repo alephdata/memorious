@@ -36,18 +36,18 @@
             <th width="15%">Actions</th>
             <td>
                 {% if not crawler.is_running %}
-                    <form action="{{ url_for('.invoke', crawler=crawler.name, action='run') }}" method="POST">
+                    <form action="{{ url_for('.crawler_run', crawler=crawler.name) }}" method="POST">
                         <input class="invoke" type="submit" value="Run" />
                     </form>
                 {% else %}
-                    <form action="{{ url_for('.invoke', crawler=crawler.name, action='cancel') }}" method="POST">
+                    <form action="{{ url_for('.crawler_cancel', crawler=crawler.name) }}" method="POST">
                         <input class="invoke" type="submit" value="Cancel" />
                     </form>
                 {% endif %}
-                <form action="{{ url_for('.invoke', crawler=crawler.name, action='flush-events') }}" method="POST">
+                <form action="{{ url_for('.crawler_flush_events', crawler=crawler.name) }}" method="POST">
                     <input class="invoke" type="submit" value="Flush events" />
                 </form>
-                <form action="{{ url_for('.invoke', crawler=crawler.name, action='flush') }}" method="POST">
+                <form action="{{ url_for('.crawler_flush', crawler=crawler.name) }}" method="POST">
                     <input class="invoke" type="submit" value="Flush everything" />
                 </form>
             </td>
@@ -105,27 +105,24 @@
             </th>
         </tr>
         <tr>
-            <th>Run ID</th>
+            <th>Started at</th>
+            <th>Ended at</th>
             <th class="number">Total Ops</th>
-            <th class="number">Started at</th>
-            <th class="number">Ended at</th>
             <th class="number">Errors</th>
             <th class="number">Warn</th>
+            <!-- th>Run ID</th -->
         </tr>
         {% for item in runs %}
         <tr>
+            <td>{{ item.start | datetime }}</td>
             <td>
-                <code>{{ item.run_id }}</code>
-            </td>
-            <td class="number">{{ item.total_ops | number }}</td>
-            <td class="number">{{ item.start | datetime }}</td>
-            <td class="number">
                 {% if item.run_id != crawler.latest_runid or not crawler.is_running %}
                     {{ item.end | datetime }}
                 {% else %}
                     running
                 {% endif %}
             </td>
+            <td class="number">{{ item.total_ops | number }}</td>
             <td class="number">
                 {% if item.error %}
                 <a href="{{ url_for('.events', name=crawler.name, run_id=item.run_id, level='error') }}" class="error">
@@ -142,6 +139,9 @@
                 </a>
                 {% endif %}
             </td>
+            <!-- td width="1%">
+                <code>{{ item.run_id }}</code>
+            </td -->
         </tr>
         {% endfor %}
     </table>

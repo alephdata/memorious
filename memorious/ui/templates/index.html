@@ -63,12 +63,12 @@
                 </td>
                 <td class="number">
                     {% if not item.running %}
-                        <form action="{{ url_for('.invoke', crawler=item.crawler.name, action='run') }}" method="POST">
+                        <form action="{{ url_for('.crawler_run', crawler=item.crawler.name) }}" method="POST">
                             <input class="invoke" type="submit" value="Run" />
                             <input type="hidden" name="return" value="index" />
                         </form>
                     {% else %}
-                        <form action="{{ url_for('.invoke', crawler=item.crawler.name, action='cancel') }}" method="POST">
+                        <form action="{{ url_for('.crawler_cancel', crawler=item.crawler.name) }}" method="POST">
                             <input class="invoke" type="submit" value="Cancel" />
                             <input type="hidden" name="return" value="index" />
                         </form>

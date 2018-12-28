@@ -1,17 +1,14 @@
+import math
 from urllib.parse import urlencode
-
 from flask import Flask, request, redirect
 from flask import render_template, abort, url_for
 from babel.numbers import format_number
 from babel.dates import format_date, format_datetime
 
-from memorious.ui.reporting import (
-    crawlers_index, global_stats, get_crawler,
-    crawler_stages, crawler_events,
-    crawler_runs
-)
-from memorious.core import init_memorious
+from memorious.core import settings, manager, init_memorious
+from memorious.model import Event
 
+PAGE_SIZE = 50
 app = Flask(__name__)
 
 
@@ -46,68 +43,116 @@ def state_change(name, value):
 
 @app.context_processor
 def context():
-    context = global_stats()
-    context['state_change'] = state_change
-    return context
+    return {
+        'version': settings.VERSION,
+        'num_crawlers': len(manager),
+        'state_change': state_change
+    }
+
+
+def get_crawler(name):
+    crawler = manager.get(name)
+    if crawler is None:
+        abort(404)
+    return crawler
+
+
+def redirect_crawler(crawler):
+    if request.form.get('return') == 'index':
+        return redirect(url_for('.index'))
+    return redirect(url_for('.crawler', name=crawler.name))
 
 
 @app.route('/')
 def index():
-    crawlers = crawlers_index()
+    """Generate a list of all crawlers, alphabetically, with op counts."""
+    crawlers = []
+    for crawler in manager:
+        data = Event.get_counts(crawler)
+        data['last_active'] = crawler.last_run
+        data['total_ops'] = crawler.op_count
+        data['running'] = crawler.is_running
+        data['crawler'] = crawler
+        crawlers.append(data)
     return render_template('index.html', crawlers=crawlers)
 
 
 @app.route('/crawlers/<name>')
 def crawler(name):
     crawler = get_crawler(name)
-    if crawler is None:
-        abort(404)
-    stages = crawler_stages(crawler)
-    runs = crawler_runs(crawler)
+    stages = []
+    for stage in crawler:
+        data = Event.get_stage_counts(crawler, stage)
+        data['total_ops'] = stage.op_count
+        data['stage'] = stage
+        stages.append(data)
+    runs = list(crawler.runs)
+    for run in runs:
+        run.update(Event.get_run_counts(crawler, run['run_id']))
+    runs = sorted(runs, key=lambda r: r['start'], reverse=True)
     return render_template('crawler.html',
                            crawler=crawler,
-                           stages=stages, runs=runs)
+                           stages=stages,
+                           runs=runs)
 
 
 @app.route('/crawlers/<name>/events')
 def events(name):
     crawler = get_crawler(name)
-    if crawler is None:
-        abort(404)
-    events = crawler_events(crawler,
-                            page=int(request.args.get('page', 1)),
-                            run_id=request.args.get('run_id'),
-                            level=request.args.get('level'),
-                            stage_name=request.args.get('stage_name'))
+    page = int(request.args.get('page', 1))
+    start = (max(1, page) - 1) * PAGE_SIZE
+    end = start + PAGE_SIZE
+    run_id = request.args.get('run_id')
+    level = request.args.get('level')
+    stage_name = request.args.get('stage_name')
+
+    if stage_name:
+        events = Event.get_stage_events(crawler, stage_name, start, end, level)
+    elif run_id:
+        events = Event.get_run_events(crawler, run_id, start, end, level)
+    else:
+        events = Event.get_crawler_events(crawler, start, end, level)
+    total = len(events)
+    pages = int(math.ceil((float(total) / PAGE_SIZE)))
     return render_template('events.html',
                            crawler=crawler,
-                           events=events)
+                           results=events,
+                           page=page,
+                           pages=pages)
 
 
 @app.route('/crawlers/<name>/config')
 def config(name):
     crawler = get_crawler(name)
-    if crawler is None:
-        abort(404)
     return render_template('config.html', crawler=crawler)
 
 
-@app.route('/invoke/<crawler>/<action>', methods=['POST'])
-def invoke(crawler, action):
+@app.route('/invoke/<crawler>/run', methods=['POST'])
+def crawler_run(crawler):
     crawler = get_crawler(crawler)
-    if crawler is None:
-        abort(404)
-    if action == 'run':
-        crawler.run()
-    if action == 'cancel':
-        crawler.cancel()
-    if action == 'flush':
-        crawler.flush()
-    if action == 'flush-events':
-        crawler.flush_events()
-    if request.form.get('return') == 'index':
-        return redirect(url_for('.index'))
-    return redirect(url_for('.crawler', name=crawler.name))
+    crawler.run()
+    return redirect_crawler(crawler)
+
+
+@app.route('/invoke/<crawler>/cancel', methods=['POST'])
+def crawler_cancel(crawler):
+    crawler = get_crawler(crawler)
+    crawler.cancel()
+    return redirect_crawler(crawler)
+
+
+@app.route('/invoke/<crawler>/flush', methods=['POST'])
+def crawler_flush(crawler):
+    crawler = get_crawler(crawler)
+    crawler.flush()
+    return redirect_crawler(crawler)
+
+
+@app.route('/invoke/<crawler>/flush-events', methods=['POST'])
+def crawler_flush_events(crawler):
+    crawler = get_crawler(crawler)
+    crawler.flush_events()
+    return redirect_crawler(crawler)
 
 
 if __name__ == '__main__':

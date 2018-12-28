@@ -24,7 +24,7 @@
             <th>Message</th>
             <th class="number">Timestamp</th>
         </tr>
-        {% for res in events.results %}
+        {% for res in results %}
             <tr>
                 <td>
                     <code>
@@ -50,14 +50,14 @@
     </table>
     <div class="float-right">
         <ul class="pagination">
-            {% if events.page > 1 %}
+            {% if page > 1 %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ state_change('page', events.page - 1)}}">Previous</a>
+                    <a class="page-link" href="{{ state_change('page', page - 1)}}">Previous</a>
                 </li>
             {% endif %}
-            {% if (events.page + 1) <= events.pages %}
+            {% if (page + 1) <= pages %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ state_change('page', events.page + 1)}}">Next</a>
+                    <a class="page-link" href="{{ state_change('page', page + 1)}}">Next</a>
                 </li>
             {% endif %}
         </ul>
