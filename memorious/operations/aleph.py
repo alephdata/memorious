@@ -1,7 +1,7 @@
+from pathlib import Path
 from pprint import pprint  # noqa
 from banal import clean_dict
 from alephclient.api import AlephAPI
-from alephclient.tasks.util import to_path
 
 from memorious import settings
 
@@ -60,7 +60,7 @@ def aleph_emit(context, data):
     with context.load_file(content_hash) as fh:
         if fh is None:
             return
-        file_path = to_path(fh.name)
+        file_path = Path(fh.name).resolve()
         res = api.ingest_upload(collection_id, file_path, meta)
         if res.get('status') == 'ok':
             document = res.get('documents')[0]
