@@ -57,8 +57,6 @@ class Queue(Base):
             data = task_data["data"]
             next_time = task_data.get("next_allowed_exec_time")
             next_time = unpack_datetime(next_time)
-            crawler = state.get('crawler')
-            cls.conn.decr(make_key('queue_pending', crawler))
             yield (stage, state, data, next_time)
 
     @classmethod
