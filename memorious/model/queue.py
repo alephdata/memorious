@@ -83,6 +83,10 @@ class Queue(Base):
         return cls.size(crawler) > 0
 
     @classmethod
+    def decr_pending(cls, crawler):
+        cls.conn.decr(make_key('queue_pending', crawler))
+
+    @classmethod
     def flush(cls, crawler):
         cls.conn.delete(make_key('queue_pending', crawler))
         for name in crawler.stages.keys():
