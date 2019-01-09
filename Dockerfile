@@ -5,8 +5,10 @@ RUN apk update && apk upgrade && \
 
 RUN apk add tesseract-ocr
 
+RUN pip3 install --upgrade pip setuptools
+
 RUN apk add --no-cache --virtual=build_deps python3-dev g++ tesseract-ocr-dev && \
-    pip3 install --no-cache-dir tesserwrap alephclient regex && \
+    pip3 install --no-cache-dir tesserocr alephclient regex && \
     apk del build_deps
 
 ENV MEMORIOUS_BASE_PATH=/data \
