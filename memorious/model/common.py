@@ -29,9 +29,11 @@ def pack_now():
     return pack_datetime(datetime.utcnow())
 
 
-def unpack_datetime(value):
-    if value is not None:
+def unpack_datetime(value, default=None):
+    try:
         return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f")
+    except Exception:
+        return default
 
 
 def delete_prefix(conn, prefix):

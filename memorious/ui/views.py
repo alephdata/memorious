@@ -89,7 +89,7 @@ def crawler(name):
     runs = list(crawler.runs)
     for run in runs:
         run.update(Event.get_run_counts(crawler, run['run_id']))
-    runs = sorted(runs, key=lambda r: r['start'], reverse=True)
+    runs = sorted(runs, key=lambda r: r.get('start'), reverse=True)
     return render_template('crawler.html',
                            crawler=crawler,
                            stages=stages,

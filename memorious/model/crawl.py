@@ -1,5 +1,6 @@
 import logging
 from banal import ensure_list
+from datetime import datetime
 
 from memorious.model.common import Base, unpack_int, unpack_datetime, pack_now
 from memorious.util import make_key
@@ -38,7 +39,7 @@ class Crawl(Base):
             yield {
                 'run_id': run_id,
                 'total_ops': unpack_int(total_ops),
-                'start': unpack_datetime(start),
+                'start': unpack_datetime(start, datetime.utcnow()),
                 'end': unpack_datetime(end)
             }
 
