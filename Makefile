@@ -1,4 +1,4 @@
-DOCKER=docker run -v $(PWD)/dist:/ingestors/dist -ti alephdata/memorious
+DOCKER=docker run -v $(PWD)/dist:/memorious/dist -ti alephdata/memorious
 
 all: clean
 
@@ -22,7 +22,7 @@ ui:
 	python memorious/ui/views.py
 
 shell:
-	$(DOCKER) /bin/bash
+	$(DOCKER) sh
 
 image:
 	docker build -t alephdata/memorious .
