@@ -81,13 +81,6 @@ ALEPH_API_KEY = env('ALEPH_API_KEY')
 
 
 ###############################################################################
-# Error reporting
-
-# Using sentry raven
-SENTRY_DSN = env('SENTRY_DSN')
-
-
-###############################################################################
 # Redis
 
 REDIS_HOST = env('REDIS_HOST', '')
