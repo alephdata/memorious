@@ -1,14 +1,15 @@
 import logging
 
+from memorious.core import conn
 from memorious.model.crawl import Crawl
-from memorious.model.common import Base, pack_now, unpack_datetime
+from memorious.model.common import pack_now, unpack_datetime
 from memorious.model.common import dump_json, load_json
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
 
 
-class Event(Base):
+class Event(object):
     """Document errors and warnings caused during tasks."""
     LEVEL_WARNING = 'warning'
     LEVEL_ERROR = 'error'
@@ -25,34 +26,34 @@ class Event(Base):
             'message': message
         }
         data = dump_json(event)
-        cls.conn.lpush(make_key(crawler, "events"), data)
-        cls.conn.lpush(make_key(crawler, "events", level), data)
-        cls.conn.lpush(make_key(crawler, "events", stage), data)
-        cls.conn.lpush(make_key(crawler, "events", stage, level), data)
-        cls.conn.lpush(make_key(crawler, "events", run_id), data)
-        cls.conn.lpush(make_key(crawler, "events", run_id, level), data)
+        conn.lpush(make_key(crawler, "events"), data)
+        conn.lpush(make_key(crawler, "events", level), data)
+        conn.lpush(make_key(crawler, "events", stage), data)
+        conn.lpush(make_key(crawler, "events", stage, level), data)
+        conn.lpush(make_key(crawler, "events", run_id), data)
+        conn.lpush(make_key(crawler, "events", run_id, level), data)
         return event
 
     @classmethod
     def delete(cls, crawler):
-        cls.conn.delete(make_key(crawler, "events"))
+        conn.delete(make_key(crawler, "events"))
         for level in cls.LEVELS:
-            cls.conn.delete(make_key(crawler, "events", level))
+            conn.delete(make_key(crawler, "events", level))
         for run_id in Crawl.run_ids(crawler):
-            cls.conn.delete(make_key(crawler, "events", run_id))
+            conn.delete(make_key(crawler, "events", run_id))
             for level in cls.LEVELS:
-                cls.conn.delete(make_key(crawler, "events", run_id, level))
+                conn.delete(make_key(crawler, "events", run_id, level))
         for stage in crawler.stages.keys():
-            cls.conn.delete(make_key(crawler, "events", stage))
+            conn.delete(make_key(crawler, "events", stage))
             for level in cls.LEVELS:
-                cls.conn.delete(make_key(crawler, "events", stage, level))
+                conn.delete(make_key(crawler, "events", stage, level))
 
     @classmethod
     def get_counts(cls, crawler):
         counts = {}
         for level in cls.LEVELS:
             key = make_key(crawler, "events", level)
-            counts[level] = cls.conn.llen(key) or 0
+            counts[level] = conn.llen(key) or 0
         return counts
 
     @classmethod
@@ -60,7 +61,7 @@ class Event(Base):
         counts = {}
         for level in cls.LEVELS:
             key = make_key(crawler, "events", stage, level)
-            counts[level] = cls.conn.llen(key) or 0
+            counts[level] = conn.llen(key) or 0
         return counts
 
     @classmethod
@@ -68,13 +69,13 @@ class Event(Base):
         counts = {}
         for level in cls.LEVELS:
             key = make_key(crawler, "events", run_id, level)
-            counts[level] = cls.conn.llen(key) or 0
+            counts[level] = conn.llen(key) or 0
         return counts
 
     @classmethod
     def event_list(cls, key, start, end):
         results = []
-        events = cls.conn.lrange(key, start, end)
+        events = conn.lrange(key, start, end)
         if events is None:
             return results
         for event in events:

@@ -1,12 +1,13 @@
 import datetime
 
+from memorious.core import conn
 from memorious.model import Crawl
 
 
 class TestReporting(object):
 
     def test_operation_reporting(self, crawler, context):
-        Crawl.conn.flushall()
+        conn.flushall()
         assert len(crawler.runs) == 0
         stage = list(crawler.stages)[0]
         Crawl.operation_start(crawler, stage, context.run_id)
