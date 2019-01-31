@@ -32,16 +32,18 @@ class Crawl(Base):
 
     @classmethod
     def runs(cls, crawler):
+        runs = []
         for run_id in cls.run_ids(crawler):
             start = cls.conn.get(make_key("run", run_id, "start"))
             end = cls.conn.get(make_key("run", run_id, "end"))
             total_ops = cls.conn.get(make_key("run", run_id, "total_ops"))
-            yield {
+            runs.append({
                 'run_id': run_id,
                 'total_ops': unpack_int(total_ops),
                 'start': unpack_datetime(start, datetime.utcnow()),
                 'end': unpack_datetime(end)
-            }
+            })
+        return runs
 
     @classmethod
     def operation_start(cls, crawler, stage, run_id):
