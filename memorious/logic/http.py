@@ -1,5 +1,7 @@
 import cgi
 import json
+import pickle
+import codecs
 from hashlib import sha1
 from lxml import html, etree
 from urllib.parse import unquote
@@ -12,13 +14,14 @@ from requests.structures import CaseInsensitiveDict
 from datetime import datetime, timedelta
 
 from memorious import settings
-from memorious.core import storage
-from memorious.model.session import SessionState
+from memorious.core import conn, storage
 from memorious.logic.mime import NON_HTML
 from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
 from memorious.helpers.dates import parse_date
 from memorious.util import random_filename
+from memorious.model.common import QUEUE_EXPIRE
+from memorious.util import make_key
 
 
 class ContextHttp(object):
@@ -31,10 +34,7 @@ class ContextHttp(object):
         if 'cache' in context.params:
             self.cache = context.params.get('cache')
 
-        self.session = None
-        if self.STATE_SESSION in self.context.state:
-            key = self.context.state.get(self.STATE_SESSION)
-            self.session = SessionState.get(context.crawler, key)
+        self.session = self.load_session()
         if self.session is None:
             self.reset()
 
@@ -69,8 +69,21 @@ class ContextHttp(object):
     def rehash(self, data):
         return ContextHttpResponse.deserialize(self, data)
 
+    def load_session(self):
+        if self.STATE_SESSION not in self.context.state:
+            return
+        key = self.context.state.get(self.STATE_SESSION)
+        value = conn.get(make_key(self.context.run_id, "session", key))
+        if value is not None:
+            session = codecs.decode(bytes(value, 'utf-8'), 'base64')
+            return pickle.loads(session)
+
     def save(self):
-        key = SessionState.get(self.context.crawler, self.session)
+        session = pickle.dumps(self.session)
+        session = codecs.encode(session, 'base64')
+        key = sha1(session).hexdigest()[:15]
+        key = make_key(self.context.run_id, "session", key)
+        conn.set(key, session, ex=QUEUE_EXPIRE)
         self.context.state[self.STATE_SESSION] = key
 
 

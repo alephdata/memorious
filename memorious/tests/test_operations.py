@@ -63,7 +63,7 @@ def test_parse(context, mocker):
         context.http.result = None
         context.params["store"] = None
         parse(context, data)
-        assert context.emit.call_count == 1, data
+        assert context.emit.call_count == 2, data
 
 
 def test_seed(context, mocker):

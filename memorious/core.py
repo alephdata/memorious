@@ -51,16 +51,17 @@ def load_datastore():
     return settings._datastore
 
 
-manager = LocalProxy(load_manager)
-datastore = LocalProxy(load_datastore)
-
-
 def connect_redis():
     if settings.TESTING or not settings.REDIS_HOST:
         if not hasattr(settings, '_redis'):
             settings._redis = fakeredis.FakeRedis(decode_responses=True)
         return settings._redis
     return redis.Redis(connection_pool=redis_pool, decode_responses=True)
+
+
+manager = LocalProxy(load_manager)
+datastore = LocalProxy(load_datastore)
+conn = LocalProxy(connect_redis)
 
 
 def load_extensions():
