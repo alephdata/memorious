@@ -73,16 +73,7 @@ def get_collection_id(context, api):
     if hasattr(context.stage, '_aleph_cid'):
         return context.stage._aleph_cid
     foreign_id = context.get('collection', context.crawler.name)
-    filters = [('foreign_id', foreign_id)]
-    for coll in api.filter_collections(filters=filters):
-        if coll.get('foreign_id') == foreign_id:
-            context.stage._aleph_cid = coll.get('id')
-            return context.stage._aleph_cid
-
-    coll = api.create_collection({
-        'label': context.crawler.description,
-        'casefile': False,
-        'foreign_id': foreign_id
-    })
-    context.stage._aleph_cid = coll.get('id')
+    config = {'label': context.crawler.description}
+    collection = api.load_collection_by_foreign_id(foreign_id, config=config)
+    context.stage._aleph_cid = collection.get('id')
     return context.stage._aleph_cid
