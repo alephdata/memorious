@@ -56,7 +56,7 @@ datastore = LocalProxy(load_datastore)
 
 
 def connect_redis():
-    if not settings.REDIS_HOST:
+    if settings.TESTING or not settings.REDIS_HOST:
         return fakeredis.FakeRedis(decode_responses=True)
     return redis.Redis(connection_pool=redis_pool, decode_responses=True)
 

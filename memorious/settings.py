@@ -24,6 +24,7 @@ APP_NAME = env('APP_NAME', 'memorious')
 
 # Enable debug logging etc.
 DEBUG = env_bool('DEBUG', default=False)
+TESTING = False
 
 # Base operating path
 BASE_PATH = env('BASE_PATH', os.path.join(os.getcwd(), 'data'))
