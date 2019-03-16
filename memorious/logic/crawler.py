@@ -25,7 +25,7 @@ class Crawler(object):
         self.source_file = source_file
         with io.open(source_file, encoding='utf-8') as fh:
             self.config_yaml = fh.read()
-            self.config = yaml.load(self.config_yaml)
+            self.config = yaml.safe_load(self.config_yaml)
 
         self.name = os.path.basename(source_file)
         self.name = self.config.get('name', self.name)

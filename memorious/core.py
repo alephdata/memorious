@@ -1,32 +1,15 @@
 import logging
-from pkg_resources import iter_entry_points
-
-import redis
-import fakeredis
 import dataset
-import storagelayer
+from servicelayer import settings as sls
+from servicelayer.archive import init_archive
+from servicelayer.cache import get_redis, get_fakeredis
+from servicelayer.extensions import get_extensions
 from sqlalchemy.pool import NullPool
 from werkzeug.local import LocalProxy
 
 from memorious import settings
 
-
 log = logging.getLogger(__name__)
-
-
-redis_pool = redis.ConnectionPool(
-    host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT,
-    decode_responses=True
-)
-
-# File storage layer for blobs on local file system or S3
-storage = storagelayer.init(settings.ARCHIVE_TYPE,
-                            path=settings.ARCHIVE_PATH,
-                            aws_key_id=settings.ARCHIVE_AWS_KEY_ID,
-                            aws_secret=settings.ARCHIVE_AWS_SECRET,
-                            aws_region=settings.ARCHIVE_AWS_REGION,
-                            bucket=settings.ARCHIVE_BUCKET)
 
 
 def load_manager():
@@ -51,24 +34,26 @@ def load_datastore():
     return settings._datastore
 
 
+def is_sync_mode():
+    if settings.TESTING or settings.DEBUG:
+        return True
+    return sls.REDIS_URL is None
+
+
 def connect_redis():
-    if settings.TESTING or not settings.REDIS_HOST:
-        if not hasattr(settings, '_redis'):
-            settings._redis = fakeredis.FakeRedis(decode_responses=True)
-        return settings._redis
-    return redis.Redis(connection_pool=redis_pool, decode_responses=True)
+    if settings.TESTING:
+        return get_fakeredis()
+    return get_redis()
 
 
 manager = LocalProxy(load_manager)
 datastore = LocalProxy(load_datastore)
 conn = LocalProxy(connect_redis)
 
-
-def load_extensions():
-    for ep in iter_entry_points('memorious.plugins'):
-        func = ep.load()
-        func()
+# File storage layer for blobs on local file system or S3
+storage = init_archive()
 
 
 def init_memorious():
-    load_extensions()
+    for func in get_extensions('memorious.plugins'):
+        func()
