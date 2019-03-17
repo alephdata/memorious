@@ -51,6 +51,25 @@ setup(
     entry_points={
         'console_scripts': [
             'memorious = memorious.cli:main'
+        ],
+        'memorious.operations': [
+            'memorious = memorious.cli:main',
+            'fetch = memorious.operations.fetch:fetch',
+            'dav_index = memorious.operations.fetch:dav_index',
+            'session = memorious.operations.fetch:session',
+            'parse = memorious.operations.parse:parse',
+            'clean_html = memorious.operations.clean:clean_html',
+            'aleph_emit = memorious.operations.aleph:aleph_emit',
+            'seed = memorious.operations.initializers:seed',
+            'sequence = memorious.operations.initializers:sequence',
+            'dates = memorious.operations.initializers:dates',
+            'enumerate = memorious.operations.initializers:enumerate',
+            'inspect = memorious.operations.debug:inspect',
+            'documentcloud_query = memorious.operations.documentcloud:documentcloud_query',  # noqa
+            'directory = memorious.operations.store:directory',
+            'extract = memorious.operations.extract:extract',
+            'db = memorious.operations.db:db',
+            'ftp_fetch = memorious.operations.ftp:ftp_fetch',
         ]
     },
     extras_require={
