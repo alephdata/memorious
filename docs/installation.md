@@ -40,17 +40,16 @@ Your Memorious instance is configured by a set of environment variables that con
 * ``MEMORIOUS_INCREMENTAL``: executing part of a crawler only once per an interval. Defaults to `True`.
 * ``MEMORIOUS_HTTP_CACHE``: HTTP request configuration.
 * ``MEMORIOUS_DATASTORE_URI``: connection path for an operational database (which crawlers can send data to using the `db` method). Defaults to a local `datastore.sqllite3`.
-
-* ``MEMORIOUS_REDIS_HOST``: address of Redis instance to use for crawler logs (uses a temporary FakeRedis if missing).
 * ``MEMORIOUS_THREADS``: how many threads to use for execution.
 * ``MEMORIOUS_MAX_SCHEDULED``: maximum number of scheduled tasks at the same time. Defaults to the same as the number of threads.
 
-* ``MEMORIOUS_ARCHIVE_TYPE``: either ``file`` or ``s3``.
-* ``MEMORIOUS_ARCHIVE_PATH``: 
-* ``MEMORIOUS_ARCHIVE_AWS_KEY_ID``: AWS Access Key ID.
-* ``MEMORIOUS_ARCHIVE_AWS_SECRET``: AWS Secret Access Key.
-* ``MEMORIOUS_ARCHIVE_AWS_REGION``: a regional AWS endpoint.
-* ``MEMORIOUS_ARCHIVE_BUCKET``
+* ``REDIS_URL``: address of Redis instance to use for crawler logs (uses a temporary FakeRedis if missing).
+* ``ARCHIVE_TYPE``: either ``file`` or ``s3``.
+* ``ARCHIVE_PATH``
+* ``ARCHIVE_BUCKET``
+* ``AWS_KEY_ID``: AWS Access Key ID.
+* ``AWS_SECRET``: AWS Secret Access Key.
+* ``AWS_REGION``: a regional AWS endpoint.
 
 * ``ALEPH_HOST``, default is ``https://data.occrp.org/``, but any instance
   of Aleph 2.0 or greater should work.
