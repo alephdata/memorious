@@ -30,7 +30,7 @@ setup(
     install_requires=[
         'banal >= 0.4.2',
         'click',
-        'requests[security] >= 2.18',
+        'requests[security] >= 2.21.0',
         'requests_ftp',
         'alephclient >= 0.9.0',
         'lxml >= 3',
@@ -38,22 +38,38 @@ setup(
         'normality >= 1.0.0',
         'tabulate',
         'dataset >= 1.0.8',
-        'storagelayer >= 0.5.2',
+        'servicelayer >= 0.3.0',
         'urlnormalizer >= 1.2.0',
         'celestial >= 0.2.0',
         'dateparser',
         'stringcase',
         'python-redis-rate-limit >= 0.0.5',
-        'redis>=2.10.6,<3',
         'blinker >= 1.4',
-        'boto3 >= 1.4.8',
-        'fakeredis',
         'flask',
         'babel'
     ],
     entry_points={
         'console_scripts': [
             'memorious = memorious.cli:main'
+        ],
+        'memorious.operations': [
+            'memorious = memorious.cli:main',
+            'fetch = memorious.operations.fetch:fetch',
+            'dav_index = memorious.operations.fetch:dav_index',
+            'session = memorious.operations.fetch:session',
+            'parse = memorious.operations.parse:parse',
+            'clean_html = memorious.operations.clean:clean_html',
+            'aleph_emit = memorious.operations.aleph:aleph_emit',
+            'seed = memorious.operations.initializers:seed',
+            'sequence = memorious.operations.initializers:sequence',
+            'dates = memorious.operations.initializers:dates',
+            'enumerate = memorious.operations.initializers:enumerate',
+            'inspect = memorious.operations.debug:inspect',
+            'documentcloud_query = memorious.operations.documentcloud:documentcloud_query',  # noqa
+            'directory = memorious.operations.store:directory',
+            'extract = memorious.operations.extract:extract',
+            'db = memorious.operations.db:db',
+            'ftp_fetch = memorious.operations.ftp:ftp_fetch',
         ]
     },
     extras_require={

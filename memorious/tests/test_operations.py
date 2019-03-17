@@ -3,8 +3,10 @@ import json
 
 import pytest
 
-from memorious.operations import fetch, session, parse, seed
-from memorious.operations import sequence, dates, enumerate, directory
+from memorious.operations.fetch import fetch, session
+from memorious.operations.parse import parse
+from memorious.operations.initializers import seed, sequence, dates, enumerate
+from memorious.operations.store import directory
 from memorious.core import connect_redis
 
 

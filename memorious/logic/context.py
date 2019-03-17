@@ -38,11 +38,14 @@ class Context(object):
             value = os.path.expandvars(value)
         return value
 
-    def emit(self, rule='pass', stage=None, data={}, delay=None):
+    def emit(self, rule='pass', stage=None, data={}, delay=None,
+             optional=False):
         """Invoke the next stage, either based on a handling rule, or by calling
         the `pass` rule by default."""
         if stage is None:
             stage = self.stage.handlers.get(rule)
+        if optional and stage is None:
+            return
         if stage is None or stage not in self.crawler.stages:
             self.log.info("No next stage: %s (%s)" % (stage, rule))
             return

@@ -3,7 +3,7 @@ from pprint import pprint  # noqa
 from banal import clean_dict
 from alephclient.api import AlephAPI
 
-from memorious import settings
+from servicelayer import settings
 
 
 def aleph_emit(context, data):

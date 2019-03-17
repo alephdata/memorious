@@ -8,4 +8,4 @@ COPY config /crawlers/config
 ENV MEMORIOUS_CONFIG_PATH=/crawlers/config \
     MEMORIOUS_BASE_PATH=/data \
     MEMORIOUS_DEBUG=false \
-    MEMORIOUS_REDIS_HOST=redis
+    REDIS_HOST=redis
