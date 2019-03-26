@@ -2,6 +2,7 @@ import logging
 import contextlib
 import datetime
 from servicelayer.cache import get_redis_pool
+from servicelayer import settings as sls
 from redis_rate_limit import RateLimit, TooManyRequests
 
 from memorious import settings
@@ -15,7 +16,7 @@ global_call_log = {}
 def rate_limiter(context):
     resource = "%s:%s" % (context.crawler.name, context.stage.name)
     rate_limit = context.stage.rate_limit
-    if settings.REDIS_HOST:
+    if sls.REDIS_URL:
         try:
             with RateLimit(resource=resource,
                            client='memorious',
