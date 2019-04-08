@@ -3,14 +3,8 @@ import logging
 from banal.dicts import clean_dict
 from datetime import datetime, date
 
-from memorious.core import connect_redis
-
 QUEUE_EXPIRE = 84600 * 14
 log = logging.getLogger(__name__)
-
-
-class Base(object):
-    conn = connect_redis()
 
 
 def unpack_int(value):
@@ -29,23 +23,11 @@ def pack_now():
     return pack_datetime(datetime.utcnow())
 
 
-def unpack_datetime(value):
-    if value is not None:
+def unpack_datetime(value, default=None):
+    try:
         return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f")
-
-
-def delete_prefix(conn, prefix):
-    idx = 0
-    keys = conn.scan_iter(prefix)
-    batch = []
-    for idx, key in enumerate(keys):
-        batch.append(key)
-        if len(batch) > 100:
-            conn.delete(*batch)
-            batch = []
-    if len(batch):
-        conn.delete(*batch)
-    log.info("Delete prefix %s: %s", prefix, idx)
+    except Exception:
+        return default
 
 
 class JSONEncoder(json.JSONEncoder):

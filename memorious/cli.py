@@ -4,7 +4,7 @@ import time
 from tabulate import tabulate
 
 from memorious import settings
-from memorious.core import manager, init_memorious
+from memorious.core import manager, init_memorious, is_sync_mode
 from memorious.model import Queue
 from memorious.task_runner import TaskRunner
 
@@ -44,7 +44,7 @@ def run(crawler):
     """Run a specified crawler."""
     crawler = get_crawler(crawler)
     crawler.run()
-    if settings.DEBUG:
+    if is_sync_mode():
         TaskRunner.run_sync()
 
 

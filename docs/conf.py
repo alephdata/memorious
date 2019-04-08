@@ -52,8 +52,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Memorious'
-copyright = u'2018, Friedrich Lindenberg'
-author = u'Friedrich Lindenberg'
+copyright = u'2018, OCCRP'
+author = u'OCCRP'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -161,7 +161,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'Memorious.tex', u'Memorious Documentation',
-     u'Friedrich Lindenberg', 'manual'),
+     u'OCCRP', 'manual'),
 ]
 
 

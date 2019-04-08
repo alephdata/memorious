@@ -3,9 +3,10 @@ import json
 
 import pytest
 
-from memorious.operations import (
-    fetch, session, parse, seed, sequence, dates, enumerate, directory
-)
+from memorious.operations.fetch import fetch, session
+from memorious.operations.parse import parse
+from memorious.operations.initializers import seed, sequence, dates, enumerate
+from memorious.operations.store import directory
 from memorious.core import connect_redis
 
 
@@ -64,7 +65,7 @@ def test_parse(context, mocker):
         context.http.result = None
         context.params["store"] = None
         parse(context, data)
-        assert context.emit.call_count == 2
+        assert context.emit.call_count == 2, data
 
 
 def test_seed(context, mocker):

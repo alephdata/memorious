@@ -1,4 +1,5 @@
 from importlib import import_module
+from servicelayer.extensions import get_entry_point
 
 from memorious.model import Crawl
 
@@ -19,10 +20,14 @@ class CrawlerStage(object):
 
     @property
     def method(self):
-        method = self.method_name
-        package = 'memorious.operations'
-        if ':' in method:
-            package, method = method.rsplit(':', 1)
+        # method A: via a named Python entry point
+        func = get_entry_point('memorious.operations', self.method_name)
+        if func is not None:
+            return func
+        # method B: direct import from a module
+        if ':' not in self.method_name:
+            raise ValueError("Unknown method: %s", self.method_name)
+        package, method = self.method_name.rsplit(':', 1)
         module = import_module(package)
         return getattr(module, method)
 

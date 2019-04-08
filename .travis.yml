@@ -17,16 +17,16 @@ script:
 
 after_success:
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-  - docker build -t alephdata/memorious .
   - if [[ "$TRAVIS_BRANCH" = "master" ]]; then
-      docker tag alephdata/memorious alephdata/memorious:master ;
+      docker build -t alephdata/memorious:master . ;
       docker push alephdata/memorious:master ;
     fi
   - if [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
       python setup.py sdist bdist_wheel ;
       twine upload dist/* ;
-      docker tag alephdata/memorious alephdata/memorious:$TRAVIS_TAG ;
+      docker build -t alephdata/memorious:$TRAVIS_TAG . ;
       docker push alephdata/memorious:$TRAVIS_TAG ;
-      docker push alephdata/memorious ;
+      docker build -t alephdata/memorious:latest . ;
+      docker push alephdata/memorious:latest ;
     fi
   

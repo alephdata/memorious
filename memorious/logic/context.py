@@ -6,9 +6,10 @@ from copy import deepcopy
 from tempfile import mkdtemp
 from contextlib import contextmanager
 
-from memorious.core import manager, storage
+from memorious.core import manager, storage, conn
 from memorious.core import datastore
-from memorious.model import Tag, Event, Queue, Crawl
+from memorious.model import Event, Queue, Crawl
+from memorious.model.common import load_json, dump_json
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
 from memorious.util import make_key, random_filename
@@ -37,11 +38,14 @@ class Context(object):
             value = os.path.expandvars(value)
         return value
 
-    def emit(self, rule='pass', stage=None, data={}, delay=None):
+    def emit(self, rule='pass', stage=None, data={}, delay=None,
+             optional=False):
         """Invoke the next stage, either based on a handling rule, or by calling
         the `pass` rule by default."""
         if stage is None:
             stage = self.stage.handlers.get(rule)
+        if optional and stage is None:
+            return
         if stage is None or stage not in self.crawler.stages:
             self.log.info("No next stage: %s (%s)" % (stage, rule))
             return
@@ -96,13 +100,17 @@ class Context(object):
                           message=str(exc))
 
     def set_tag(self, key, value):
-        return Tag.save(self.crawler, key, value)
+        data = dump_json(value)
+        key = make_key(self.crawler, "tag", key)
+        return conn.set(key, data, ex=self.crawler.expire)
 
     def get_tag(self, key):
-        return Tag.find(self.crawler, key)
+        value = conn.get(make_key(self.crawler, "tag", key))
+        if value is not None:
+            return load_json(value)
 
     def check_tag(self, key):
-        return Tag.exists(self.crawler, key)
+        return conn.exists(make_key(self.crawler, "tag", key))
 
     def skip_incremental(self, *criteria):
         """Perform an incremental check on a set of criteria.
@@ -121,7 +129,7 @@ class Context(object):
         if key is None:
             return False
 
-        if Tag.exists(self.crawler, key):
+        if self.check_tag(key):
             return True
 
         self.set_tag(key, None)

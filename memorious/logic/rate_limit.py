@@ -1,11 +1,11 @@
 import logging
 import contextlib
 import datetime
-
+from servicelayer.cache import get_redis_pool
+from servicelayer import settings as sls
 from redis_rate_limit import RateLimit, TooManyRequests
 
 from memorious import settings
-from memorious.core import redis_pool
 from memorious.exc import RateLimitException
 
 log = logging.getLogger(__name__)
@@ -16,13 +16,13 @@ global_call_log = {}
 def rate_limiter(context):
     resource = "%s:%s" % (context.crawler.name, context.stage.name)
     rate_limit = context.stage.rate_limit
-    if settings.REDIS_HOST:
+    if sls.REDIS_URL:
         try:
             with RateLimit(resource=resource,
                            client='memorious',
                            expire=120,
                            max_requests=rate_limit,
-                           redis_pool=redis_pool):
+                           redis_pool=get_redis_pool()):
                 yield
         except TooManyRequests:
             raise RateLimitException

@@ -10,7 +10,7 @@ class TestCrawler(object):
         crawler = Crawler(manager, source_file)
         assert crawler.name == "occrp_web_site"
         assert crawler.schedule == "weekly"
-        assert set(crawler.stages.keys()) == {"init", "fetch", "parse", "store"}
-        assert all(
-            isinstance(stage, CrawlerStage) for stage in crawler.stages.values()
-        )
+        names = crawler.stages.keys()
+        assert set(names) == {"init", "fetch", "parse", "store"}
+        stages = crawler.stages.values()
+        assert all(isinstance(s, CrawlerStage) for s in stages)

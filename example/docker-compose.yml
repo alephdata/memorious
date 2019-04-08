@@ -8,16 +8,18 @@ services:
       - redis
     volumes:
       - "./build/data:/data"
+      - ../memorious:/memorious/memorious
     tmpfs:
       - "/tmp"
 
   ui:
     build: .
-    command: gunicorn -t 900 -w 8 -b 0.0.0.0:8000 --log-level info --log-file - memorious.ui:app
+    command: gunicorn -t 900 -w 8 -b 0.0.0.0:8000 --log-level info --log-file - memorious.ui.views:app
     links:
       - redis
     volumes:
       - "./build/data:/data"
+      - ../memorious:/memorious/memorious
     tmpfs:
       - "/tmp"
     ports:
@@ -30,6 +32,7 @@ services:
       - redis
     volumes:
       - "./build/data:/data"
+      - ../memorious:/memorious/memorious
     tmpfs:
       - "/tmp"
 

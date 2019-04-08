@@ -1,4 +1,5 @@
 import json
+
 from memorious.logic.context import Context
 from memorious.model import Event
 

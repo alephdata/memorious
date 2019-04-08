@@ -2,8 +2,8 @@ import logging
 from collections import deque
 from datetime import datetime, timedelta
 
-from memorious.core import manager, settings
-from memorious.model.common import Base, pack_datetime, unpack_datetime
+from memorious.core import manager, conn, settings
+from memorious.model.common import pack_datetime, unpack_datetime
 from memorious.model.common import unpack_int, load_json, dump_json
 from memorious.model.common import QUEUE_EXPIRE
 from memorious.util import make_key
@@ -11,7 +11,7 @@ from memorious.util import make_key
 log = logging.getLogger(__name__)
 
 
-class Queue(Base):
+class Queue(object):
     """Manage the execution of tasks in the system."""
 
     @classmethod
@@ -37,7 +37,7 @@ class Queue(Base):
         queues = [make_key('queue', c, s) for c, s in manager.stages]
         while True:
             timeout = 1 if settings.DEBUG else 0
-            task_data_tuple = cls.conn.blpop(queues, timeout=timeout)
+            task_data_tuple = conn.blpop(queues, timeout=timeout)
             # blpop blocks until it finds something. But fakeredis has no
             # blocking support. So it justs returns None.
             if task_data_tuple is None:
@@ -63,15 +63,15 @@ class Queue(Base):
     def queue(cls, stage, state, data, delay=None):
         crawler = state.get('crawler')
         task_data = cls.serialize_task_data(stage, state, data, delay)
-        cls.conn.rpush(make_key('queue', crawler, stage), task_data)
-        cls.conn.expire(make_key('queue', crawler, stage), QUEUE_EXPIRE)
-        cls.conn.incr(make_key('queue_pending', crawler))
+        conn.rpush(make_key('queue', crawler, stage), task_data)
+        conn.expire(make_key('queue', crawler, stage), QUEUE_EXPIRE)
+        conn.incr(make_key('queue_pending', crawler))
 
     @classmethod
     def size(cls, crawler):
         """Total operations pending for this crawler"""
         key = make_key('queue_pending', crawler)
-        return unpack_int(cls.conn.get(key))
+        return unpack_int(conn.get(key))
 
     @classmethod
     def is_running(cls, crawler):
@@ -86,6 +86,6 @@ class Queue(Base):
 
     @classmethod
     def flush(cls, crawler):
-        cls.conn.delete(make_key('queue_pending', crawler))
+        conn.delete(make_key('queue_pending', crawler))
         for name in crawler.stages.keys():
-            cls.conn.delete(make_key('queue', crawler, name))
+            conn.delete(make_key('queue', crawler, name))
