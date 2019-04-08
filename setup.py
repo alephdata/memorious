@@ -59,7 +59,6 @@ setup(
             'session = memorious.operations.fetch:session',
             'parse = memorious.operations.parse:parse',
             'clean_html = memorious.operations.clean:clean_html',
-            'aleph_emit = memorious.operations.aleph:aleph_emit',
             'seed = memorious.operations.initializers:seed',
             'sequence = memorious.operations.initializers:sequence',
             'dates = memorious.operations.initializers:dates',
