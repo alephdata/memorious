@@ -18,30 +18,35 @@ class TaskRunner(object):
     @classmethod
     def execute(cls, stage, state, data, next_allowed_exec_time=None):
         """Execute the operation, rate limiting allowing."""
-        now = datetime.utcnow()
-        if next_allowed_exec_time and now < next_allowed_exec_time:
-            # task not allowed to run yet; put it back in the queue
-            Queue.queue(stage, state, data, delay=next_allowed_exec_time)
-            return
-
-        context = Context.from_state(state, stage)
-        if context.crawler.disabled:
-            return
-
-        if context.stage.rate_limit:
-            try:
-                with rate_limiter(context):
-                    context.execute(data)
-                    return
-            except RateLimitException:
-                delay = max(1, 1.0/context.stage.rate_limit)
-                delay = random.randint(1, int(delay))
-                context.log.info(
-                    "Rate limit exceeded, delaying %d sec.", delay
-                )
-                Queue.queue(stage, state, data, delay=delay)
-
-        context.execute(data)
+        try:
+            context = Context.from_state(state, stage)
+            now = datetime.utcnow()
+            if next_allowed_exec_time and now < next_allowed_exec_time:
+                # task not allowed to run yet; put it back in the queue
+                Queue.queue(stage, state, data, delay=next_allowed_exec_time)
+            elif context.crawler.disabled:
+                pass
+            elif context.stage.rate_limit:
+                try:
+                    with rate_limiter(context):
+                        context.execute(data)
+                except RateLimitException:
+                    delay = max(1, 1.0/context.stage.rate_limit)
+                    delay = random.randint(1, int(delay))
+                    context.log.info(
+                        "Rate limit exceeded, delaying %d sec.", delay
+                    )
+                    Queue.queue(stage, state, data, delay=delay)
+            else:
+                context.execute(data)
+        except Exception:
+            log.exception("Task failed to execute:")
+        finally:
+            # Decrease the pending task count after excuting a task.
+            Queue.decr_pending(context.crawler)
+            # If we don't have anymore tasks to execute, time to clean up.
+            if not context.crawler.is_running:
+                context.crawler.aggregate(context)
 
     @classmethod
     def process(cls, q):

@@ -57,8 +57,6 @@ class Queue(object):
             data = task_data["data"]
             next_time = task_data.get("next_allowed_exec_time")
             next_time = unpack_datetime(next_time)
-            crawler = state.get('crawler')
-            conn.decr(make_key('queue_pending', crawler))
             yield (stage, state, data, next_time)
 
     @classmethod
@@ -81,6 +79,10 @@ class Queue(object):
         if crawler.disabled:
             return False
         return cls.size(crawler) > 0
+
+    @classmethod
+    def decr_pending(cls, crawler):
+        conn.decr(make_key('queue_pending', crawler))
 
     @classmethod
     def flush(cls, crawler):

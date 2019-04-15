@@ -1,4 +1,5 @@
 from six.moves.urllib.parse import urljoin
+import datafreeze
 
 
 def login(context, data):
@@ -21,7 +22,7 @@ def login(context, data):
         'username': username,
         'password': password
     }
-    login = context.http.post(login_url, data=login_data)
+    context.http.post(login_url, data=login_data)
 
     # Set data for input to the next stage, and proceed.
     # (The next stage is 'fetch' which takes a 'url' input.)
@@ -50,7 +51,7 @@ def crawl(context, data):
         quote_data = {
             "text": quote.find('.//span[@class="text"]').text_content(),
             "author": quote.find('.//small[@class="author"]').text_content(),
-            "tags": ', '.join([tag.text_content() for tag in quote.findall('.//a[@class="tag"]')])
+            "tags": ', '.join([tag.text_content() for tag in quote.findall('.//a[@class="tag"]')])  # noqa
         }
 
         # If 'rule' is not set, it defaults to 'pass', which triggers the
@@ -64,3 +65,8 @@ def store(context, data):
     table = context.datastore[context.params.get("table")]
     # The data is passed in from context.emit of the previous 'crawl' stage.
     table.upsert(data, ['text', 'author'])
+
+
+def export(context, params):
+    table = context.datastore[context.params.get("table")]
+    datafreeze.freeze(table, format='json', filename=params['filename'])
