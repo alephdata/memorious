@@ -46,7 +46,7 @@ class TaskRunner(object):
             Queue.decr_pending(context.crawler)
             # If we don't have anymore tasks to execute, time to clean up.
             if not context.crawler.is_running:
-                context.crawler.aggregate()
+                context.crawler.aggregate(context)
 
     @classmethod
     def process(cls, q):

@@ -82,7 +82,7 @@ class Queue(object):
 
     @classmethod
     def decr_pending(cls, crawler):
-        cls.conn.decr(make_key('queue_pending', crawler))
+        conn.decr(make_key('queue_pending', crawler))
 
     @classmethod
     def flush(cls, crawler):

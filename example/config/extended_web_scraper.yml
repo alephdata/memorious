@@ -31,3 +31,7 @@ pipeline:
     method: example.quotes:store
     params:
       table: example_quotes
+aggregator:
+  method: example.quotes:export
+  params:
+    filename: all_quotes.json

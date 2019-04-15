@@ -73,11 +73,11 @@ class Crawler(object):
                 module = import_module(package)
                 return getattr(module, method)
 
-    def aggregate(self):
+    def aggregate(self, context):
         if self.aggregator_method:
             log.info("Running aggregator for %s" % self.name)
             self.aggregator_method(
-                self, self.aggregator_config.get("params", {})
+                context, self.aggregator_config.get("params", {})
             )
 
     def flush(self):

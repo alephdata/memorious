@@ -390,22 +390,16 @@ Memorious contains some helpers that use [Tesseract](https://github.com/tesserac
 
 ## Postprocessing
 
-It's possible to run predefined postprocessing tasks after a Memorious crawler has finished running. The postprocessing task is defined under `cleanup` section in a crawler's YAML config.
+It's possible to run predefined postprocessing tasks after a Memorious crawler has finished running. The postprocessing task is defined under `aggregator` section in a crawler's YAML config.
 
-`cleanup` must contain:
+`aggregator` should contain:
 
-* `method`: which postprocessing method to use. These are defined in `memorious.helpers.export`
-* `params`: params to pass to the postprocessing method
-
-### Exporting to S3
-
-The `export_tables` postprocessing method can export tables to csv files and upload that to a Amazon S3 bucket. The params section of this method should contain a list of the following keys:
-
-* `table`: Name of the database table to export
-* `csv_filename` (optional): Name of the output csv file
-* `bucket`: Name of the S3 bucket to upload to
+* `method`: which function to execute for postprocessing
+* `params` (optional): params to pass to the postprocessing method
 
 eg:
+
+Here's an example from `example/config/extended_web_scraper.yml`
 
 ```
 name: ...
@@ -413,12 +407,8 @@ description: ...
 schedule: ...
 pipeline:
   ...
-cleanup:
-  method: export_tables
+aggregator:
+  method: example.quotes:export
   params:
-  - table: example_quotes
-    csv_filename: quotes.csv
-    bucket: example
-  - table: example_authors
-    bucket: example
+    filename: all_quotes.json
 ```
