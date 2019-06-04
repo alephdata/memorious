@@ -51,7 +51,7 @@ class Context(object):
             return
         state = self.dump_state()
         delay = delay or self.crawler.delay
-        Queue.queue(stage, state, data, delay)
+        Queue.queue(stage, state, data)
 
     def recurse(self, data={}, delay=None):
         """Have a stage invoke itself with a modified set of arguments."""

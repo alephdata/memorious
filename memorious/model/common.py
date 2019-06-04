@@ -15,8 +15,8 @@ def unpack_int(value):
 
 
 def pack_datetime(value):
-        if value is not None:
-            return str(value)
+    if value is not None:
+        return str(value)
 
 
 def pack_now():
@@ -44,12 +44,12 @@ class JSONEncoder(json.JSONEncoder):
 
 def dump_json(data):
     if data is None:
-        return
+        return ''
     data = clean_dict(data)
     return JSONEncoder().encode(data)
 
 
 def load_json(encoded):
-    if encoded is None:
+    if encoded is None or encoded == '':
         return
     return json.loads(encoded)
