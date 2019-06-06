@@ -7,9 +7,7 @@ from servicelayer.extensions import get_extensions
 from sqlalchemy.pool import NullPool
 from werkzeug.local import LocalProxy
 
-from memorious.services.ocr import (
-    LocalOCRService, ServiceOCRService, GoogleOCRService
-)
+from memorious.services.ocr import OCRService
 from memorious import settings
 
 log = logging.getLogger(__name__)
@@ -50,14 +48,10 @@ def connect_redis():
 
 
 def get_ocr():
-    """Find the best available method to perform OCR."""
+    """Check if OCR service is available; else throw an error"""
     if not hasattr(settings, '_ocr_service'):
-        if GoogleOCRService.is_available():
-            settings._ocr_service = GoogleOCRService()
-        elif ServiceOCRService.is_available():
-            settings._ocr_service = ServiceOCRService()
-        elif LocalOCRService.is_available():
-            settings._ocr_service = LocalOCRService()
+        if OCRService.is_available():
+            settings._ocr_service = OCRService()
         else:
             raise RuntimeError("OCR is not available")
     return settings._ocr_service
