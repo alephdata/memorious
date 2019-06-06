@@ -18,10 +18,8 @@ def _upsert(context, params, data):
             return
     data["__first_seen"] = data["__last_seen"]
     rate_limit = get_rate_limit("db", limit=settings.DB_RATE_LIMIT)
-    if not rate_limit.check():
-        rate_limit.comply()
+    rate_limit.comply()
     table.insert(data)
-    rate_limit.update()
 
 
 def _recursive_upsert(context, params, data):

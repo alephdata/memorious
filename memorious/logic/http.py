@@ -24,7 +24,6 @@ from memorious.util import random_filename
 from memorious.model.common import QUEUE_EXPIRE
 from memorious.util import make_key
 from memorious.logic.rate_limit import get_rate_limit
-from memorious import settings
 
 
 class ContextHttp(object):
@@ -151,13 +150,11 @@ class ContextHttpResponse(object):
             rate_limit = get_rate_limit(
                 resource, limit=settings.HTTP_PER_HOST_RATE_LIMIT
             )
-            if not rate_limit.check():
-                rate_limit.comply()
+            rate_limit.comply()
             response = session.send(prepared,
                                     stream=True,
                                     verify=False,
                                     allow_redirects=self.allow_redirects)
-            rate_limit.update()
 
             if existing is not None and response.status_code == 304:
                 self.context.log.info("Using cached HTTP response: %s",
