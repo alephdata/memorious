@@ -42,6 +42,8 @@ Your Memorious instance is configured by a set of environment variables that con
 * ``MEMORIOUS_DATASTORE_URI``: connection path for an operational database (which crawlers can send data to using the `db` method). Defaults to a local `datastore.sqllite3`.
 * ``MEMORIOUS_THREADS``: how many threads to use for execution.
 * ``MEMORIOUS_MAX_SCHEDULED``: maximum number of scheduled tasks at the same time. Defaults to the same as the number of threads.
+* ``MEMORIOUS_DB_RATE_LIMIT``: maximum number of database inserts per minute. Defaults to 6000.
+* ``MEMORIOUS_HTTP_PER_HOST_RATE_LIMIT``: maximum number of http calls to a host per minute. Defaults to 120.
 
 * ``REDIS_URL``: address of Redis instance to use for crawler logs (uses a temporary FakeRedis if missing).
 * ``ARCHIVE_TYPE``: either ``file`` or ``s3``.
