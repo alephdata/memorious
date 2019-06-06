@@ -76,6 +76,10 @@ setup(
             'pytest-env',
             'pytest-cov',
             'pytest-mock',
+        ],
+        'ocr': [
+            'pillow',
+            'tesserocr'
         ]
     }
 )

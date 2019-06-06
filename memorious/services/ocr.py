@@ -1,7 +1,6 @@
 import logging
 from io import BytesIO
 from hashlib import sha1
-from PIL import Image
 from threading import local
 from abc import ABC, abstractmethod
 # from languagecodes import list_to_alpha3
@@ -87,6 +86,7 @@ class LocalOCRService(OCRService):
 
         try:
             # TODO: play with contrast and sharpening the images.
+            from PIL import Image
             image = Image.open(BytesIO(data))
             api.SetImage(image)
             return api.GetUTF8Text()
