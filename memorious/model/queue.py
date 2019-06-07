@@ -3,7 +3,7 @@ import logging
 from servicelayer.process import ServiceQueue
 
 from memorious.core import manager, conn
-from memorious.model.common import unpack_int
+from memorious.model.common import unpack_int, load_json, dump_json
 
 log = logging.getLogger(__name__)
 
@@ -20,13 +20,13 @@ class Queue(object):
             )
             if not queue:
                 continue
-            yield (queue.operation, state, data)
+            yield (queue.operation, state, load_json(data))
 
     @classmethod
     def queue(cls, stage, state, data):
         crawler = state.get('crawler')
         queue = ServiceQueue(conn, str(stage), str(crawler))
-        queue.queue_task(data, state)
+        queue.queue_task(dump_json(data), state)
 
     @classmethod
     def size(cls, crawler):
