@@ -1,6 +1,6 @@
 import logging
 
-from servicelayer.process import ServiceQueue
+from servicelayer.process import ServiceQueue, Progress
 
 from memorious.core import manager, conn
 from memorious.model.common import unpack_int, load_json, dump_json
@@ -25,7 +25,7 @@ class Queue(object):
     @classmethod
     def queue(cls, stage, state, data):
         crawler = state.get('crawler')
-        queue = ServiceQueue(conn, str(stage), str(crawler))
+        queue = ServiceQueue(conn, str(stage), state['run_id'], str(crawler))
         queue.queue_task(dump_json(data), state)
 
     @classmethod
@@ -42,19 +42,16 @@ class Queue(object):
         """Is the crawler currently running?"""
         if crawler.disabled:
             return False
-        for stage in crawler.stages.keys():
-            queue = ServiceQueue(conn, str(stage), str(crawler))
-            if not queue.is_done():
-                return True
-        return False
+        status = Progress.get_dataset_status(conn, str(crawler))
+        return status.get('pending') > 0
 
     @classmethod
     def flush(cls, crawler):
-        for stage in crawler.stages.keys():
-            queue = ServiceQueue(conn, str(stage), str(crawler))
-            queue.remove()
+        ServiceQueue.remove_dataset(str(crawler))
 
     @classmethod
     def task_done(cls, crawler, stage):
-        queue = ServiceQueue(conn, str(stage), str(crawler))
+        queue = ServiceQueue(
+            conn, str(stage), str(stage['run_id']), str(crawler)
+        )
         queue.task_done()
