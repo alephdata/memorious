@@ -47,7 +47,7 @@ class Queue(object):
 
     @classmethod
     def flush(cls, crawler):
-        ServiceQueue.remove_dataset(str(crawler))
+        ServiceQueue.remove_dataset(conn, str(crawler))
 
     @classmethod
     def task_done(cls, crawler, stage):
