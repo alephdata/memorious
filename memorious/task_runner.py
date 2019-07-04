@@ -35,7 +35,7 @@ class TaskRunner(object):
         except Exception:
             log.exception("Task failed to execute:")
         finally:
-            Queue.task_done(context.crawler, context.stage)
+            Queue.task_done(context.crawler, stage, state)
             # If we don't have anymore tasks to execute, time to clean up.
             if not context.crawler.is_running:
                 context.crawler.aggregate(context)

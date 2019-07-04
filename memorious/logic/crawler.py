@@ -2,6 +2,7 @@ import os
 import io
 import yaml
 import logging
+import uuid
 from datetime import timedelta, datetime
 from importlib import import_module
 
@@ -97,7 +98,7 @@ class Crawler(object):
         """Queue the execution of a particular crawler."""
         state = {
             'crawler': self.name,
-            'run_id': run_id,
+            'run_id': run_id or uuid.uuid1().hex,
             'incremental': settings.INCREMENTAL
         }
         if incremental is not None:

@@ -33,7 +33,7 @@ class Queue(object):
         """Total operations pending for this crawler"""
         total = 0
         for stage in crawler.stages.keys():
-            queue = ServiceQueue(conn, str(stage), str(crawler))
+            queue = ServiceQueue(conn, str(stage), state['run_id'], str(crawler))
             total += unpack_int(queue.progress.get()['pending'])
         return total
 
@@ -50,8 +50,8 @@ class Queue(object):
         ServiceQueue.remove_dataset(conn, str(crawler))
 
     @classmethod
-    def task_done(cls, crawler, stage):
+    def task_done(cls, crawler, stage, state):
         queue = ServiceQueue(
-            conn, str(stage), str(stage['run_id']), str(crawler)
+            conn, str(stage), str(state['run_id']), str(crawler)
         )
         queue.task_done()
