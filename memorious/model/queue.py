@@ -1,9 +1,9 @@
 import logging
 
-from servicelayer.process import ServiceQueue, Progress
+from servicelayer.jobs import JobOp, Progress, Job
+from servicelayer.util import unpack_int, load_json, dump_json
 
 from memorious.core import manager, conn
-from memorious.model.common import unpack_int, load_json, dump_json
 
 log = logging.getLogger(__name__)
 
@@ -15,26 +15,26 @@ class Queue(object):
     def tasks(cls):
         stages = list({str(stage) for _, stage in manager.stages})
         while True:
-            queue, data, state = ServiceQueue.get_operation_task(
+            job_op, data, state = JobOp.get_operation_task(
                 conn, stages, timeout=5
             )
-            if not queue:
+            if not job_op:
                 continue
-            yield (queue.operation, state, load_json(data))
+            yield (job_op.operation, state, load_json(data))
 
     @classmethod
     def queue(cls, stage, state, data):
         crawler = state.get('crawler')
-        queue = ServiceQueue(conn, str(stage), state['run_id'], str(crawler))
-        queue.queue_task(dump_json(data), state)
+        job_op = JobOp(conn, str(stage), state['run_id'], str(crawler))
+        job_op.queue_task(dump_json(data), state)
 
     @classmethod
     def size(cls, crawler):
         """Total operations pending for this crawler"""
         total = 0
         for stage in crawler.stages.keys():
-            queue = ServiceQueue(conn, str(stage), state['run_id'], str(crawler))
-            total += unpack_int(queue.progress.get()['pending'])
+            job_op = JobOp(conn, str(stage), state['run_id'], str(crawler))
+            total += unpack_int(job_op.progress.get()['pending'])
         return total
 
     @classmethod
@@ -47,11 +47,11 @@ class Queue(object):
 
     @classmethod
     def flush(cls, crawler):
-        ServiceQueue.remove_dataset(conn, str(crawler))
+        Job.remove_dataset(conn, str(crawler))
 
     @classmethod
     def task_done(cls, crawler, stage, state):
-        queue = ServiceQueue(
+        job_op = JobOp(
             conn, str(stage), str(state['run_id']), str(crawler)
         )
-        queue.task_done()
+        job_op.task_done()
