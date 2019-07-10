@@ -4,14 +4,16 @@ import pickle
 import codecs
 from hashlib import sha1
 from lxml import html, etree
-from urllib.parse import unquote
+from datetime import datetime, timedelta
+from urllib.parse import unquote, urlparse
+
 from banal import hash_data, is_mapping
 from urlnormalizer import normalize_url
 from celestial import parse_mimetype, normalize_mimetype
 from normality import guess_file_encoding, stringify
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
-from datetime import datetime, timedelta
+from servicelayer.util import QUEUE_EXPIRE
 
 from memorious import settings
 from memorious.core import conn, storage
@@ -20,8 +22,8 @@ from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
 from memorious.helpers.dates import parse_date
 from memorious.util import random_filename
-from memorious.model.common import QUEUE_EXPIRE
 from memorious.util import make_key
+from memorious.logic.rate_limit import get_rate_limit
 
 
 class ContextHttp(object):
@@ -143,6 +145,12 @@ class ContextHttpResponse(object):
 
             session = self.http.session
             prepared = session.prepare_request(request)
+
+            resource = urlparse(self.request.url).netloc or self.request.url
+            rate_limit = get_rate_limit(
+                resource, limit=settings.HTTP_PER_HOST_RATE_LIMIT
+            )
+            rate_limit.comply()
             response = session.send(prepared,
                                     stream=True,
                                     verify=False,

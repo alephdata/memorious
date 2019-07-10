@@ -7,6 +7,7 @@ from servicelayer.extensions import get_extensions
 from sqlalchemy.pool import NullPool
 from werkzeug.local import LocalProxy
 
+from memorious.services.ocr import OCRService
 from memorious import settings
 
 log = logging.getLogger(__name__)
@@ -46,9 +47,20 @@ def connect_redis():
     return get_redis()
 
 
+def get_ocr():
+    """Check if OCR service is available; else throw an error"""
+    if not hasattr(settings, '_ocr_service'):
+        if OCRService.is_available():
+            settings._ocr_service = OCRService()
+        else:
+            raise RuntimeError("OCR is not available")
+    return settings._ocr_service
+
+
 manager = LocalProxy(load_manager)
 datastore = LocalProxy(load_datastore)
 conn = LocalProxy(connect_redis)
+ocr_service = LocalProxy(get_ocr)
 
 # File storage layer for blobs on local file system or S3
 storage = init_archive()

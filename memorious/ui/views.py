@@ -1,5 +1,6 @@
 import math
 from urllib.parse import urlencode
+import logging
 from flask import Flask, request, redirect
 from flask import render_template, abort, url_for
 from babel.numbers import format_number
@@ -10,6 +11,11 @@ from memorious.model import Event
 
 PAGE_SIZE = 50
 app = Flask(__name__)
+if settings.DEBUG:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 
 @app.template_filter('number')

@@ -2,8 +2,10 @@ import logging
 from banal import ensure_list
 from datetime import datetime
 
+from servicelayer.util import unpack_int, unpack_datetime, pack_now
+from servicelayer.jobs import Job, JobOp
+
 from memorious.core import conn
-from memorious.model.common import unpack_int, unpack_datetime, pack_now
 from memorious.util import make_key
 
 log = logging.getLogger(__name__)
@@ -91,6 +93,8 @@ class Crawl(object):
         conn.sadd(make_key(crawler, "runs_abort"), run_id)
         if conn.get(make_key("run", run_id, "end")) is None:
             conn.set(make_key("run", run_id, "end"), pack_now())
+        job = Job(conn, str(crawler), run_id)
+        job.remove()
 
     @classmethod
     def abort_all(cls, crawler):

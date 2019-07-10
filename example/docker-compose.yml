@@ -6,17 +6,22 @@ services:
     command: memorious process
     links:
       - redis
+      - recognize-text
     volumes:
       - "./build/data:/data"
       - ../memorious:/memorious/memorious
     tmpfs:
       - "/tmp"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      OCR_SERVICE: recognize-text:50000
 
   ui:
     build: .
     command: gunicorn -t 900 -w 8 -b 0.0.0.0:8000 --log-level info --log-file - memorious.ui.views:app
     links:
       - redis
+      - recognize-text
     volumes:
       - "./build/data:/data"
       - ../memorious:/memorious/memorious
@@ -24,20 +29,48 @@ services:
       - "/tmp"
     ports:
       - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      OCR_SERVICE: recognize-text:50000
 
   beat:
     build: .
     command: memorious scheduled --wait
     links:
       - redis
+      - recognize-text
     volumes:
       - "./build/data:/data"
       - ../memorious:/memorious/memorious
     tmpfs:
       - "/tmp"
+    environment:
+        REDIS_URL: redis://redis:6379/0
+        OCR_SERVICE: recognize-text:50000
 
   redis:
     image: redis:alpine
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - ./build/redis-data:/data
+
+  recognize-text:
+    image: alephdata/recognize-text:1.2.0
+    restart: on-failure
+    expose:
+      - 50000
+
+  shell:
+    build: .
+    command: /bin/sh
+    links:
+      - redis
+      - recognize-text
+    volumes:
+      - "./build/data:/data"
+      - ../memorious:/memorious/memorious
+    tmpfs:
+      - "/tmp"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      OCR_SERVICE: recognize-text:50000

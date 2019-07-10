@@ -28,7 +28,7 @@ SEVENZIP_MIME_TYPES = [
 ]
 
 
-def extract_zip(file_path, extract_dir):
+def extract_zip(file_path, extract_dir, context):
     with zipfile.ZipFile(file_path, "r") as zip_ref:
         if zip_ref.testzip() is not None:
             context.log.warning("Bad zip file: %s", file_path)
@@ -82,7 +82,7 @@ def extract(context, data):
         content_type = result.content_type
         extract_dir = random_filename(context.work_path)
         if content_type in ZIP_MIME_TYPES:
-            extracted_files = extract_zip(file_path, extract_dir)
+            extracted_files = extract_zip(file_path, extract_dir, context)
         elif content_type in TAR_MIME_TYPES:
             extracted_files = extract_tar(file_path, extract_dir, context)
         elif content_type in SEVENZIP_MIME_TYPES:

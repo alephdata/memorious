@@ -376,17 +376,16 @@ from memorious.helpers import ...
 #### OCR
 
 ```
-from memorious.helpers.ocr import ...
+from memorious.helpers.ocr import read_text
+from memorious.helpers.ocr import read_word
 ```
 
-Memorious contains some helpers that use [Tesseract](https://github.com/tesseract-ocr) to OCR images. This depends on [tesserocr](https://github.com/sirfz/tesserocr), which depends on Tesseract version 0.3.4+. If you wish to use these helpers you need to install an up to date version of Tesseract (and *its* dependencies), *then* `pip install tesserocr`.
+Memorious contains some helpers that use [a OCR microservice](https://github.com/alephdata/aleph-recognize-text) to OCR images. This microservice uses [tesserocr](https://github.com/sirfz/tesserocr), which depends on Tesseract version 0.3.4+. If you wish to use these helpers, you need to run this microservice using docker and set the `OCR_SERVICE` environment variable to point to this service. Please see
+the [docker-compose file](../example/docker-compose.yml) in examples for an example.
 
 * `read_word`: OCR a single word from an image.
-* `read_char`: OCR a single character from an image.
+* `read_text`: OCR text from an image.
 
-[See the Tesseract wiki](https://github.com/tesseract-ocr/tesseract/wiki/Compiling) for more installation details.
-
-`tesserocr` is not listed as a Memorious dependency, because Tesseract is not a sane dependency unless you're actually going to use it.
 
 ## Postprocessing
 

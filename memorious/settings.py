@@ -29,6 +29,12 @@ INCREMENTAL = env.to_bool('MEMORIOUS_INCREMENTAL', default=True)
 # How many days until an incremental crawl expires
 EXPIRE = env.to_int('MEMORIOUS_EXPIRE', 60)
 
+# How many db inserts per minute
+DB_RATE_LIMIT = env.to_int('MEMORIOUS_DB_RATE_LIMIT', 6000)
+
+# How many http requests to a host per minute
+HTTP_PER_HOST_RATE_LIMIT = env.to_int('MEMORIOUS_HTTP_PER_HOST_RATE_LIMIT', 120)  # noqa
+
 # How many seconds to wait before trying to run scheduled crawlers
 SCHEDULER_INTERVAL = env.to_int('MEMORIOUS_SCHEDULER_INTERVAL', 60)
 
