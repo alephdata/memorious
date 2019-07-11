@@ -3,11 +3,10 @@ import json
 import pickle
 import codecs
 from hashlib import sha1
+from pathlib import Path
 from lxml import html, etree
 from datetime import datetime, timedelta
 from urllib.parse import unquote, urlparse
-from pathlib import Path
-
 from banal import hash_data, is_mapping
 from urlnormalizer import normalize_url
 from celestial import parse_mimetype, normalize_mimetype
