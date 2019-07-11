@@ -31,19 +31,15 @@ class Queue(object):
     @classmethod
     def size(cls, crawler):
         """Total operations pending for this crawler"""
-        total = 0
-        for stage in crawler.stages.keys():
-            job_op = JobOp(conn, str(stage), state['run_id'], str(crawler))
-            total += unpack_int(job_op.progress.get()['pending'])
-        return total
+        status = Progress.get_dataset_status(conn, str(crawler))
+        return status.get('pending')
 
     @classmethod
     def is_running(cls, crawler):
         """Is the crawler currently running?"""
         if crawler.disabled:
             return False
-        status = Progress.get_dataset_status(conn, str(crawler))
-        return status.get('pending') > 0
+        return cls.size(crawler) > 0
 
     @classmethod
     def flush(cls, crawler):
