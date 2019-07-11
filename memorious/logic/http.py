@@ -6,6 +6,7 @@ from hashlib import sha1
 from lxml import html, etree
 from datetime import datetime, timedelta
 from urllib.parse import unquote, urlparse
+from pathlib import Path
 
 from banal import hash_data, is_mapping
 from urlnormalizer import normalize_url
@@ -257,7 +258,7 @@ class ContextHttpResponse(object):
     @property
     def file_path(self):
         self.fetch()
-        return self._file_path
+        return Path(self._file_path)
 
     @property
     def content_hash(self):
@@ -312,7 +313,7 @@ class ContextHttpResponse(object):
                 self._html = html.fromstring(self.text)
             except ValueError as ve:
                 if 'encoding declaration' in str(ve):
-                    self._html = html.parse(self.file_path)
+                    self._html = html.parse(self.file_path.as_posix())
             except (etree.ParserError, etree.ParseError):
                 pass
         return self._html
@@ -320,7 +321,13 @@ class ContextHttpResponse(object):
     @property
     def xml(self):
         if not hasattr(self, '_xml'):
-            self._xml = etree.parse(self.file_path)
+            parser = etree.XMLParser(
+                ns_clean=True,
+                recover=True,
+                resolve_entities=False,
+                no_network=True
+            )
+            self._xml = etree.parse(self.file_path.as_posix(), parser=parser)
         return self._xml
 
     @property
