@@ -77,5 +77,8 @@ setup(
             'pytest-cov',
             'pytest-mock',
         ],
+        'ocr': [
+            'tesserocr',
+        ],
     }
 )
