@@ -55,7 +55,7 @@ class TaskRunner(object):
 
     @classmethod
     def run_sync(cls):
-        for task in Queue.tasks():
+        for task in Queue.tasks(stop_on_timeout=True):
             cls.execute(*task)
 
     @classmethod

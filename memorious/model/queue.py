@@ -12,14 +12,18 @@ class Queue(object):
     """Manage the execution of tasks in the system."""
 
     @classmethod
-    def tasks(cls):
+    def tasks(cls, stop_on_timeout=False):
         stages = list({str(stage) for _, stage in manager.stages})
         while True:
             job_op, data, state = JobOp.get_operation_task(
                 conn, stages, timeout=5
             )
             if not job_op:
-                continue
+                if stop_on_timeout:
+                    # Stop if timed out/ no task returned
+                    return
+                else:
+                    continue
             yield (job_op.operation, state, load_json(data))
 
     @classmethod
