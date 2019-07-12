@@ -3,7 +3,7 @@ from banal import ensure_list
 from datetime import datetime
 
 from servicelayer.util import unpack_int, unpack_datetime, pack_now
-from servicelayer.jobs import Job, JobOp
+from servicelayer.jobs import Job
 
 from memorious.core import conn
 from memorious.util import make_key

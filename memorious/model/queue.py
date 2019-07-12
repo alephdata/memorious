@@ -1,7 +1,7 @@
 import logging
 
-from servicelayer.jobs import JobOp, Progress, Job
-from servicelayer.util import unpack_int, load_json, dump_json
+from servicelayer.jobs import JobStage, Progress, Job
+from servicelayer.util import load_json, dump_json
 
 from memorious.core import manager, conn
 
@@ -15,22 +15,22 @@ class Queue(object):
     def tasks(cls, stop_on_timeout=False):
         stages = list({str(stage) for _, stage in manager.stages})
         while True:
-            job_op, data, state = JobOp.get_operation_task(
+            job_stage, data, state = JobStage.get_stage_task(
                 conn, stages, timeout=5
             )
-            if not job_op:
+            if not job_stage:
                 if stop_on_timeout:
                     # Stop if timed out/ no task returned
                     return
                 else:
                     continue
-            yield (job_op.operation, state, load_json(data))
+            yield (job_stage.operation, state, load_json(data))
 
     @classmethod
     def queue(cls, stage, state, data):
         crawler = state.get('crawler')
-        job_op = JobOp(conn, str(stage), state['run_id'], str(crawler))
-        job_op.queue_task(dump_json(data), state)
+        job_stage = JobStage(conn, str(stage), state['run_id'], str(crawler))
+        job_stage.queue_task(dump_json(data), state)
 
     @classmethod
     def size(cls, crawler):
@@ -51,7 +51,7 @@ class Queue(object):
 
     @classmethod
     def task_done(cls, crawler, stage, state):
-        job_op = JobOp(
+        job_stage = JobStage(
             conn, str(stage), str(state['run_id']), str(crawler)
         )
-        job_op.task_done()
+        job_stage.task_done()
