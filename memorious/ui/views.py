@@ -11,6 +11,7 @@ from memorious.model import Event
 
 PAGE_SIZE = 50
 app = Flask(__name__)
+init_memorious()
 if settings.DEBUG:
     logging.basicConfig(level=logging.DEBUG)
 else:
@@ -162,5 +163,4 @@ def crawler_flush_events(crawler):
 
 
 if __name__ == '__main__':
-    init_memorious()
     app.run(host='0.0.0.0', port=4000, debug=True)
