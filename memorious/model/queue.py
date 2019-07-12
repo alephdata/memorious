@@ -24,7 +24,7 @@ class Queue(object):
                     return
                 else:
                     continue
-            yield (job_stage.operation, state, load_json(data))
+            yield (job_stage.stage, state, load_json(data))
 
     @classmethod
     def queue(cls, stage, state, data):
