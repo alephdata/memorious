@@ -257,7 +257,8 @@ class ContextHttpResponse(object):
     @property
     def file_path(self):
         self.fetch()
-        return Path(self._file_path)
+        if self._file_path is not None:
+            return Path(self._file_path)
 
     @property
     def content_hash(self):
