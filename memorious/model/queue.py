@@ -3,10 +3,9 @@ import logging
 from servicelayer.jobs import Stage, Job, Dataset
 
 from memorious.core import conn
+from memorious.settings import MAX_QUEUE_LENGTH
 
 log = logging.getLogger(__name__)
-
-MAX_QUEUE_LENGTH = 50000
 
 
 class Queue(object):
