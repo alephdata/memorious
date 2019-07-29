@@ -6,6 +6,8 @@ from memorious.core import conn
 
 log = logging.getLogger(__name__)
 
+MAX_QUEUE_LENGTH = 50000
+
 
 class Queue(object):
     """Manage the execution of tasks in the system."""
@@ -15,6 +17,12 @@ class Queue(object):
         crawler = state.get('crawler')
         job = Job(conn, str(crawler), state['run_id'])
         job_stage = Stage(job, str(stage))
+        queue_length = job_stage.get_status().get('pending')
+        if queue_length > MAX_QUEUE_LENGTH:
+            raise QueueTooBigError(
+                "queue for %s:%s too big. Try to rate limit stages that emit"
+                "tasks to this stage."
+            )
         job_stage.queue(payload=data, context=state)
 
     @classmethod
@@ -35,3 +43,7 @@ class Queue(object):
     def flush(cls, crawler):
         dataset = Dataset(conn, str(crawler))
         dataset.cancel()
+
+
+class QueueTooBigError(Exception):
+    pass
