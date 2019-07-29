@@ -1,9 +1,8 @@
 import logging
 
-from servicelayer.jobs import JobStage, Progress, Job
-from servicelayer.util import load_json, dump_json
+from servicelayer.jobs import Stage, Job, Dataset
 
-from memorious.core import manager, conn
+from memorious.core import conn
 
 log = logging.getLogger(__name__)
 
@@ -12,30 +11,17 @@ class Queue(object):
     """Manage the execution of tasks in the system."""
 
     @classmethod
-    def tasks(cls, stop_on_timeout=False):
-        stages = list({str(stage) for _, stage in manager.stages})
-        while True:
-            job_stage, data, state = JobStage.get_stage_task(
-                conn, stages, timeout=5
-            )
-            if not job_stage:
-                if stop_on_timeout:
-                    # Stop if timed out/ no task returned
-                    return
-                else:
-                    continue
-            yield (job_stage.stage, state, load_json(data))
-
-    @classmethod
     def queue(cls, stage, state, data):
         crawler = state.get('crawler')
-        job_stage = JobStage(conn, str(stage), state['run_id'], str(crawler))
-        job_stage.queue_task(dump_json(data), state)
+        job = Job(conn, str(crawler), state['run_id'])
+        job_stage = Stage(job, str(stage))
+        job_stage.queue(payload=data, context=state)
 
     @classmethod
     def size(cls, crawler):
         """Total operations pending for this crawler"""
-        status = Progress.get_dataset_status(conn, str(crawler))
+        dataset = Dataset(conn, str(crawler))
+        status = dataset.get_status()
         return status.get('pending')
 
     @classmethod
@@ -47,11 +33,5 @@ class Queue(object):
 
     @classmethod
     def flush(cls, crawler):
-        Job.remove_dataset(conn, str(crawler))
-
-    @classmethod
-    def task_done(cls, crawler, stage, state):
-        job_stage = JobStage(
-            conn, str(stage), str(state['run_id']), str(crawler)
-        )
-        job_stage.task_done()
+        dataset = Dataset(conn, str(crawler))
+        dataset.cancel()

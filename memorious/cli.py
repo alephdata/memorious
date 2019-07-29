@@ -6,7 +6,7 @@ from tabulate import tabulate
 from memorious import settings
 from memorious.core import manager, init_memorious, is_sync_mode
 from memorious.model import Queue
-from memorious.task_runner import TaskRunner
+from memorious.worker import get_worker
 
 log = logging.getLogger(__name__)
 
@@ -45,8 +45,8 @@ def run(crawler):
     crawler = get_crawler(crawler)
     crawler.run()
     if is_sync_mode():
-        TaskRunner.run_sync()
-
+        worker = get_worker()
+        worker.sync()
 
 @cli.command()
 @click.argument('crawler')
@@ -67,7 +67,8 @@ def flush(crawler):
 @cli.command()
 def process():
     """Start the queue and process tasks as they come. Blocks while waiting"""
-    TaskRunner.run()
+    worker = get_worker()
+    worker.run()
 
 
 @cli.command('list')
