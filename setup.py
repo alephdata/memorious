@@ -37,7 +37,7 @@ setup(
         'normality >= 1.0.0',
         'tabulate',
         'dataset >= 1.0.8',
-        'servicelayer >= 1.8.0',
+        'servicelayer == 1.8.0',
         'urlnormalizer >= 1.2.0',
         'celestial >= 0.2.0',
         'dateparser',
