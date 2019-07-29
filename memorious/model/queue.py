@@ -1,6 +1,6 @@
 import logging
 
-from servicelayer.jobs import JobStage, Progress, Job, Task
+from servicelayer.jobs import Stage, Job, Dataset
 
 from memorious.core import conn
 
@@ -13,14 +13,15 @@ class Queue(object):
     @classmethod
     def queue(cls, stage, state, data):
         crawler = state.get('crawler')
-        job_stage = JobStage(conn, str(stage), state['run_id'], str(crawler))
-        task = Task(job_stage, payload=data, context=state)
-        task.queue()
+        job = Job(conn, str(crawler), state['run_id'])
+        job_stage = Stage(job, str(stage))
+        job_stage.queue(payload=data, context=state)
 
     @classmethod
     def size(cls, crawler):
         """Total operations pending for this crawler"""
-        status = Progress.get_dataset_status(conn, str(crawler))
+        dataset = Dataset(conn, str(crawler))
+        status = dataset.get_status()
         return status.get('pending')
 
     @classmethod
@@ -32,4 +33,5 @@ class Queue(object):
 
     @classmethod
     def flush(cls, crawler):
-        Job.remove_dataset(conn, str(crawler))
+        dataset = Dataset(conn, str(crawler))
+        dataset.cancel()

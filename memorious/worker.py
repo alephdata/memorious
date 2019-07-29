@@ -22,11 +22,8 @@ class MemoriousWorker(Worker):
         stage = task.stage.stage
         state = task.context
         context = Context.from_state(state, stage)
-
-        def aggregate(context):
+        if task.job.is_done():
             context.crawler.aggregate(context)
-
-        task.job.execute_if_done(aggregate, context)
 
     def get_stages(self):
         return list({str(stage) for _, stage in manager.stages})
