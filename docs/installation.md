@@ -12,7 +12,7 @@ We recommend using [Docker Compose](https://docs.docker.com/compose/) to run you
 You can access the Memorious CLI through the `worker` container:
 
 ```
-docker-compose run --rm worker /bin/bash
+docker-compose run --rm worker /bin/sh
 ```
 
 To see the crawlers available to you:

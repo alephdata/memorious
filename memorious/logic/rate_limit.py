@@ -1,5 +1,5 @@
 import logging
-from servicelayer.jobs import RateLimit
+from servicelayer.rate_limit import RateLimit
 from memorious.core import conn
 
 log = logging.getLogger(__name__)

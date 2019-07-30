@@ -44,6 +44,9 @@ THREADS = env.to_int('MEMORIOUS_THREADS', min(8, multiprocessing.cpu_count()))
 # Max scheduled tasks at the same time
 MAX_SCHEDULED = env.to_int('MEMORIOUS_MAX_SCHEDULED', THREADS)
 
+# Max number of tasks in a stage's task queue
+MAX_QUEUE_LENGTH = env.to_int('MEMORIOUS_MAX_QUEUE_LENGTH', 50000)
+
 # HTTP request configuration
 HTTP_CACHE = env.to_bool('MEMORIOUS_HTTP_CACHE', default=True)
 
