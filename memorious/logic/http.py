@@ -142,15 +142,11 @@ class ContextHttpResponse(object):
                 etag = headers.get('etag')
                 if etag:
                     request.headers['If-None-Match'] = etag
+            
+            self._rate_limit(request.url)
 
             session = self.http.session
             prepared = session.prepare_request(request)
-
-            resource = urlparse(self.request.url).netloc or self.request.url
-            rate_limit = get_rate_limit(
-                resource, limit=settings.HTTP_PER_HOST_RATE_LIMIT
-            )
-            rate_limit.comply()
             response = session.send(prepared,
                                     stream=True,
                                     verify=False,
@@ -195,6 +191,12 @@ class ContextHttpResponse(object):
     def _complete(self):
         if self._content_hash is None:
             self.fetch()
+
+    def _rate_limit(self, url):
+        resource = urlparse(url).netloc or url
+        limit = self.context.get('http_rate_limit', settings.HTTP_RATE_LIMIT)
+        rate_limit = get_rate_limit(resource, limit=limit)
+        rate_limit.comply()
 
     @property
     def url(self):
