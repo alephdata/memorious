@@ -34,7 +34,11 @@ class Queue(object):
         """Is the crawler currently running?"""
         if crawler.disabled:
             return False
-        return cls.size(crawler) > 0
+        dataset = Dataset(conn, str(crawler))
+        for job in dataset.get_jobs():
+            if not job.is_done():
+                return True
+        return False
 
     @classmethod
     def flush(cls, crawler):
