@@ -33,21 +33,6 @@ services:
       REDIS_URL: redis://redis:6379/0
       OCR_SERVICE: recognize-text:50000
 
-  beat:
-    build: .
-    command: memorious scheduled --wait
-    links:
-      - redis
-      - recognize-text
-    volumes:
-      - "./build/data:/data"
-      - ../memorious:/memorious/memorious
-    tmpfs:
-      - "/tmp"
-    environment:
-        REDIS_URL: redis://redis:6379/0
-        OCR_SERVICE: recognize-text:50000
-
   redis:
     image: redis:alpine
     command: ["redis-server", "--appendonly", "yes"]

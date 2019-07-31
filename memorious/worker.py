@@ -4,11 +4,23 @@ from servicelayer.worker import Worker
 from memorious.logic.context import Context
 from memorious.logic.rate_limit import get_rate_limit
 from memorious.core import manager, conn
+from memorious import settings
+
 
 log = logging.getLogger(__name__)
 
 
 class MemoriousWorker(Worker):
+    def boot(self):
+        self.scheduler = get_rate_limit(
+            'scheduler', unit=settings.SCHEDULER_INTERVAL, interval=1, limit=1
+        )
+
+    def periodic(self):
+        if self.scheduler.check():
+            log.info("Running scheduled crawlers ...")
+            self.scheduler.update()
+            manager.run_scheduled()
 
     def handle(self, task):
         data = task.payload
