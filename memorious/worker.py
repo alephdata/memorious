@@ -10,6 +10,9 @@ log = logging.getLogger(__name__)
 
 class MemoriousWorker(Worker):
 
+    def periodic(self):
+        manager.run_scheduled()
+
     def handle(self, task):
         data = task.payload
         stage = task.stage.stage

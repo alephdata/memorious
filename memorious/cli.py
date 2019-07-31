@@ -88,17 +88,6 @@ def index():
 
 
 @cli.command()
-@click.option('--wait/--no-wait', default=False)
-def scheduled(wait=False):
-    """Run crawlers that are due."""
-    manager.run_scheduled()
-    while wait:
-        # Loop and try to run scheduled crawlers at short intervals
-        manager.run_scheduled()
-        time.sleep(settings.SCHEDULER_INTERVAL)
-
-
-@cli.command()
 def killthekitten():
     """Completely kill redis contents."""
     from memorious.core import connect_redis
