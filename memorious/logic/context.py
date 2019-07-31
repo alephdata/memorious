@@ -14,6 +14,7 @@ from memorious.model import Event, Queue, Crawl
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
 from memorious.util import make_key, random_filename
+from memorious.exc import QueueTooBigError
 
 
 class Context(object):
@@ -74,6 +75,8 @@ class Context(object):
                           self.stage.method_name,
                           self.run_id)
             return self.stage.method(self, data)
+        except QueueTooBigError as qtbe:
+            self.emit_warning(str(qtbe))
         except Exception as exc:
             self.emit_exception(exc)
         finally:
