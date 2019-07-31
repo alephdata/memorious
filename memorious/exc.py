@@ -3,6 +3,10 @@ class MemoriousException(Exception):
     pass
 
 
+class QueueTooBigError(MemoriousException):
+    pass
+
+
 class ConfigurationError(MemoriousException):
     """A configuration option is not set."""
 

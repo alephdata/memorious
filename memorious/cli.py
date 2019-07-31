@@ -5,7 +5,6 @@ from tabulate import tabulate
 
 from memorious import settings
 from memorious.core import manager, init_memorious, is_sync_mode
-from memorious.model import Queue
 from memorious.worker import get_worker
 
 log = logging.getLogger(__name__)
@@ -83,7 +82,7 @@ def index():
                              crawler.description,
                              crawler.schedule,
                              is_due,
-                             Queue.size(crawler)])
+                             crawler.pending])
     headers = ['Name', 'Description', 'Schedule', 'Due', 'Pending']
     print(tabulate(crawler_list, headers=headers))
 
