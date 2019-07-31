@@ -11,7 +11,10 @@ log = logging.getLogger(__name__)
 class MemoriousWorker(Worker):
 
     def periodic(self):
-        manager.run_scheduled()
+        rate_limit = get_rate_limit('scheduler', unit=60, interval=10, limit=1)
+        if rate_limit.check():
+            manager.run_scheduled()
+            rate_limit.update()
 
     def handle(self, task):
         data = task.payload
