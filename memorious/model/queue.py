@@ -18,10 +18,8 @@ class Queue(object):
         job_stage = Stage(job, str(stage))
         queue_length = job_stage.get_status().get('pending')
         if queue_length > MAX_QUEUE_LENGTH:
-            raise QueueTooBigError(
-                "queue for %s:%s too big. Try to rate limit stages that emit"
-                "tasks to this stage."
-            )
+            msg = "queue for %s:%s too big."
+            raise QueueTooBigError(msg % (str(crawler), str(stage)))
         job_stage.queue(payload=data, context=state)
 
     @classmethod
