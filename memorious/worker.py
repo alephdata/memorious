@@ -26,7 +26,7 @@ class MemoriousWorker(Worker):
                 context.execute(data)
                 rate_limit.update()
             else:
-                Queue.queue(stage, state, data)
+                self.retry(task)
         context.execute(data)
 
     def after_task(self, task):
