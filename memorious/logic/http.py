@@ -216,7 +216,7 @@ class ContextHttpResponse(object):
                 parts.append(hash_data(self.request.data))
             if self.request.json:
                 parts.append(hash_data(self.request.json))
-            return ' '.join(parts)
+            return make_key(*parts)
 
     @property
     def status_code(self):
