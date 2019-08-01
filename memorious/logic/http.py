@@ -13,6 +13,7 @@ from celestial import parse_mimetype, normalize_mimetype
 from normality import guess_file_encoding, stringify
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
+from servicelayer.cache import make_key
 from servicelayer.util import QUEUE_EXPIRE
 
 from memorious import settings
@@ -22,7 +23,6 @@ from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
 from memorious.helpers.dates import parse_date
 from memorious.util import random_filename
-from memorious.util import make_key
 from memorious.logic.rate_limit import get_rate_limit
 
 

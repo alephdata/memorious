@@ -1,6 +1,6 @@
 from hashlib import sha1
 
-from memorious.util import make_key
+from servicelayer.cache import make_key
 
 
 def make_id(*parts):

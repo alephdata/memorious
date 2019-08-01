@@ -5,7 +5,7 @@ import logging
 from copy import deepcopy
 from tempfile import mkdtemp
 from contextlib import contextmanager
-
+from servicelayer.cache import make_key
 from servicelayer.util import load_json, dump_json
 
 from memorious.core import manager, storage, conn
@@ -13,7 +13,7 @@ from memorious.core import datastore
 from memorious.model import Event, Queue, Crawl
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
-from memorious.util import make_key, random_filename
+from memorious.util import random_filename
 from memorious.exc import QueueTooBigError
 
 

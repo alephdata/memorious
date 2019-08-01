@@ -3,10 +3,10 @@ from banal import ensure_list
 from urllib.parse import urljoin
 from urlnormalizer import normalize_url
 from normality import collapse_spaces
+from servicelayer.cache import make_key
 
 from memorious.helpers.rule import Rule
 from memorious.helpers.dates import iso_date
-from memorious.util import make_key
 
 
 log = logging.getLogger(__name__)
