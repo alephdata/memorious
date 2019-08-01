@@ -91,7 +91,7 @@ class Crawl(object):
     @classmethod
     def abort_run(cls, crawler, run_id):
         conn.sadd(make_key(crawler, "runs_abort"), run_id)
-        conn.setex(make_key("run", run_id, "end"), pack_now())
+        conn.setnx(make_key("run", run_id, "end"), pack_now())
         job = Job(conn, crawler.queue, run_id)
         job.remove()
 
