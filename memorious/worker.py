@@ -31,10 +31,10 @@ class MemoriousWorker(Worker):
         context.execute(data)
 
     def after_task(self, task):
-        stage = task.stage.stage
-        state = task.context
-        context = Context.from_state(state, stage)
         if task.job.is_done():
+            stage = task.stage.stage
+            state = task.context
+            context = Context.from_state(state, stage)
             context.crawler.aggregate(context)
 
     def get_stages(self):
