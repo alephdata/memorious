@@ -14,9 +14,6 @@ class CrawlerStage(object):
         self.method_name = config.get('method')
         self.params = config.get('params') or {}
         self.handlers = config.get('handle') or {}
-        self.rate_limit = None
-        if 'rate_limit' in config:
-            self.rate_limit = float(config.get('rate_limit'))
 
     @property
     def method(self):

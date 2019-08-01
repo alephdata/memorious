@@ -2,6 +2,7 @@ import logging
 import dataset
 from servicelayer import settings as sls
 from servicelayer.archive import init_archive
+from servicelayer.rate_limit import RateLimit
 from servicelayer.cache import get_redis, get_fakeredis
 from servicelayer.extensions import get_extensions
 from sqlalchemy.pool import NullPool
@@ -57,3 +58,7 @@ storage = init_archive()
 def init_memorious():
     for func in get_extensions('memorious.plugins'):
         func()
+
+
+def get_rate_limit(resource, limit=100, interval=60, unit=1):
+    return RateLimit(conn, resource, limit=limit, interval=interval, unit=unit)

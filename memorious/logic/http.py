@@ -17,13 +17,12 @@ from servicelayer.cache import make_key
 from servicelayer.util import QUEUE_EXPIRE
 
 from memorious import settings
-from memorious.core import conn, storage
+from memorious.core import conn, storage, get_rate_limit
 from memorious.logic.mime import NON_HTML
 from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
 from memorious.helpers.dates import parse_date
 from memorious.util import random_filename
-from memorious.logic.rate_limit import get_rate_limit
 
 
 class ContextHttp(object):
