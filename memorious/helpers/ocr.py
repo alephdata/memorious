@@ -50,3 +50,7 @@ def read_word(image, languages=None, spaces=False):
         guess = ''.join([c for c in guess if c != " "])
         guess = guess.strip()
     return guess
+
+
+def read_char(image, languages=None):
+    return read_word(image, languages=languages)

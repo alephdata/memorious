@@ -5,7 +5,6 @@ from tabulate import tabulate
 
 from memorious import settings
 from memorious.core import manager, init_memorious, is_sync_mode
-from memorious.model import Queue
 from memorious.worker import get_worker
 
 log = logging.getLogger(__name__)
@@ -83,20 +82,9 @@ def index():
                              crawler.description,
                              crawler.schedule,
                              is_due,
-                             Queue.size(crawler)])
+                             crawler.pending])
     headers = ['Name', 'Description', 'Schedule', 'Due', 'Pending']
     print(tabulate(crawler_list, headers=headers))
-
-
-@cli.command()
-@click.option('--wait/--no-wait', default=False)
-def scheduled(wait=False):
-    """Run crawlers that are due."""
-    manager.run_scheduled()
-    while wait:
-        # Loop and try to run scheduled crawlers at short intervals
-        manager.run_scheduled()
-        time.sleep(settings.SCHEDULER_INTERVAL)
 
 
 @cli.command()

@@ -1,8 +1,7 @@
 import datetime
 from banal import ensure_list
 
-from memorious.core import datastore
-from memorious.logic.rate_limit import get_rate_limit
+from memorious.core import datastore, get_rate_limit
 from memorious import settings
 
 
