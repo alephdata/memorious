@@ -1,6 +1,7 @@
 import logging
 from servicelayer.worker import Worker
 
+from memorious import settings
 from memorious.logic.context import Context
 from memorious.core import manager, conn, get_rate_limit
 
@@ -11,7 +12,7 @@ class MemoriousWorker(Worker):
 
     def periodic(self):
         rate_limit = get_rate_limit('scheduler', unit=60, interval=10, limit=1)
-        if rate_limit.check():
+        if rate_limit.check() and not settings.DEBUG:
             manager.run_scheduled()
             rate_limit.update()
 
