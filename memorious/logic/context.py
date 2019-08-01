@@ -5,7 +5,7 @@ import logging
 from copy import deepcopy
 from tempfile import mkdtemp
 from contextlib import contextmanager
-
+from servicelayer.cache import make_key
 from servicelayer.util import load_json, dump_json
 
 from memorious.core import manager, storage, conn
@@ -13,7 +13,8 @@ from memorious.core import datastore
 from memorious.model import Event, Queue, Crawl
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
-from memorious.util import make_key, random_filename
+from memorious.util import random_filename
+from memorious.exc import QueueTooBigError
 
 
 class Context(object):
@@ -74,6 +75,8 @@ class Context(object):
                           self.stage.method_name,
                           self.run_id)
             return self.stage.method(self, data)
+        except QueueTooBigError as qtbe:
+            self.emit_warning(str(qtbe))
         except Exception as exc:
             self.emit_exception(exc)
         finally:

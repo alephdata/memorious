@@ -2,10 +2,10 @@ import logging
 
 from servicelayer.util import pack_now, unpack_datetime
 from servicelayer.util import dump_json, load_json
+from servicelayer.cache import make_key
 
 from memorious.core import conn
 from memorious.model.crawl import Crawl
-from memorious.util import make_key
 
 log = logging.getLogger(__name__)
 

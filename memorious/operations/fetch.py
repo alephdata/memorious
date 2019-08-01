@@ -1,8 +1,8 @@
 from urllib.parse import urljoin
 from requests.exceptions import RequestException
+from servicelayer.cache import make_key
 
 from memorious.helpers.rule import Rule
-from memorious.util import make_key
 
 
 def fetch(context, data):
