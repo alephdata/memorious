@@ -2,7 +2,7 @@ from datetime import datetime
 from setuptools import setup, find_packages
 
 setup(
-    name='crawlers',
+    name='example',
     version=datetime.utcnow().date().isoformat(),
     classifiers=[],
     keywords='',
@@ -12,6 +12,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=['memorious', 'datafreeze'],
-    entry_points={},
-    tests_require=[]
+    entry_points={
+        'memorious.plugins': [
+            'example = example:init'
+        ]
+    }
 )
