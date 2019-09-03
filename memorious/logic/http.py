@@ -50,7 +50,10 @@ class ContextHttp(object):
                 params=None, json=None, allow_redirects=True, lazy=False):
         if is_mapping(params):
             params = list(params.items())
-        url = normalize_url(url, extra_query_args=params)
+
+        if self.context.params.get('normalize_url', True):
+            url = normalize_url(url, extra_query_args=params)
+
         method = method.upper().strip()
         request = Request(method, url, data=data, headers=headers,
                           json=json, auth=auth)
