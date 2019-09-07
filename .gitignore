@@ -21,3 +21,4 @@ memorious/tests/testdata/data/*
 .tox
 .pytest_cache/*
 .idea/
+balkhashdb

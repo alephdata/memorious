@@ -144,7 +144,7 @@ class ContextHttpResponse(object):
                 etag = headers.get('etag')
                 if etag:
                     request.headers['If-None-Match'] = etag
-            
+
             self._rate_limit(request.url)
 
             session = self.http.session
