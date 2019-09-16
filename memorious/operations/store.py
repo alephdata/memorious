@@ -39,7 +39,9 @@ def directory(context, data):
             # if no extension can be guessed, file_name will
             # still be None and dft_name still 'raw'
             mime_type = data['headers']['Content-Type']
-            dft_name = mimetypes.guess_extension(mime_type)
+            ext_name = mimetypes.guess_extension(mime_type)
+            if ext_name is not None:
+                dft_name = ext_name
         file_name = safe_filename(file_name, default=dft_name)
         file_name = '%s.%s' % (content_hash, file_name)
         data['_file_name'] = file_name
