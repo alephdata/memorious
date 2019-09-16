@@ -33,13 +33,14 @@ def directory(context, data):
 
         path = _get_directory_path(context)
         file_name = data.get('file_name', result.file_name)
+        dft_name = 'raw'
         if file_name is None:
             # try to guess at least the file extension ;
             # if no extension can be guessed, file_name will
-            # still be None
+            # still be None and dft_name still 'raw'
             mime_type = data['headers']['Content-Type']
-            file_name = mimetypes.guess_extension(mime_type)
-        file_name = safe_filename(file_name, default='raw')
+            dft_name = mimetypes.guess_extension(mime_type)
+        file_name = safe_filename(file_name, default=dft_name)
         file_name = '%s.%s' % (content_hash, file_name)
         data['_file_name'] = file_name
         file_path = os.path.join(path, file_name)
