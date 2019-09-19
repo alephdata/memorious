@@ -1,3 +1,4 @@
+import mimetypes
 import os
 import json
 import shutil
@@ -19,6 +20,21 @@ def _get_directory_path(context):
     return path
 
 
+def _get_file_extension(file_name, mime_type):
+    if file_name is not None:
+        _, extension = os.path.split(file_name)
+        extension = extension.replace('.', '')
+        if len(extension) > 1:
+            return extension
+    if mime_type is not None:
+        extension = mimetypes.guess_extension(mime_type)
+        if extension is not None:    
+            extension = extension.replace('.', '')
+            if len(extension) > 1:
+                return extension
+    return 'raw'
+
+
 def directory(context, data):
     """Store the collected files to a given directory."""
     with context.http.rehash(data) as result:
@@ -32,7 +48,10 @@ def directory(context, data):
 
         path = _get_directory_path(context)
         file_name = data.get('file_name', result.file_name)
-        file_name = safe_filename(file_name, default='raw')
+        mime_type = data.get('headers', {}).get('Content-Type')
+        extension = _get_file_extension(file_name, mime_type)
+        file_name = file_name or 'data'
+        file_name = safe_filename(file_name, extension=extension)
         file_name = '%s.%s' % (content_hash, file_name)
         data['_file_name'] = file_name
         file_path = os.path.join(path, file_name)
@@ -40,7 +59,6 @@ def directory(context, data):
             shutil.copyfile(result.file_path, file_path)
 
         context.log.info("Store [directory]: %s", file_name)
-
         meta_path = os.path.join(path, '%s.json' % content_hash)
         with open(meta_path, 'w') as fh:
             json.dump(data, fh)

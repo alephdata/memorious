@@ -29,12 +29,12 @@ def parse_html(context, data, result):
     else:
         roots = []
         for path in include:
-            roots = roots + result.html.findall(path)
+            roots = roots + result.html.xpath(path)
 
     seen = set()
     for root in roots:
         for tag_query, attr_name in URL_TAGS:
-            for element in root.findall(tag_query):
+            for element in root.xpath(tag_query):
                 attr = element.get(attr_name)
                 if attr is None:
                     continue
