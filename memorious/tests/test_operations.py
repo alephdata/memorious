@@ -144,8 +144,8 @@ def test_directory(context):
         file_path, "../testdata/data/store/occrp_web_site"
     ))
 
+    raw_file_path = os.path.join(store_dir, content_hash + ".data.json")
     meta_file_path = os.path.join(store_dir, content_hash + ".json")
-    raw_file_path = os.path.join(store_dir, content_hash + ".raw")
     assert os.path.exists(meta_file_path)
     assert os.path.exists(raw_file_path)
 
