@@ -90,7 +90,7 @@ class MimeTypeRule(Rule):
         self.clean = normalize_mimetype(self.value)
 
     def apply(self, res):
-        return self.res.content_type == self.clean
+        return res.content_type == self.clean
 
 
 class MimeGroupRule(Rule):
