@@ -1,6 +1,6 @@
 import re
 from urllib.parse import urlparse
-from celestial import normalize_mimetype
+from pantomime import normalize_mimetype
 
 from memorious.logic.mime import GROUPS
 
@@ -13,7 +13,7 @@ class Rule(object):
         pass
 
     def apply(self, res):
-        raise NotImplemented()
+        raise NotImplementedError
 
     def to_dict(self):
         return self.value

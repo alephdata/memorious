@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from urllib.parse import unquote, urlparse
 from banal import hash_data, is_mapping
 from urlnormalizer import normalize_url
-from celestial import parse_mimetype, normalize_mimetype
+from pantomime import parse_mimetype, normalize_mimetype
 from normality import guess_file_encoding, stringify
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
