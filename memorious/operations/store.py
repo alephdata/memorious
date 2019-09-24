@@ -2,7 +2,9 @@ import mimetypes
 import os
 import json
 import shutil
+
 from normality import safe_filename
+from pantomime import normalize_mimetype
 
 from memorious import settings
 
@@ -51,7 +53,7 @@ def directory(context, data):
         # the MIME type (aka 'Media-Type') is the first part of 'Content-Type'
         # if we keep the eventual charset or boundary, guess_extension()
         # returns None
-        mime_type = data.get('headers', {}).get('Content-Type').split(';')[0]
+        mime_type = normalize_mimetype(data.get('headers', {}).get('Content-Type'))
         extension = _get_file_extension(file_name, mime_type)
         file_name = file_name or 'data'
         file_name = safe_filename(file_name, extension=extension)
