@@ -2,7 +2,9 @@ import mimetypes
 import os
 import json
 import shutil
+
 from normality import safe_filename
+from pantomime import normalize_mimetype
 
 from memorious import settings
 
@@ -28,7 +30,7 @@ def _get_file_extension(file_name, mime_type):
             return extension
     if mime_type is not None:
         extension = mimetypes.guess_extension(mime_type)
-        if extension is not None:    
+        if extension is not None:
             extension = extension.replace('.', '')
             if len(extension) > 1:
                 return extension
@@ -48,7 +50,7 @@ def directory(context, data):
 
         path = _get_directory_path(context)
         file_name = data.get('file_name', result.file_name)
-        mime_type = data.get('headers', {}).get('Content-Type')
+        mime_type = normalize_mimetype(data.get('headers', {}).get('Content-Type'))
         extension = _get_file_extension(file_name, mime_type)
         file_name = file_name or 'data'
         file_name = safe_filename(file_name, extension=extension)
