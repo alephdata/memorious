@@ -40,7 +40,9 @@ def parse_html(context, data, result):
                     continue
 
                 try:
-                    url = normalize_url(urljoin(result.url, attr))
+                    url = urljoin(result.url, attr)
+                    if context.params.get('normalize_url', True):
+                        url = normalize_url(url)
                 except Exception:
                     log.warning('Invalid URL: %r', attr)
                     continue

@@ -205,7 +205,10 @@ class ContextHttpResponse(object):
         if self._url is not None:
             return self._url
         if self._response is not None:
-            return normalize_url(self._response.url)
+            if self.context.params.get('normalize_url', True):
+                return normalize_url(self._response.url)
+            else:
+                return self._response.url
         if self.request is not None:
             return self.request.url
 
