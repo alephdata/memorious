@@ -1,5 +1,5 @@
 import os
-import collections
+from collections.abc import Iterable
 
 from memorious.logic.manager import Crawler, CrawlerManager
 
@@ -20,4 +20,4 @@ class TestManager(object):
         assert len(manager) == 3
         assert isinstance(manager.get("book_scraper"), Crawler)
         assert isinstance(manager["book_scraper"], Crawler)
-        assert isinstance(manager, collections.Iterable)
+        assert isinstance(manager, Iterable)

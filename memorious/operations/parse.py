@@ -46,7 +46,7 @@ def parse_html(context, data, result):
                     log.warning('Invalid URL: %r', attr)
                     continue
 
-                if url is None or key in seen:
+                if url is None or key is None or key in seen:
                     continue
                 seen.add(key)
 
@@ -55,6 +55,7 @@ def parse_html(context, data, result):
                     continue
                 context.set_tag(tag, None)
                 data = {'url': url}
+
                 # Option to set the document title from the link text.
                 if context.get('link_title', False):
                     data['title'] = collapse_spaces(element.text_content())
