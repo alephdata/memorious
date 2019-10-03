@@ -51,9 +51,6 @@ class ContextHttp(object):
         if is_mapping(params):
             params = list(params.items())
 
-        if self.context.params.get('normalize_url', True):
-            url = normalize_url(url, extra_query_args=params)
-
         method = method.upper().strip()
         request = Request(method, url, data=data, headers=headers,
                           json=json, auth=auth)
@@ -214,7 +211,7 @@ class ContextHttpResponse(object):
         if self._request_id is not None:
             return self._request_id
         if self.request is not None:
-            parts = [self.request.method, self.url]
+            parts = [self.request.method, normalize_url(self.url)]
             if self.request.data:
                 parts.append(hash_data(self.request.data))
             if self.request.json:

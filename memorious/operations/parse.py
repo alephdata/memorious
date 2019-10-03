@@ -40,16 +40,17 @@ def parse_html(context, data, result):
                     continue
 
                 try:
-                    url = normalize_url(urljoin(result.url, attr))
+                    url = urljoin(result.url, attr)
+                    key = normalize_url(url)
                 except Exception:
                     log.warning('Invalid URL: %r', attr)
                     continue
 
-                if url is None or url in seen:
+                if url is None or key in seen:
                     continue
-                seen.add(url)
+                seen.add(key)
 
-                tag = make_key(context.run_id, url)
+                tag = make_key(context.run_id, key)
                 if context.check_tag(tag):
                     continue
                 context.set_tag(tag, None)
