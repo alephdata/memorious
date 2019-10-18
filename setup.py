@@ -42,7 +42,7 @@ setup(
         'pantomime == 0.3.3',
         'dateparser',
         'stringcase',
-        'redis == 3.2.1',
+        'redis == 3.3.11',
         'flask',
         'babel'
     ],
