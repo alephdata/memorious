@@ -54,7 +54,7 @@ def test_parse(context, mocker):
         parse(context, data)
         assert context.emit.call_count == 1
         context.emit.assert_called_once_with(rule="fetch", data={
-            "url": "http://www.iana.org/domains/example"
+            "url": "https://www.iana.org/domains/example"
         })
 
     # cleanup tags
