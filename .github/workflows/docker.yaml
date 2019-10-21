@@ -13,7 +13,7 @@ jobs:
       with:
         python-version: ${{ matrix.python }}
     - name: Build docker image for master
-      if: github.event_name == 'push' && github.ref == 'master'
+      if: github.event_name == 'push' && ${GITHUB_REF##*/} == 'master'
       run: |
         docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
         docker build -t alephdata/memorious:master .
