@@ -1,6 +1,9 @@
 name: Build Memorious Docker images
 
-on: [push]
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -12,12 +15,6 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python }}
-    - name: Build docker image for master
-      if: github.event_name == 'push' && ${GITHUB_REF##*/} == 'master'
-      run: |
-        docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
-        docker build -t alephdata/memorious:master .
-        docker push alephdata/memorious:master
     - name: Build docker image for tags
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       run: |

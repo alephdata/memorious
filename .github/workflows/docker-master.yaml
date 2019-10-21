@@ -1,0 +1,23 @@
+name: Build Memorious Docker images
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Memorious Docker Build
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Build docker image for master
+      if: github.event_name == 'push'
+      run: |
+        docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
+        docker build -t alephdata/memorious:master .
+        docker push alephdata/memorious:master
