@@ -1,0 +1,35 @@
+name: Test and build Memorious
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [ '3.x']
+    name: Memorious on Python ${{ matrix.python }}
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install dependencies
+      run: |
+        sudo apt-get install p7zip-full libicu-dev
+        pip install tox twine
+    - name: Run the tests
+      run: tox
+    - name: Build a distribution
+      run: |
+        python setup.py sdist bdist_wheel
+    - name: Publish a Python distribution to PyPI
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
+    - name: build docker image
+      run: |
+        docker build -t alephdata/memorious:latest .
