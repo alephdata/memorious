@@ -1,0 +1,28 @@
+name: Build Memorious Docker images
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Memorious Docker Build
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Build docker image for master
+      if: github.event_name == 'push' && github.ref == 'master'
+      run: |
+        docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
+        docker build -t alephdata/memorious:master .
+        docker push alephdata/memorious:master
+    - name: Build docker image for tags
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      run: |
+        docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
+        docker build -t alephdata/memorious:${GITHUB_REF##*/} .
+        docker push alephdata/memorious:${GITHUB_REF##*/}
+        docker build -t alephdata/memorious:latest .
+        docker push alephdata/memorious:latest
