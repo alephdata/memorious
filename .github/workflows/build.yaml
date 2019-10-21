@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install p7zip-full libicu-dev
-        pip install tox twine
+        pip install tox twine wheel
     - name: Run the tests
       run: tox
     - name: Build a distribution
@@ -30,6 +30,6 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.pypi_password }}
-    - name: build docker image
+    - name: Build docker image
       run: |
         docker build -t alephdata/memorious:latest .
