@@ -1,4 +1,4 @@
-name: Test and build Memorious
+name: Test, build and publish Memorious PyPI packages
 
 on: [push]
 
@@ -30,6 +30,3 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.pypi_password }}
-    - name: Build docker image
-      run: |
-        docker build -t alephdata/memorious:latest .
