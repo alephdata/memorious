@@ -7,11 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Show ref
+      run: |
+        echo "$GITHUB_REF"
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
         python-version: '3.x'
     - name: Install dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
       run: |
         sudo apt-get install -y -qq p7zip-full libicu-dev
         python -m pip install -U pip setuptools pyicu twine wheel
