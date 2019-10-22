@@ -5,7 +5,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Memorious Docker Build
     steps:
     - uses: actions/checkout@v1
     - name: Build docker image
