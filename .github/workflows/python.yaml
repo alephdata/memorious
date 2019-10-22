@@ -1,4 +1,4 @@
-name: Test, build and publish Memorious PyPI packages
+name: memorious python build
 
 on: [push]
 
@@ -14,7 +14,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -y -qq p7zip-full libicu-dev
-        python -m pip install install -U pip setuptools pyicu twine wheel
+        python -m pip install -U pip setuptools pyicu twine wheel
         pip install pytest pytest-env pytest-cov pytest-mock
         pip install -e .
     - name: Run the tests
