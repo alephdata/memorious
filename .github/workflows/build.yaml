@@ -14,8 +14,9 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -y -qq p7zip-full libicu-dev
-        pip install -U setuptools pyicu twine wheel
-        pip install -e '.[dev]'
+        python -m pip install install -U pip setuptools pyicu twine wheel
+        pip install pytest pytest-env pytest-cov pytest-mock
+        pip install -e .
     - name: Run the tests
       run: |
         pytest --cov=memorious --cov-report term-missing
