@@ -5,9 +5,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python: [ '3.x']
     name: Memorious on Python ${{ matrix.python }}
     steps:
     - uses: actions/checkout@v1
@@ -18,9 +15,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install p7zip-full libicu-dev
-        pip install tox twine wheel
+        pip install tox pyicu twine wheel
     - name: Run the tests
-      run: tox
+      run: |
+        pytest --cov=memorious --cov-report term-missing
     - name: Build a distribution
       run: |
         python setup.py sdist bdist_wheel
