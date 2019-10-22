@@ -11,6 +11,11 @@ jobs:
     - name: Build docker image
       run: |
         docker build -t alephdata/memorious:latest .
+    - name: Push docker image (master)
+      run: |
+        docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
+        docker build -t alephdata/memorious:master .
+        docker push alephdata/memorious:master
     - name: Push docker image for tags
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       run: |
