@@ -16,6 +16,7 @@ jobs:
       run: |
         sudo apt-get install p7zip-full libicu-dev
         pip install tox pyicu twine wheel
+        pip install -e .
     - name: Run the tests
       run: |
         pytest --cov=memorious --cov-report term-missing
