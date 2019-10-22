@@ -1,9 +1,6 @@
 name: memorious docker build
 
-on:
-  push:
-    tags:
-      - '*'
+on: [push]
 
 jobs:
   build:
