@@ -2,6 +2,8 @@
 Memorious
 =========
 
+.. image:: https://github.com/alephdata/memorious/workflows/memorious/badge.svg
+
     The solitary and lucid spectator of a multiform, instantaneous and almost intolerably precise world.
     
     -- `Funes the Memorious <http://users.clas.ufl.edu/burt/spaceshotsairheads/borges-funes.pdf>`_,
