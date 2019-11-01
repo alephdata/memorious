@@ -11,7 +11,7 @@ setup(
         "Programming Language :: Python",
     ],
     keywords='',
-    author='Journalism Development Network',
+    author='Organized Crime and Corruption Reporting Project',
     author_email='data@occrp.org',
     url='http://github.com/alephdata/memorious',
     license='MIT',
