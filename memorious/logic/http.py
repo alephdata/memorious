@@ -8,7 +8,6 @@ from lxml import html, etree
 from datetime import datetime, timedelta
 from urllib.parse import unquote, urlparse
 from banal import hash_data, is_mapping
-from urlnormalizer import normalize_url
 from pantomime import parse_mimetype, normalize_mimetype
 from normality import guess_file_encoding, stringify
 from requests import Session, Request
@@ -202,7 +201,7 @@ class ContextHttpResponse(object):
         if self._url is not None:
             return self._url
         if self._response is not None:
-            return normalize_url(self._response.url)
+            return self._response.url
         if self.request is not None:
             return self.request.url
 
@@ -211,7 +210,7 @@ class ContextHttpResponse(object):
         if self._request_id is not None:
             return self._request_id
         if self.request is not None:
-            parts = [self.request.method, normalize_url(self.url)]
+            parts = [self.request.method, self.url]
             if self.request.data:
                 parts.append(hash_data(self.request.data))
             if self.request.json:

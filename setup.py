@@ -38,7 +38,6 @@ setup(
         'tabulate',
         'dataset >= 1.0.8',
         'servicelayer[google,amazon] == 1.9.3',
-        'urlnormalizer == 1.2.5',
         'pantomime == 0.3.3',
         'dateparser',
         'stringcase',

@@ -1,7 +1,6 @@
 import logging
 from banal import ensure_list
 from urllib.parse import urljoin
-from urlnormalizer import normalize_url
 from normality import collapse_spaces
 from servicelayer.cache import make_key
 
@@ -41,7 +40,7 @@ def parse_html(context, data, result):
 
                 try:
                     url = urljoin(result.url, attr)
-                    key = normalize_url(url)
+                    key = url
                 except Exception:
                     log.warning('Invalid URL: %r', attr)
                     continue
