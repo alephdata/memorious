@@ -18,7 +18,7 @@ URL_TAGS = [('.//a', 'href'),
 def parse_html(context, data, result):
     context.log.info('Parse: %r', result.url)
 
-    title = result.html.findtext('.//title')
+    title = result.html.xpath('.//title/text()')[0]
     if title is not None and 'title' not in data:
         data['title'] = title
 
@@ -74,7 +74,7 @@ def parse_for_metadata(context, data, html):
 
     for key, xpaths in meta_paths.items():
         for xpath in ensure_list(xpaths):
-            element = html.find(xpath)
+            element = html.xpath(xpath)[0]
             if element is None:
                 continue
             value = collapse_spaces(element.text_content())
