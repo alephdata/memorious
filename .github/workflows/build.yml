@@ -1,6 +1,6 @@
 name: memorious
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   python:
@@ -26,6 +26,7 @@ jobs:
       run: |
         pytest --cov=memorious --cov-report term-missing
     - name: Build a distribution
+      if: github.event_name == 'push'
       run: |
         python setup.py sdist bdist_wheel
     - name: Publish a Python distribution to PyPI
@@ -46,6 +47,7 @@ jobs:
       run: |
         docker build -t alephdata/memorious:latest .
     - name: Push docker image (master)
+      if: github.event_name == 'push'
       run: |
         docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
         docker build -t alephdata/memorious:${GITHUB_SHA} .
