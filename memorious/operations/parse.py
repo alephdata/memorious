@@ -77,7 +77,11 @@ def parse_for_metadata(context, data, html):
             element = html.xpath(xpath)[0]
             if element is None:
                 continue
-            value = collapse_spaces(element.text_content())
+            try:
+                value = collapse_spaces(element.text_content())
+            except AttributeError:
+                # useful when element is an attribute
+                value = collapse_spaces(str(element))
             if key in meta_date:
                 value = iso_date(value)
             if value is not None:
