@@ -22,6 +22,9 @@ def login(context, data):
         'username': username,
         'password': password
     }
+    # We also need to pass the hidden inputs from the form.
+    hidden_inputs = {h_in.get('name'): h_in.get('value') for h_in in form.xpath('./input[@type="hidden"]')}
+    login_data.update(hidden_inputs)
     context.http.post(login_url, data=login_data)
 
     # Set data for input to the next stage, and proceed.

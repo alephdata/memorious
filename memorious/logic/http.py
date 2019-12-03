@@ -74,7 +74,7 @@ class ContextHttp(object):
         if self.STATE_SESSION not in self.context.state:
             return
         key = self.context.state.get(self.STATE_SESSION)
-        value = conn.get(make_key(self.context.run_id, "session", key))
+        value = conn.get(key)
         if value is not None:
             session = codecs.decode(bytes(value, 'utf-8'), 'base64')
             return pickle.loads(session)
