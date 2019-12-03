@@ -48,24 +48,24 @@ def test_parse(context, mocker):
     result = context.http.get(url)
     data = result.serialize()
 
-    with mocker.patch.object(context, "emit"):
-        rules = {'pattern': 'https://httpbin.org/*'}
-        context.params["store"] = rules
-        parse(context, data)
-        assert context.emit.call_count == 1
-        context.emit.assert_called_once_with(rule="fetch", data={
-            "url": "https://www.iana.org/domains/example"
-        })
+    mocker.patch.object(context, "emit")
+
+    rules = {'pattern': 'https://httpbin.org/*'}
+    context.params["store"] = rules
+    parse(context, data)
+    assert context.emit.call_count == 1
+    context.emit.assert_called_once_with(rule="fetch", data={
+        "url": "https://www.iana.org/domains/example"
+    })
 
     # cleanup tags
     conn = connect_redis()
     conn.flushall()
 
-    with mocker.patch.object(context, "emit"):
-        context.http.result = None
-        context.params["store"] = None
-        parse(context, data)
-        assert context.emit.call_count == 2, data
+    context.http.result = None
+    context.params["store"] = None
+    parse(context, data)
+    assert context.emit.call_count == 3, data
 
 
 def test_seed(context, mocker):
@@ -82,19 +82,19 @@ def test_seed(context, mocker):
 
 
 def test_sequence(context, mocker):
-    with mocker.patch.object(context, "emit"):
-        context.params["start"] = 2
-        context.params["stop"] = 11
-        context.params["step"] = 3
-        sequence(context, data={})
-        assert context.emit.call_count == 3
+    mocker.patch.object(context, "emit")
 
-    with mocker.patch.object(context, "emit"):
-        context.params["start"] = 7
-        context.params["stop"] = 1
-        context.params["step"] = -3
-        sequence(context, data={})
-        assert context.emit.call_count == 2
+    context.params["start"] = 2
+    context.params["stop"] = 11
+    context.params["step"] = 3
+    sequence(context, data={})
+    assert context.emit.call_count == 3
+
+    context.params["start"] = 7
+    context.params["stop"] = 1
+    context.params["step"] = -3
+    sequence(context, data={})
+    assert context.emit.call_count == 5
 
 
 def test_dates(context, mocker):
