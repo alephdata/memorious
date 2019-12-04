@@ -16,6 +16,8 @@ rebuild:
 	docker build --pull --no-cache -t alephdata/memorious .
 
 test:
+	# Check if we the command works
+	memorious list
 	pytest --cov=memorious --cov-report term-missing
 
 ui:

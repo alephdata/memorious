@@ -25,6 +25,9 @@ jobs:
     - name: Run the tests
       run: |
         pytest --cov=memorious --cov-report term-missing
+    - name: Test run memorious
+      run: |
+        memorious list
     - name: Build a distribution
       if: github.event_name == 'push'
       run: |
