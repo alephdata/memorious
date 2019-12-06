@@ -17,7 +17,7 @@ def clean_html(context, data):
 
     remove_paths = context.params.get('remove_paths')
     for path in ensure_list(remove_paths):
-        for el in doc.findall(path):
+        for el in doc.xpath(path):
             el.drop_tree()
 
     html_text = html.tostring(doc, pretty_print=True)
