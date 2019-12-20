@@ -5,7 +5,7 @@ RUN apk add --no-cache --virtual=build_deps python3-dev g++ tesseract-ocr-dev mu
     pip3 install --no-cache-dir tesserocr regex
 ENV OMP_THREAD_LIMIT=1
 
-RUN pip3 install --no-cache-dir -U pip setuptools six
+RUN pip3 install --no-cache-dir -U pip setuptools six wheel
 
 COPY setup.py /memorious/
 COPY memorious /memorious/memorious
