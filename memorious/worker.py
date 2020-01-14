@@ -26,8 +26,6 @@ class MemoriousWorker(Worker):
         stage = task.stage.stage
         state = task.context
         context = Context.from_state(state, stage)
-        if context.crawler.disabled:
-            return
         context.execute(data)
 
     def after_task(self, task):

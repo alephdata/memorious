@@ -8,7 +8,7 @@ The first few lines of your config are to set up your crawler:
 
 * `name`: A unique slug, eg. "my_crawler", which you can pass to `memorious run` to start your crawler.
 * `description`: An optional description, will be shown when you run `list`.
-* `schedule`: one of `hourly`, `daily`, `weekly` or `monthly`.
+* `schedule`: one of `disabled`, `hourly`, `daily`, `weekly` or `monthly`. `disabled` by default.
 
 ## The Pipeline
 
