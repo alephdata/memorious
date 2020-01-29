@@ -45,7 +45,7 @@ THREADS = env.to_int('MEMORIOUS_THREADS', min(8, multiprocessing.cpu_count()))
 MAX_SCHEDULED = max(env.to_int('MEMORIOUS_MAX_SCHEDULED', THREADS), 20)
 
 # How many seconds to wait before timing out a crawler
-CRAWLER_TIMEOUT = env.to_int('MEMORIOUS_CRAWLER_TIMEOUT', 3600)
+CRAWLER_TIMEOUT = env.to_int('MEMORIOUS_CRAWLER_TIMEOUT', 3600 * 6)
 
 # Max number of tasks in a stage's task queue
 MAX_QUEUE_LENGTH = env.to_int('MEMORIOUS_MAX_QUEUE_LENGTH', 50000)
