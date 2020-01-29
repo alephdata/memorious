@@ -93,6 +93,15 @@ class Crawler(object):
         Crawl.abort_all(self)
         self.queue.cancel()
 
+    @property
+    def should_timeout(self):
+        now = datetime.utcnow()
+        return self.last_run < now - timedelta(seconds=settings.CRAWLER_TIMEOUT) # noqa
+
+    def timeout(self):
+        log.warning("Crawler timed out: %s. Aggregator won't be run", self.name)  # noqa
+        self.cancel()
+
     def run(self, incremental=None, run_id=None):
         """Queue the execution of a particular crawler."""
         state = {

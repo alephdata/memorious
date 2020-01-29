@@ -20,6 +20,10 @@ class Crawl(object):
         return unpack_datetime(last_run)
 
     @classmethod
+    def heartbeat(cls, crawler):
+        conn.set(make_key(crawler, "last_run"), pack_now())
+
+    @classmethod
     def op_count(cls, crawler, stage=None):
         """Total operations performed for this crawler"""
         if stage:

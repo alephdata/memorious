@@ -34,6 +34,8 @@ class CrawlerManager(object):
                 continue
             if not crawler.check_due():
                 continue
+            if num_running >= settings.MAX_SCHEDULED:
+                continue
             log.info('[%s] due, queueing...', crawler.name)
             crawler.run()
             num_running += 1

@@ -14,8 +14,15 @@ class MemoriousWorker(Worker):
                                         unit=60,
                                         interval=settings.SCHEDULER_INTERVAL,
                                         limit=1)
+        self.hourly = get_rate_limit('hourly', unit=3600, interval=1, limit=1)
 
     def periodic(self):
+        if self.hourly.check():
+            self.hourly.update()
+            log.info("Running hourly tasks...")
+            for crawler in manager:
+                if crawler.should_timeout:
+                    crawler.timeout()
         if self.scheduler.check() and not settings.DEBUG:
             log.info("Running scheduled crawlers ...")
             self.scheduler.update()
