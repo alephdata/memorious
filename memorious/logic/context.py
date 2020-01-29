@@ -83,6 +83,9 @@ class Context(object):
             Crawl.operation_end(self.crawler, self.run_id)
             shutil.rmtree(self.work_path)
 
+    def emit_heartbeat(self):
+        Crawl.heartbeat(self.crawler)
+
     def emit_warning(self, message, type=None, *args):
         if len(args):
             message = message % args

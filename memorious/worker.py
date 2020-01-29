@@ -16,6 +16,9 @@ class MemoriousWorker(Worker):
                                         limit=1)
 
     def periodic(self):
+        for crawler in manager:
+            if crawler.should_timeout:
+                crawler.timeout()
         if self.scheduler.check() and not settings.DEBUG:
             log.info("Running scheduled crawlers ...")
             self.scheduler.update()
