@@ -95,6 +95,8 @@ class Crawler(object):
 
     @property
     def should_timeout(self):
+        if self.last_run is None:
+            return False
         now = datetime.utcnow()
         return self.last_run < now - timedelta(seconds=settings.CRAWLER_TIMEOUT) # noqa
 
