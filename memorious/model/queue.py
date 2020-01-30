@@ -17,6 +17,7 @@ class Queue(object):
         crawler = state.get('crawler')
         job = Job(conn, str(crawler), state['run_id'])
         job_stage = job.get_stage(stage)
+        job_stage.sync()
         queue_length = job_stage.get_status().get('pending')
         if queue_length > MAX_QUEUE_LENGTH:
             msg = "queue for %s:%s too big."
