@@ -38,7 +38,7 @@ setup(
         'tabulate',
         'python-dateutil == 2.8.1',
         'dataset >= 1.0.8',
-        'servicelayer[google,amazon] == 1.9.12',
+        'servicelayer[google,amazon] == 1.9.13',
         'pantomime == 0.4.0',
         'dateparser',
         'stringcase',
