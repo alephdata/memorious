@@ -1,8 +1,9 @@
 import logging
 
-from servicelayer.util import pack_now, unpack_datetime
+from servicelayer.util import pack_now, unpack_datetime, unpack_int
 from servicelayer.util import dump_json, load_json
 from servicelayer.cache import make_key
+from servicelayer.settings import REDIS_EXPIRE, REDIS_LONG
 
 from memorious.core import conn
 from memorious.model.crawl import Crawl
@@ -27,16 +28,35 @@ class Event(object):
             'message': message
         }
         data = dump_json(event)
-        conn.lpush(make_key(crawler, "events"), data)
-        conn.lpush(make_key(crawler, "events", level), data)
-        conn.lpush(make_key(crawler, "events", stage), data)
-        conn.lpush(make_key(crawler, "events", stage, level), data)
-        conn.lpush(make_key(crawler, "events", run_id), data)
-        conn.lpush(make_key(crawler, "events", run_id, level), data)
+        keys = [
+            make_key(crawler, "events"),
+            make_key(crawler, "events", level),
+            make_key(crawler, "events", stage),
+            make_key(crawler, "events", stage, level),
+            make_key(crawler, "events", run_id),
+            make_key(crawler, "events", run_id, level),
+        ]
+        for key in keys:
+            conn.lpush(key, data)
+            conn.expire(key, REDIS_EXPIRE)
+        # Persist the counts for longer
+        count_keys = [
+            make_key(crawler, "events", "count", level),
+            make_key(crawler, "events", "count", stage, level),
+            make_key(crawler, "events", "count", run_id, level),
+        ]
+        for key in count_keys:
+            conn.incr(key)
+            conn.expire(key, REDIS_LONG)
         return event
 
     @classmethod
     def delete(cls, crawler):
+        cls.delete_data(crawler)
+        cls.delete_counts(crawler)
+
+    @classmethod
+    def delete_data(cls, crawler):
         conn.delete(make_key(crawler, "events"))
         for level in cls.LEVELS:
             conn.delete(make_key(crawler, "events", level))
@@ -50,27 +70,38 @@ class Event(object):
                 conn.delete(make_key(crawler, "events", stage, level))
 
     @classmethod
+    def delete_counts(cls, crawler):
+        for level in cls.LEVELS:
+            conn.delete(make_key(crawler, "events", "count", level))
+        for run_id in Crawl.run_ids(crawler):
+            for level in cls.LEVELS:
+                conn.delete(make_key(crawler, "events", "count", run_id, level))  # noqa
+        for stage in crawler.stages.keys():
+            for level in cls.LEVELS:
+                conn.delete(make_key(crawler, "events", "count", stage, level))
+
+    @classmethod
     def get_counts(cls, crawler):
         counts = {}
         for level in cls.LEVELS:
-            key = make_key(crawler, "events", level)
-            counts[level] = conn.llen(key) or 0
+            key = make_key(crawler, "events", "count", level)
+            counts[level] = unpack_int(conn.get(key))
         return counts
 
     @classmethod
     def get_stage_counts(cls, crawler, stage):
         counts = {}
         for level in cls.LEVELS:
-            key = make_key(crawler, "events", stage, level)
-            counts[level] = conn.llen(key) or 0
+            key = make_key(crawler, "events", "count", stage, level)
+            counts[level] = unpack_int(conn.get(key))
         return counts
 
     @classmethod
     def get_run_counts(cls, crawler, run_id):
         counts = {}
         for level in cls.LEVELS:
-            key = make_key(crawler, "events", run_id, level)
-            counts[level] = conn.llen(key) or 0
+            key = make_key(crawler, "events", "count", run_id, level)
+            counts[level] = unpack_int(conn.get(key))
         return counts
 
     @classmethod

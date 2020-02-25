@@ -5,6 +5,7 @@ from datetime import datetime
 from servicelayer.jobs import Job
 from servicelayer.util import unpack_int, unpack_datetime, pack_now
 from servicelayer.cache import make_key
+from servicelayer.settings import REDIS_LONG
 
 from memorious.core import conn
 
@@ -41,9 +42,9 @@ class Crawl(object):
     def runs(cls, crawler):
         runs = []
         for run_id in cls.run_ids(crawler):
-            start = conn.get(make_key("run", run_id, "start"))
-            end = conn.get(make_key("run", run_id, "end"))
-            total_ops = conn.get(make_key("run", run_id, "total_ops"))
+            start = conn.get(make_key(crawler, "run", run_id, "start"))
+            end = conn.get(make_key(crawler, "run", run_id, "end"))
+            total_ops = conn.get(make_key(crawler, "run", run_id, "total_ops"))
             runs.append({
                 'run_id': run_id,
                 'total_ops': unpack_int(total_ops),
@@ -56,20 +57,21 @@ class Crawl(object):
     def operation_start(cls, crawler, stage, run_id):
         if not conn.sismember(make_key(crawler, "runs"), run_id):
             conn.sadd(make_key(crawler, "runs"), run_id)
-            conn.set(make_key("run", run_id, "start"), pack_now())
-        conn.incr(make_key("run", run_id))
-        conn.incr(make_key("run", run_id, "total_ops"))
+            conn.expire(make_key(crawler, "runs"), REDIS_LONG)
+            conn.set(make_key(crawler, "run", run_id, "start"), pack_now(), ex=REDIS_LONG)  # noqa
+        conn.incr(make_key(crawler, "run", run_id))
+        conn.incr(make_key(crawler, "run", run_id, "total_ops"))
         conn.incr(make_key(crawler, stage))
         conn.incr(make_key(crawler, "total_ops"))
-        conn.set(make_key(crawler, "last_run"), pack_now())
-        conn.set(make_key(crawler, "current_run"), run_id)
+        conn.set(make_key(crawler, "last_run"), pack_now(), ex=REDIS_LONG)
+        conn.set(make_key(crawler, "current_run"), run_id, ex=REDIS_LONG)
 
     @classmethod
     def operation_end(cls, crawler, run_id):
-        conn.set(make_key(crawler, "last_run"), pack_now())
-        pending = conn.decr(make_key("run", run_id))
+        conn.set(make_key(crawler, "last_run"), pack_now(), ex=REDIS_LONG)
+        pending = conn.decr(make_key(crawler, "run", run_id))
         if unpack_int(pending) == 0:
-            conn.set(make_key("run", run_id, "end"), pack_now())
+            conn.set(make_key(crawler, "run", run_id, "end"), pack_now(), ex=REDIS_LONG)  # noqa
 
     @classmethod
     def flush(cls, crawler):
@@ -95,7 +97,8 @@ class Crawl(object):
     @classmethod
     def abort_run(cls, crawler, run_id):
         conn.sadd(make_key(crawler, "runs_abort"), run_id)
-        conn.setnx(make_key("run", run_id, "end"), pack_now())
+        conn.expire(make_key(crawler, "runs_abort"), REDIS_LONG)
+        conn.setnx(make_key(crawler, "run", run_id, "end"), pack_now())
         job = Job(conn, crawler.queue, run_id)
         job.remove()
 

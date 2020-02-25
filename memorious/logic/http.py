@@ -13,7 +13,7 @@ from normality import guess_file_encoding, stringify
 from requests import Session, Request
 from requests.structures import CaseInsensitiveDict
 from servicelayer.cache import make_key
-from servicelayer.util import QUEUE_EXPIRE
+from servicelayer.settings import REDIS_SHORT
 
 from memorious import settings
 from memorious.core import conn, storage, get_rate_limit
@@ -82,8 +82,8 @@ class ContextHttp(object):
         session = pickle.dumps(self.session)
         session = codecs.encode(session, 'base64')
         key = sha1(session).hexdigest()[:15]
-        key = make_key(self.context.run_id, "session", key)
-        conn.set(key, session, ex=QUEUE_EXPIRE)
+        key = make_key(self.context.crawler, "session", self.context.run_id, key)  # noqa
+        conn.set(key, session, ex=REDIS_SHORT)
         self.context.state[self.STATE_SESSION] = key
 
 

@@ -27,7 +27,7 @@ CONFIG_PATH = env.get('MEMORIOUS_CONFIG_PATH')
 INCREMENTAL = env.to_bool('MEMORIOUS_INCREMENTAL', default=True)
 
 # How many days until an incremental crawl expires
-EXPIRE = env.to_int('MEMORIOUS_EXPIRE', 60)
+EXPIRE = env.to_int('MEMORIOUS_EXPIRE', 1)
 
 # How many db inserts per minute
 DB_RATE_LIMIT = env.to_int('MEMORIOUS_DB_RATE_LIMIT', 6000)
