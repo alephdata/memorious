@@ -42,8 +42,8 @@ class Context(object):
 
     def emit(self, rule='pass', stage=None, data={}, delay=None,
              optional=False):
-        """Invoke the next stage, either based on a handling rule, or by calling
-        the `pass` rule by default."""
+        """Invoke the next stage, either based on a handling rule, or by
+        calling the `pass` rule by default."""
         if stage is None:
             stage = self.stage.handlers.get(rule)
         if optional and stage is None:

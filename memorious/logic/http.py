@@ -52,7 +52,7 @@ class ContextHttp(object):
 
         method = method.upper().strip()
         request = Request(method, url, data=data, headers=headers,
-                          json=json, auth=auth)
+                          json=json, auth=auth, params=params)
         response = ContextHttpResponse(self,
                                        request=request,
                                        allow_redirects=allow_redirects)
@@ -198,12 +198,12 @@ class ContextHttpResponse(object):
 
     @property
     def url(self):
-        if self._url is not None:
-            return self._url
         if self._response is not None:
             return self._response.url
         if self.request is not None:
-            return self.request.url
+            session = self.http.session
+            return session.prepare_request(self.request).url
+        return self._url
 
     @property
     def request_id(self):
