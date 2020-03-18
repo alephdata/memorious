@@ -51,7 +51,8 @@ def sequence(context, data):
         tag = None if prefix is None else '%s:%s' % (prefix, number)
 
         if tag is None or not context.check_tag(tag):
-            context.emit(data={'number': number})
+            data['number'] = number
+            context.emit(data=data)
 
         if tag is not None:
             context.set_tag(tag, True)
@@ -63,7 +64,8 @@ def sequence(context, data):
             break
 
         if delay is not None:
-            context.recurse(data={'number': number}, delay=delay)
+            data['number'] = number
+            context.recurse(data=data, delay=delay)
             break
 
 
