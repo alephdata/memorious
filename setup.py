@@ -33,7 +33,7 @@ setup(
         'requests[security] >= 2.21.0',
         'requests_ftp',
         'lxml >= 3',
-        'PyYAML == 5.3',
+        'PyYAML == 5.3.1',
         'normality == 2.0.0',
         'tabulate',
         'python-dateutil == 2.8.1',
