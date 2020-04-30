@@ -17,16 +17,28 @@ Force an immediate run of a specific crawler:
 memorious run my_crawler
 ```
 
-Check which crawlers are due for scheduled execution and execute the ones that
-need to be updated:
+
+Cancel a running crawler
 
 ```sh
-memorious scheduled
+memorious cancel my_crawler
 ```
 
 Clear all the run status and cached information associated with a crawler:
 
 ```sh
 memorious flush my_crawler
+```
+
+Clear only the cached information associated with a crawler:
+
+```sh
+memorious flush_tags my_crawler
+```
+
+Run a worker process and process tasks as they come. Blocks while waiting
+
+```sh
+memorious process
 ```
 
