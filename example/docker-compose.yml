@@ -23,6 +23,8 @@ services:
       - datastore
     volumes:
       - "./build/data:/data"
+      - "./config:/crawlers/config"
+      - "./src:/crawlers/src"
     tmpfs:
       - "/tmp"
 
@@ -34,8 +36,9 @@ services:
       - datastore
     volumes:
       - "./build/data:/data"
+      - "./config:/crawlers/config"
+      - "./src:/crawlers/src"
     tmpfs:
       - "/tmp"
     ports:
       - "8000:8000"
-      

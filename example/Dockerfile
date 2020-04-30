@@ -6,7 +6,7 @@ RUN pip3 install -q -e /crawlers
 COPY config /crawlers/config
 
 ENV MEMORIOUS_BASE_PATH=/data \
-    MEMORIOUS_DEBUG=false \
+    MEMORIOUS_DEBUG=true \
     ARCHIVE_PATH=/data/archive \
     REDIS_URL=redis://redis:6379/0 \
     MEMORIOUS_DATASTORE_URI=postgresql://datastore:datastore@datastore/datastore
