@@ -1,6 +1,5 @@
 import click
 import logging
-import time
 from tabulate import tabulate
 
 from memorious import settings
@@ -46,6 +45,7 @@ def run(crawler):
     if is_sync_mode():
         worker = get_worker()
         worker.sync()
+
 
 @cli.command()
 @click.argument('crawler')

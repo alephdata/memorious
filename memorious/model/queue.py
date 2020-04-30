@@ -1,6 +1,6 @@
 import logging
 
-from servicelayer.jobs import Stage, Job, Dataset
+from servicelayer.jobs import Job
 
 from memorious.core import conn
 from memorious.settings import MAX_QUEUE_LENGTH
@@ -23,4 +23,3 @@ class Queue(object):
             msg = "queue for %s:%s too big."
             raise QueueTooBigError(msg % (str(crawler), stage))
         job_stage.queue(payload=data, context=state)
-
