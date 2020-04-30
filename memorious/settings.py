@@ -33,16 +33,13 @@ EXPIRE = env.to_int('MEMORIOUS_EXPIRE', 1)
 DB_RATE_LIMIT = env.to_int('MEMORIOUS_DB_RATE_LIMIT', 6000)
 
 # How many http requests to a host per minute
-HTTP_RATE_LIMIT = env.to_int('MEMORIOUS_HTTP_RATE_LIMIT', 120)  # noqa
+HTTP_RATE_LIMIT = env.to_int('MEMORIOUS_HTTP_RATE_LIMIT', 120)
 
 # How many seconds to wait before trying to run scheduled crawlers
 SCHEDULER_INTERVAL = env.to_int('MEMORIOUS_SCHEDULER_INTERVAL', 60)
 
-# How many threads to use for execution
-THREADS = env.to_int('MEMORIOUS_THREADS', min(8, multiprocessing.cpu_count()))
-
 # Max scheduled tasks at the same time
-MAX_SCHEDULED = max(env.to_int('MEMORIOUS_MAX_SCHEDULED', THREADS), 20)
+MAX_SCHEDULED = max(env.to_int('MEMORIOUS_MAX_SCHEDULED', multiprocessing.cpu_count()), 20)   # noqa
 
 # How many seconds to wait before timing out a crawler
 CRAWLER_TIMEOUT = env.to_int('MEMORIOUS_CRAWLER_TIMEOUT', 3600 * 6)

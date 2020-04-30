@@ -74,6 +74,9 @@ setup(
             'pytest-env',
             'pytest-cov',
             'pytest-mock',
+            'sphinx',
+            'sphinx_rtd_theme',
+            'recommonmark'
         ],
         'ocr': [
             'tesserocr',

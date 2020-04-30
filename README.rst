@@ -2,12 +2,12 @@
 Memorious
 =========
 
-.. image:: https://github.com/alephdata/memorious/workflows/memorious/badge.svg
-
     The solitary and lucid spectator of a multiform, instantaneous and almost intolerably precise world.
-    
+
     -- `Funes the Memorious <http://users.clas.ufl.edu/burt/spaceshotsairheads/borges-funes.pdf>`_,
     Jorge Luis Borges
+
+.. image:: https://github.com/alephdata/memorious/workflows/memorious/badge.svg
 
 ``memorious`` is a distributed web scraping toolkit. It is a light-weight tool
 that schedules, monitors and supports scrapers that collect structured or

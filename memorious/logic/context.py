@@ -2,6 +2,7 @@ import os
 import uuid
 import shutil
 import logging
+import time
 from copy import deepcopy
 from tempfile import mkdtemp
 from contextlib import contextmanager
@@ -52,7 +53,8 @@ class Context(object):
             self.log.info("No next stage: %s (%s)" % (stage, rule))
             return
         state = self.dump_state()
-        delay = delay or self.crawler.delay
+        delay = delay or self.params.get('delay', 0) or self.crawler.delay
+        self.sleep(delay)
         Queue.queue(stage, state, data)
 
     def recurse(self, data={}, delay=None):
@@ -82,6 +84,11 @@ class Context(object):
         finally:
             Crawl.operation_end(self.crawler, self.run_id)
             shutil.rmtree(self.work_path)
+
+    def sleep(self, seconds):
+        for sec in range(seconds):
+            self.emit_heartbeat()
+            time.sleep(1)
 
     def emit_heartbeat(self):
         Crawl.heartbeat(self.crawler)

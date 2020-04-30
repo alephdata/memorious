@@ -33,29 +33,33 @@ See [Usage](https://memorious.readthedocs.io/en/latest/usage.html) (or run `memo
 
 ## Environment variables
 
-Your Memorious instance is configured by a set of environment variables that control database connectivity and general principles of how the sytem operates. You can set all of these in the `Dockerfile`.
+Your Memorious instance is configured by a set of environment variables that control database connectivity and general principles of how the system operates. You can set all of these in the `Dockerfile`.
 
 * ``MEMORIOUS_CONFIG_PATH``: a path to crawler pipeline YAML configurations.
 * ``MEMORIOUS_DEBUG``: whether to go into a simple mode with task threading disabled. Defaults to `False`.
 * ``MEMORIOUS_INCREMENTAL``: executing part of a crawler only once per an interval. Defaults to `True`.
-* ``MEMORIOUS_HTTP_CACHE``: HTTP request configuration.
-* ``MEMORIOUS_DATASTORE_URI``: connection path for an operational database (which crawlers can send data to using the `db` method). Defaults to a local `datastore.sqllite3`.
-* ``MEMORIOUS_THREADS``: how many threads to use for execution.
-* ``MEMORIOUS_MAX_SCHEDULED``: maximum number of scheduled tasks at the same time. Defaults to the same as the number of threads.
+* ``MEMORIOUS_EXPIRE``: how many days until cached crawled data expires. Defaults to 1 day.
 * ``MEMORIOUS_DB_RATE_LIMIT``: maximum number of database inserts per minute. Defaults to 6000.
-* ``MEMORIOUS_HTTP_PER_HOST_RATE_LIMIT``: maximum number of http calls to a host per minute. Defaults to 120.
+* ``MEMORIOUS_HTTP_RATE_LIMIT``: maximum number of http calls to a host per minute. Defaults to 120.
+* ``MEMORIOUS_SCHEDULER_INTERVAL``: how many seconds to wait in-between before checking whether any scheduled crawlers are available to run. Defaults to 60.
+* ``MEMORIOUS_HTTP_CACHE``: HTTP request configuration.
+* ``MEMORIOUS_USER_AGENT``: Custom User-Agent string for Memorious.
+* ``MEMORIOUS_DATASTORE_URI``: connection path for an operational database (which crawlers can send data to using the `db` method). Defaults to a local `datastore.sqllite3`.
 
+* ``MEMORIOUS_MAX_SCHEDULED``: maximum number of scheduled crawlers to run at the same time.
+
+* ``WORKER_THREADS``: how many threads to use for execution.
 * ``REDIS_URL``: address of Redis instance to use for crawler logs (uses a temporary FakeRedis if missing).
-* ``ARCHIVE_TYPE``: either ``file`` or ``s3``.
-* ``ARCHIVE_PATH``
-* ``ARCHIVE_BUCKET``
-* ``AWS_KEY_ID``: AWS Access Key ID.
-* ``AWS_SECRET``: AWS Secret Access Key.
-* ``AWS_REGION``: a regional AWS endpoint.
+* ``ARCHIVE_TYPE``: either `file`(local file system is used for storage) or `s3`(Amazon S3 is used) or `gs`(Google Cloud Storage is used).
+* ``ARCHIVE_PATH``: local directory to use for storage if `ARCHIVE_TYPE` is `file`
+* ``ARCHIVE_BUCKET``: bucket name if `ARCHIVE_TYPE` is `s3` or `gs`
+* ``AWS_KEY_ID``: AWS Access Key ID. (Only needed if `ARCHIVE_TYPE` is `s3`)
+* ``AWS_SECRET``: AWS Secret Access Key. (Only needed if `ARCHIVE_TYPE` is `s3`)
+* ``AWS_REGION``: a regional AWS endpoint. (Only needed if `ARCHIVE_TYPE` is `s3`)
 
-* ``ALEPH_HOST``, default is ``https://data.occrp.org/``, but any instance
+* ``ALEPH_HOST``, default is `https://data.occrp.org/`, but any instance
   of Aleph 2.0 or greater should work.
-* ``ALEPH_API_KEY``, a valid API key for use by the upload operation. 
+* ``ALEPH_API_KEY``, a valid API key for use by the upload operation.
 
 ## Shut it down
 
@@ -67,17 +71,14 @@ Files which were downloaded by crawlers you ran, Memorious progress data from th
 
 To understand what goes into your `config` and `src` directories, check out the [examples](https://github.com/alephdata/memorious/tree/master/example) and [reference documentation](https://memorious.readthedocs.io/en/latest/buildingcrawler.html).
 
-### Development mode
+### Crawler Development mode
 
 When you're working on your crawlers, it's not convenient to rebuild your Docker containers all the time. To run without Docker:
 
-* Copy the environment variables from the `env.sh.tmpl` to `env.sh`.
+* Copy the environment variables from the `env.sh.tmpl` to `env.sh`. Make sure ``MEMORIOUS_CONFIG_PATH`` points to your crawler YAML files, wherever they may be.
 * Run `source env.sh`.
+* Run `pip install memorious`. If your crawlers use Python extensions, you'll need to run `pip install` in your crawlers directory as well
+* Run `memorious list` to list your crawlers and `memorious run your-crawler` to run a crawler.
 
-Make sure ``MEMORIOUS_CONFIG_PATH`` points to your crawler YAML files, wherever they may be.
-
-Then either:
-
-* Run `pip install memorious`. If your crawlers use Python extensions, you'll need to run `pip install` in your crawlers directory as well;
-* **or** clone the [Memorious repository](https://github.com/alephdata/memorious) and run `make install` (this will also install your crawlers for you).
+*Note: In development mode Memorious uses a single threaded worker (becuase FakeRedis is single threaded). So task execution concurrency is limited.*
 

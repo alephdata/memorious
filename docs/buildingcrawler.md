@@ -1,6 +1,6 @@
 # Building a crawler
 
-Memorious contains all of the functionality for basic Web crawlers, which can be configured and customised entirely through YAML files. For more complex crawlers, Memorious can be extended with custom Python functions, which you can point a crawler at through its YAML config.
+Memorious contains all of the functionality for basic Web crawlers, which can be configured and customized entirely through YAML files. For more complex crawlers, Memorious can be extended with custom Python functions, which you can point a crawler at through its YAML config.
 
 We'll start by describing the included functionality.
 
@@ -9,6 +9,12 @@ The first few lines of your config are to set up your crawler:
 * `name`: A unique slug, eg. "my_crawler", which you can pass to `memorious run` to start your crawler.
 * `description`: An optional description, will be shown when you run `list`.
 * `schedule`: one of `disabled`, `hourly`, `daily`, `weekly` or `monthly`. `disabled` by default.
+
+Optionally, the crawler can take the following configurations too:
+
+* `delay`: delay in seconds before queuing a task. `delay` can also be set individually for particular stages in [stage params](#stages)
+* `expire`: number of days the cached contents of a crawler are kept in the cache. This is the per crawler equivalent of ``MEMORIOUS_EXPIRE`` environment variable.
+* `stealthy`: turn stealth mode on or off. In stealth mode, Memorious uses a random User-Agent. It's set to `False` by default.
 
 ## The Pipeline
 
@@ -74,7 +80,7 @@ Parameters (all optional):
 * `stop`: the end of the sequence.
 * `step`: how much to increment by. Defaults to 1; can be negative.
 * `delay`: numbers can be generated one by one with a delay to avoid large sequences clogging up the queue.
-* `prefix`: a string which ensures each number will be emitted only once across multiple runs of the crawler.
+* `tag`: a string which ensures each number will be emitted only once across multiple runs of the crawler.
 
 If this stage is preceded by a stage which outputs a `number` (for example, another `sequence` stage), it will use this value as the start of the sequence instead of `start`.
 
@@ -133,6 +139,7 @@ The `fetch` method does an HTTP `GET` on the value of `url` in data passed from 
 Parameters (optional):
 
 * `rules`: only the URLs which match are retrieved. See [Rules](#rules).
+* `http_rate_limit`: how many http requests to a host per minute
 
 Output data:
 
@@ -147,6 +154,7 @@ Parameters:
 
 * `username`: for FTP username authentication, defaults to `Anonymous`.
 * `password`: for FTP password authentication, defaults to `anonymous@ftp`.
+* `http_rate_limit`: how many requests to a host per minute
 
 Output data:
 
@@ -280,6 +288,8 @@ Parameters:
 * `table`: the name of the database table in which data will be stored
 * `unique`: A list of keys in data. If `unique` is defined, we try to update existing columns based on the values of keys in `unique`. If no matching row is found, a new row is inserted.
 
+*Note: In case of large crawlers, it's better to use [the context datastore](#the-datastore) directly to store crawled data to make sure the task queue doesn't run out of memory.*
+
 ### Rules
 
 You can configure rules per stage to tell certain methods which inputs to process or skip. You can nest them, and apply `not`, `and` and `or` for the combinations you desire.
@@ -310,12 +320,12 @@ The `data` dict is what was output from the previous stage, and what it contains
 
 ### Context
 
-Access the YAML config:
+#### Access the YAML config
 
 * You can access `params` with `context.params.get('my_param')`.
-* You can also access other properties of the crawler, eg. `context.get('name')` and `context.get('description')`.
+* You can also access other properties of the crawler, eg. `context.crawler.name` and `context.crawler.description`.
 
-The HTTP session:
+#### The HTTP session
 
 * `context.http` is a wrapper for [requests](http://docs.python-requests.org/en/master/). Use `context.http.get` (or `.post`) just like you would use requests, and benefit from Memorious database caching; session persistence; lazy evaluation; and serialization of responses between crawler operations.
 * Properties of the `ContextHTTPResponse` object:
@@ -331,7 +341,7 @@ The HTTP session:
   * `retrieved_at`: the date the GET request was made.
   * `modified_at`: from the `Last-Modified` header, provided it wasn't in the last 16 seconds.
 
-Data validation:
+#### Data validation
 As part of the context logic the following data validation helpers are available:
 * `is_not_empty`: whether value is not empty.
 * `is_numeric`: whether value is numeric.
@@ -341,20 +351,37 @@ As part of the context logic the following data validation helpers are available
 * `has_length`: whether value has a given length.
 * `must_contain`: whether value contains a string.
 
-The datastore:
+#### The datastore
 
 * Create and access tables in the Memorious database to store intermediary useful crawler data: `table = context.datastore['my_table']`.
 * See [dataset](https://dataset.readthedocs.io/en/latest/) for the rest of how this works..
 
-Output:
+#### Output
 
 * Call `context.recurse(data=data)` to have a stage invoke itself with a modified set of arguments (this is useful for example for paging through search results and handing off each list of links to a `fetch` stage).
 * To pass data from `my_method` to the next stage, use: `context.emit(data={'my_key': 'my_value'})`.
 * `context.store_file(path, content_hash)`: Put a file into permanent storage so it can be visible to other stages.
 
-Logs:
+#### Logs
 
-* `context.log.info()`, `.warning()`, `.error()` to explictly log things.
+* `context.log.info()`, `.warning()`, `.error()` to explicitly log things.
+
+#### Caching and incremental crawling
+
+Memorious caches responses as tags in Redis. These tags expire after a certain duration (configurable by `expire` config option of the crawler or `MEMORIOUS_EXPIRE` environment variable). The context object has some helper functions to deal with these tags.
+
+* `context.set_tag(key, value)` to set a cache value
+* `context.check_tag(key)` to check if a key exists in cache
+* `context.get_tag(key)` to get a cached value
+
+`context.skip_incremental(*criteria)` is a helper function that uses tags to provide support for incremental crawling. For example, let's say you want to skip the urls you've crawled in a previous run. The code below will check if the url is in cache as a tag. If it's not in cache, it will create a tag in cache and return `False` - it's a new url that should be crawled. Else, if it's already in cache, `skip_incremental` returns `True` - the url has been crawled before and should be skipped.
+
+```
+if context.skip_incremental(url):
+    # skip url
+else:
+    # process url
+```
 
 ### Helpers
 
@@ -380,8 +407,7 @@ from memorious.helpers.ocr import read_text
 from memorious.helpers.ocr import read_word
 ```
 
-Memorious contains some helpers that use [a OCR microservice](https://github.com/alephdata/aleph-recognize-text) to OCR images. This microservice uses [tesserocr](https://github.com/sirfz/tesserocr), which depends on Tesseract version 0.3.4+. If you wish to use these helpers, you need to run this microservice using docker and set the `OCR_SERVICE` environment variable to point to this service. Please see
-the [docker-compose file](../example/docker-compose.yml) in examples for an example.
+Memorious contains some helpers that use [tesserocr](https://github.com/sirfz/tesserocr) to OCR images. `tesserocr` depends on Tesseract version 0.3.4+.
 
 * `read_word`: OCR a single word from an image.
 * `read_text`: OCR text from an image.
@@ -398,7 +424,7 @@ It's possible to run predefined postprocessing tasks after a Memorious crawler h
 
 eg:
 
-Here's an example from `example/config/extended_web_scraper.yml`
+Here's an example from [an example crawler](https://github.com/alephdata/memorious/blob/master/example/config/extended_web_scraper.yml)
 
 ```
 name: ...
