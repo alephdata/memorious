@@ -9,7 +9,9 @@ We recommend using [Docker Compose](https://docs.docker.com/compose/) to run you
 * If you need to (eg. if your database connection or directory structure is different), update any environment variables in the `Dockerfile` or `docker-compose.yml`, although the defaults should work fine.
 * Run `docker-compose up -d`. This might take a while when it's building for the first time.
 
-You can access the Memorious CLI through the `worker` container:
+## Run a crawler
+
+* You can access the Memorious CLI through the `worker` container:
 
 ```
 docker-compose run --rm worker /bin/sh
@@ -26,8 +28,22 @@ And to run a crawler:
 ```
 memorious run my_crawler
 ```
-
 See [Usage](https://memorious.readthedocs.io/en/latest/usage.html) (or run `memorious --help`) for the complete list of Memorious commands.
+
+## Check worker logs
+
+* You can check the worker logs:
+
+```
+docker-compose logs worker -f
+```
+
+## Access Memorious UI
+
+* The Memorious UI is available at [http://localhost:8000/](http://localhost:8000/)
+
+![memorious ui](docs/memorious-ui.png)
+
 
 *Note: you can use any directory structure you like, `src` and `config` are not required, and nor is separation of YAML and Python files. So long as the `MEMORIOUS_CONFIG_PATH` environment variable points to a directory containing, within any level of directory nesting, your YAML files, Memorious will find them.*
 
@@ -80,5 +96,5 @@ When you're working on your crawlers, it's not convenient to rebuild your Docker
 * Run `pip install memorious`. If your crawlers use Python extensions, you'll need to run `pip install` in your crawlers directory as well
 * Run `memorious list` to list your crawlers and `memorious run your-crawler` to run a crawler.
 
-*Note: In development mode Memorious uses a single threaded worker (becuase FakeRedis is single threaded). So task execution concurrency is limited.*
+*Note: In development mode Memorious uses a single threaded worker (because FakeRedis is single threaded). So task execution concurrency is limited and the worker executes stages in a crawler's pipeline linearly one after another.*
 
