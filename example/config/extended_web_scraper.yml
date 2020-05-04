@@ -3,6 +3,7 @@ name: quote_scraper
 description: Quotes to scraper
 # Uncomment to run this scraper automatically:
 # schedule: weekly
+# delay: 2
 pipeline:
   init:
     # The first stage logs in and creates an HTTP session which is used for subsequent requests.
@@ -34,4 +35,5 @@ pipeline:
 aggregator:
   method: example.quotes:export
   params:
+    table: example_quotes
     filename: all_quotes.json

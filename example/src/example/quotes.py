@@ -71,5 +71,5 @@ def store(context, data):
 
 
 def export(context, params):
-    table = context.datastore[context.params.get("table")]
+    table = context.datastore[params["table"]]
     datafreeze.freeze(table, format='json', filename=params['filename'])
