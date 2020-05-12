@@ -49,13 +49,13 @@ Your Memorious instance is configured by a set of environment variables that con
 * ``ARCHIVE_TYPE``: either ``file`` or ``s3``.
 * ``ARCHIVE_PATH``
 * ``ARCHIVE_BUCKET``
-* ``AWS_KEY_ID``: AWS Access Key ID.
-* ``AWS_SECRET``: AWS Secret Access Key.
+* ``AWS_ACCESS_KEY_ID``: AWS Access Key ID.
+* ``AWS_SECRET_ACCESS_KEY``: AWS Secret Access Key.
 * ``AWS_REGION``: a regional AWS endpoint.
 
 * ``ALEPH_HOST``, default is ``https://data.occrp.org/``, but any instance
   of Aleph 2.0 or greater should work.
-* ``ALEPH_API_KEY``, a valid API key for use by the upload operation. 
+* ``ALEPH_API_KEY``, a valid API key for use by the upload operation.
 
 ## Shut it down
 
