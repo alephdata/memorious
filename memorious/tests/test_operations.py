@@ -1,5 +1,6 @@
 import os
 import json
+from unittest.mock import ANY
 
 import pytest
 
@@ -52,11 +53,13 @@ def test_parse(context, mocker):
 
     rules = {'pattern': 'https://httpbin.org/*'}
     context.params["store"] = rules
+    context.params["meta"] = {
+        "title": ".//h1",
+        "description": ".//p"
+    }
     parse(context, data)
     assert context.emit.call_count == 1
-    context.emit.assert_called_once_with(rule="fetch", data={
-        "url": "https://www.iana.org/domains/example"
-    })
+    context.emit.assert_called_once_with(rule="fetch", data=ANY)
 
     # cleanup tags
     conn = connect_redis()
@@ -65,6 +68,9 @@ def test_parse(context, mocker):
     context.http.result = None
     context.params["store"] = None
     parse(context, data)
+    assert data['url'] == 'https://www.iana.org/domains/example'
+    assert data['title'] == 'Example Domain'
+    assert data['description'].startswith('This domain is for')
     assert context.emit.call_count == 3, data
 
 
