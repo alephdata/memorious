@@ -53,13 +53,14 @@ def parse_html(context, data, result):
                 if context.check_tag(tag):
                     continue
                 context.set_tag(tag, None)
-                data = {'url': url}
+                data['url'] = url
 
-                # Option to set the document title from the link text.
-                if context.get('link_title', False):
-                    data['title'] = collapse_spaces(element.text_content())
-                elif element.get('title'):
-                    data['title'] = collapse_spaces(element.get('title'))
+                if data.get('title') is None:
+                    # Option to set the document title from the link text.
+                    if context.get('link_title', False):
+                        data['title'] = collapse_spaces(element.text_content())
+                    elif element.get('title'):
+                        data['title'] = collapse_spaces(element.get('title'))
 
                 context.http.session.headers['Referer'] = url
                 context.emit(rule='fetch', data=data)
@@ -91,10 +92,9 @@ def parse_for_metadata(context, data, html):
 def parse(context, data):
     with context.http.rehash(data) as result:
         if result.html is not None:
-            parse_html(context, data, result)
-
             # Get extra metadata from the DOM
             parse_for_metadata(context, data, result.html)
+            parse_html(context, data, result)
 
         rules = context.params.get('store') or {'match_all': {}}
         if Rule.get_rule(rules).apply(result):
