@@ -225,7 +225,7 @@ An example `parse` configuration, which crawls links and stores only documents:
         mime_group: documents
       include_paths:
        - './/aside'
-       - './/article
+       - './/article'
       meta:
         creator: './/article/p[@class="author"]'
         title: './/h1'
