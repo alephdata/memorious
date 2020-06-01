@@ -69,8 +69,8 @@ Your Memorious instance is configured by a set of environment variables that con
 * ``ARCHIVE_TYPE``: either `file`(local file system is used for storage) or `s3`(Amazon S3 is used) or `gs`(Google Cloud Storage is used).
 * ``ARCHIVE_PATH``: local directory to use for storage if `ARCHIVE_TYPE` is `file`
 * ``ARCHIVE_BUCKET``: bucket name if `ARCHIVE_TYPE` is `s3` or `gs`
-* ``AWS_KEY_ID``: AWS Access Key ID. (Only needed if `ARCHIVE_TYPE` is `s3`)
-* ``AWS_SECRET``: AWS Secret Access Key. (Only needed if `ARCHIVE_TYPE` is `s3`)
+* ``AWS_ACCESS_KEY_ID``: AWS Access Key ID. (Only needed if `ARCHIVE_TYPE` is `s3`)
+* ``AWS_SECRET_ACCESS_KEY``: AWS Secret Access Key. (Only needed if `ARCHIVE_TYPE` is `s3`)
 * ``AWS_REGION``: a regional AWS endpoint. (Only needed if `ARCHIVE_TYPE` is `s3`)
 
 * ``ALEPH_HOST``, default is `https://data.occrp.org/`, but any instance
