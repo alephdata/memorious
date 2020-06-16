@@ -40,7 +40,7 @@ A stage must contain:
   * Some in-built methods may return different conditions depending on the input - see method-specific sections. 
   * You will care more about this if you're [extending](#extending) Memorious.
 
-```
+```yaml
 name: my_crawler
 pipeline:
   init:
@@ -199,7 +199,7 @@ Output data:
 
 Here's an example configuration for a crawler that uses a socks5 proxy:
 
-```
+```yaml
 name: quote_scraper
 description: Quotes to scraper
 pipeline:
@@ -247,7 +247,7 @@ Output:
 
 An example `parse` configuration, which crawls links and stores only documents:
 
-```
+```yaml
   parse:
     method: parse
     params:
@@ -335,7 +335,7 @@ If none of the inbuilt methods do it for you, you can write your own. You'll nee
 
 You can then call these methods from a YAML config instead of the Memorious ones. eg:
 
-```
+```yaml
   my_stage:
     method: custom.module:my_method
     params:
@@ -406,7 +406,7 @@ Memorious caches responses as tags in Redis. These tags expire after a certain d
 
 `context.skip_incremental(*criteria)` is a helper function that uses tags to provide support for incremental crawling. For example, let's say you want to skip the urls you've crawled in a previous run. The code below will check if the url is in cache as a tag. If it's not in cache, it will create a tag in cache and return `False` - it's a new url that should be crawled. Else, if it's already in cache, `skip_incremental` returns `True` - the url has been crawled before and should be skipped.
 
-```
+```python
 if context.skip_incremental(url):
     # skip url
 else:
@@ -417,7 +417,7 @@ else:
 
 Memorious contains useful helper functions you might like to use:
 
-```
+```python
 from memorious.helpers import ...
 ```
 
@@ -432,7 +432,7 @@ from memorious.helpers import ...
 
 #### OCR
 
-```
+```python
 from memorious.helpers.ocr import read_text
 from memorious.helpers.ocr import read_word
 ```
@@ -456,7 +456,7 @@ eg:
 
 Here's an example from [an example crawler](https://github.com/alephdata/memorious/blob/master/example/config/extended_web_scraper.yml)
 
-```
+```yaml
 name: ...
 description: ...
 schedule: ...
@@ -466,4 +466,43 @@ aggregator:
   method: example.quotes:export
   params:
     filename: all_quotes.json
+```
+
+## Debugging
+
+Best way to debug a crawler is to use [logging](#logs) liberally as needed. In addition to that Memorious provides a built in operation called `debug`
+that can log the data passed into it.
+
+A stage in the pipeline can also take the parameter `sampling_rate` which is a float between 0.0 to 1.0. In debug mode, sampling rate determines what percentage
+of a stage's tasks are passed forward. For example, with a `sampling_rate` of 0.2, Memorious forwards roughly 20% of the stage's tasks to the next stages. This is
+helpful when developing and running big crawlers locally where we may not want to run through the entire crawler but only a smaller subset of the crawler to do a
+sanity check.
+
+Here's an example of a crawler that uses the `debug` op and the `sampling_rate` parameter.
+
+```yaml
+name: quote_scraper
+description: Quotes to scraper
+pipeline:
+  init:
+    method: example.quotes:login
+    params:
+      url: http://quotes.toscrape.com
+      username: fred
+      password: asdfasdf
+    handle:
+      pass: fetch
+  fetch:
+    method: fetch
+    handle:
+      pass: crawl
+  crawl:
+    method: example.quotes:crawl
+    params:
+      sampling_rate: 0.2
+    handle:
+      fetch: fetch
+      pass: debug
+  debug:
+    method: debug
 ```
