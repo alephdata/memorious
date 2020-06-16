@@ -176,7 +176,7 @@ Output data:
 
 #### DAV index
 
-The `dav_index` method lists the files in a WebDAV directory and does nad HTTP `get` on them; the directory is passed via the `url` of the previous stage data.
+The `dav_index` method lists the files in a WebDAV directory and does HTTP `get` on them; the directory is passed via the `url` of the previous stage data.
 
 Output data:
 
@@ -196,6 +196,36 @@ Parameters:
 Output data: 
 
 * Emits the same `data` dict that was passed in, unmodified.
+
+Here's an example configuration for a crawler that uses a socks5 proxy:
+
+```
+name: quote_scraper
+description: Quotes to scraper
+pipeline:
+  init:
+    method: session
+    params:
+      user_agent: "Memorious"
+      proxy: "socks5://localhost:8080"
+    handle:
+      pass: login
+  login:
+    # The first stage logs in and creates an HTTP session which is used for subsequent requests.
+    method: example.quotes:login
+    params:
+      url: http://quotes.toscrape.com
+      username: fred
+      password: asdfasdf
+    handle:
+      pass: fetch
+  fetch:
+    # Download the page passed from the login stage.
+    method: fetch
+    handle:
+      pass: crawl
+  ...
+```
 
 #### Parse
 

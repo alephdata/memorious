@@ -31,6 +31,7 @@ setup(
         'banal >= 0.4.2',
         'click',
         'requests[security] >= 2.21.0',
+        'PySocks == 1.7.1',
         'requests_ftp',
         'lxml >= 3',
         'PyYAML == 5.3.1',
@@ -43,7 +44,7 @@ setup(
         'dateparser',
         'stringcase',
         'flask',
-        'babel'
+        'babel',
     ],
     entry_points={
         'console_scripts': [
