@@ -4,10 +4,11 @@ import yaml
 import logging
 from datetime import timedelta, datetime
 from importlib import import_module
+from servicelayer.cache import make_key
 from servicelayer.jobs import Dataset, Job
 
 from memorious import settings
-from memorious.core import conn
+from memorious.core import conn, tags
 from memorious.model import Event, Crawl, Queue
 from memorious.logic.stage import CrawlerStage
 
@@ -99,6 +100,9 @@ class Crawler(object):
             return False
         now = datetime.utcnow()
         return self.last_run < now - timedelta(seconds=settings.CRAWLER_TIMEOUT)  # noqa
+    
+    def flush_tags(self):
+        tags.delete(prefix=make_key(self, 'tag'))
 
     def timeout(self):
         log.warning("Crawler timed out: %s. Aggregator won't be run", self.name)  # noqa
