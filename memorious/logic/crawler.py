@@ -151,15 +151,6 @@ class Crawler(object):
         status = self.queue.get_status()
         return status.get('pending')
 
-    def flush_tags(self):
-        pipe = conn.pipeline()
-        count = 0
-        for key in conn.scan_iter(make_key(self, 'tag', '*')):
-            pipe.delete(key)
-            count += 1
-        pipe.execute()
-        log.info("Deleted %d tags", count)
-
     def get(self, name):
         return self.stages.get(name)
 
