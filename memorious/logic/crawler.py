@@ -86,6 +86,10 @@ class Crawler(object):
         self.queue.cancel()
         Event.delete(self)
         Crawl.flush(self)
+        self.flush_tags()
+
+    def flush_tags(self):
+        tags.delete(prefix=make_key(self, 'tag'))
 
     def flush_events(self):
         Event.delete(self)
@@ -100,9 +104,6 @@ class Crawler(object):
             return False
         now = datetime.utcnow()
         return self.last_run < now - timedelta(seconds=settings.CRAWLER_TIMEOUT)  # noqa
-    
-    def flush_tags(self):
-        tags.delete(prefix=make_key(self, 'tag'))
 
     def timeout(self):
         log.warning("Crawler timed out: %s. Aggregator won't be run", self.name)  # noqa
