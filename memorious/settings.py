@@ -59,3 +59,6 @@ USER_AGENT = env.get('MEMORIOUS_USER_AGENT', USER_AGENT)
 DATASTORE_FILE = os.path.join(BASE_PATH, 'datastore.sqlite3')
 DATASTORE_URI = 'sqlite:///%s' % DATASTORE_FILE
 DATASTORE_URI = env.get('MEMORIOUS_DATASTORE_URI', DATASTORE_URI)
+
+# Tags cache table name
+TAGS_TABLE = env.get('MEMORIOUS_TAGS_TABLE', 'memorious_tags')
