@@ -5,7 +5,6 @@ import logging
 from datetime import timedelta, datetime
 from importlib import import_module
 from servicelayer.jobs import Dataset, Job
-from servicelayer.cache import make_key
 
 from memorious import settings
 from memorious.core import conn
@@ -99,7 +98,7 @@ class Crawler(object):
         if self.last_run is None:
             return False
         now = datetime.utcnow()
-        return self.last_run < now - timedelta(seconds=settings.CRAWLER_TIMEOUT) # noqa
+        return self.last_run < now - timedelta(seconds=settings.CRAWLER_TIMEOUT)  # noqa
 
     def timeout(self):
         log.warning("Crawler timed out: %s. Aggregator won't be run", self.name)  # noqa

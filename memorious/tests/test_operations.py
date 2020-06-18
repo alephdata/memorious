@@ -1,14 +1,13 @@
 import os
 import json
+import pytest
 from unittest.mock import ANY
 
-import pytest
-
+from memorious.core import tags
 from memorious.operations.fetch import fetch, session
 from memorious.operations.parse import parse
 from memorious.operations.initializers import seed, sequence, dates, enumerate
 from memorious.operations.store import directory
-from memorious.core import connect_redis
 
 
 @pytest.mark.parametrize("url,call_count", [
@@ -62,8 +61,7 @@ def test_parse(context, mocker):
     context.emit.assert_called_once_with(rule="fetch", data=ANY)
 
     # cleanup tags
-    conn = connect_redis()
-    conn.flushall()
+    tags.delete()
 
     context.http.result = None
     context.params["store"] = None
