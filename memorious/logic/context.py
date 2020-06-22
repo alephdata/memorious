@@ -3,6 +3,7 @@ import uuid
 import shutil
 import logging
 import time
+import random
 from copy import deepcopy
 from tempfile import mkdtemp
 from contextlib import contextmanager
@@ -16,6 +17,7 @@ from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
 from memorious.util import random_filename
 from memorious.exc import QueueTooBigError
+from memorious import settings
 
 
 class Context(object):
@@ -52,6 +54,13 @@ class Context(object):
         if stage is None or stage not in self.crawler.stages:
             self.log.info("No next stage: %s (%s)" % (stage, rule))
             return
+        if settings.DEBUG:
+            # sampling rate is a float between 0.0 to 1.0. If it's 0.2, we
+            # aim to execute only 20% of the crawler's tasks.
+            sampling_rate = self.get('sampling_rate')
+            if sampling_rate and random.random() > float(sampling_rate):
+                self.log.info("Skipping emit due to sampling rate")
+                return
         state = self.dump_state()
         delay = delay or self.params.get('delay', 0) or self.crawler.delay
         self.sleep(delay)
