@@ -35,7 +35,7 @@ setup(
         'requests_ftp',
         'lxml >= 3',
         'PyYAML == 5.3.1',
-        'normality == 2.0.0',
+        'normality == 2.1.1',
         'tabulate',
         'python-dateutil == 2.8.1',
         'dataset >= 1.0.8',
