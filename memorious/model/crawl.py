@@ -111,3 +111,13 @@ class Crawl(object):
     def is_aborted(cls, crawler, run_id):
         key = make_key(crawler, "runs_abort")
         return conn.sismember(key, run_id)
+
+    @classmethod
+    def set_schedule(cls, crawler, schedule):
+        key = make_key(crawler, "schedule")
+        conn.set(key, schedule)
+
+    @classmethod
+    def get_schedule(cls, crawler):
+        key = make_key(crawler, "schedule")
+        return conn.get(key)

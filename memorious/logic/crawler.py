@@ -36,7 +36,7 @@ class Crawler(object):
         self.name = self.config.get('name', self.name)
         self.description = self.config.get('description', self.name)
         self.category = self.config.get('category', 'scrape')
-        self.schedule = self.config.get('schedule', 'disabled')
+        self._schedule = self.config.get('schedule', 'disabled')
         self.init_stage = self.config.get('init', 'init')
         self.delta = Crawler.SCHEDULES.get(self.schedule)
         self.delay = int(self.config.get('delay', 0))
@@ -63,6 +63,11 @@ class Crawler(object):
         if now > last_run + self.delta:
             return True
         return False
+
+    @property
+    def schedule(self):
+        schedule = Crawl.get_schedule(self) or self._schedule
+        return schedule if schedule in self.SCHEDULES else 'disabled'
 
     @property
     def aggregator_method(self):

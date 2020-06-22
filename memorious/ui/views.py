@@ -1,13 +1,13 @@
 import math
 from urllib.parse import urlencode
 import logging
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, jsonify
 from flask import render_template, abort, url_for
 from babel.numbers import format_number
 from babel.dates import format_date, format_datetime
 
 from memorious.core import settings, manager, init_memorious
-from memorious.model import Event
+from memorious.model import Event, Crawl
 
 PAGE_SIZE = 50
 app = Flask(__name__)
@@ -160,6 +160,13 @@ def crawler_flush_events(crawler):
     crawler = get_crawler(crawler)
     crawler.flush_events()
     return redirect_crawler(crawler)
+
+@app.route('/invoke/<crawler>/change-schedule', methods=['POST'])
+def crawler_change_schedule(crawler):
+    crawler = get_crawler(crawler)
+    schedule = request.json.get('schedule', crawler.schedule)
+    Crawl.set_schedule(crawler, schedule)
+    return jsonify(success=True)
 
 
 if __name__ == '__main__':

@@ -33,7 +33,17 @@
                     {{item.crawler.description}}
                 </td>
                 <td>
-                    {{item.crawler.schedule or ''}}
+                    <select name="schedule" id="schedule" data-crawler="{{ item.crawler }}">
+                        {% for schedule in item.crawler.SCHEDULES %}
+                            <option value="{{ schedule }}"
+                                {% if schedule == item.crawler.schedule %}
+                                selected="selected"
+                                {% endif %}
+                            >
+                                {{ schedule }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </td>
                 <td>
                     {% if item.running %}

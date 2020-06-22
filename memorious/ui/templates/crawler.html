@@ -24,7 +24,19 @@
             <th width="15%">Description</th>
             <td>{{crawler.description}}</td>
             <th width="15%">Schedule</th>
-            <td>{{crawler.schedule}}</td>
+            <td>
+                <select name="schedule" id="schedule" data-crawler="{{ crawler }}">
+                    {% for schedule in crawler.SCHEDULES %}
+                        <option value="{{ schedule }}"
+                            {% if schedule == crawler.schedule %}
+                            selected="selected"
+                            {% endif %}
+                        >
+                            {{ schedule }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </td>
         </tr>
         <tr>
             <th width="15%">Configuration</th>
