@@ -7,9 +7,8 @@ RUN apk add --no-cache --virtual=build_deps python3-dev g++ tesseract-ocr-dev mu
 ENV OMP_THREAD_LIMIT=1
 
 COPY setup.py /memorious/
+RUN pip3 install --no-cache-dir -e /memorious
 COPY memorious /memorious/memorious
-WORKDIR /memorious
-RUN pip3 install --no-cache-dir -e .
 
 ENV MEMORIOUS_BASE_PATH=/data \
     MEMORIOUS_INCREMENTAL=true

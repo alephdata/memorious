@@ -1,4 +1,5 @@
 DOCKER=docker run -v $(PWD)/dist:/memorious/dist -ti alephdata/memorious
+COMPOSE=docker-compose -f docker-compose.dev.yml
 
 all: clean
 
@@ -11,6 +12,11 @@ clean:
 
 build:
 	docker build -t alephdata/memorious .
+
+dev: build
+	$(COMPOSE) build
+	$(COMPOSE) up
+
 
 rebuild:
 	docker build --pull --no-cache -t alephdata/memorious .
