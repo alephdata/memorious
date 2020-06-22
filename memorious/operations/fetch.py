@@ -1,4 +1,4 @@
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from requests.exceptions import RequestException
 from servicelayer.cache import make_key
 
@@ -8,6 +8,9 @@ from memorious.helpers.rule import Rule
 def fetch(context, data):
     """Do an HTTP GET on the ``url`` specified in the inbound data."""
     url = data.get('url')
+    if urlparse(url).scheme not in ('http', 'https', ''):
+        context.log.info('Fetch skipped. Unsupported scheme: %r', url)
+        return
     attempt = data.pop('retry_attempt', 1)
     try:
         result = context.http.get(url, lazy=True)
