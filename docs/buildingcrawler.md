@@ -320,6 +320,38 @@ Parameters:
 
 *Note: In case of large crawlers, it's better to use [the context datastore](#the-datastore) directly to store crawled data to make sure the task queue doesn't run out of memory.*
 
+#### Storing in Aleph
+
+The [alephclient](https://github.com/alephdata/alephclient) package provides a method named `aleph_emit` to push crawled documents from a Memorious crawler into an
+Aleph dataset.
+
+The following data items can be passed into the `aleph_client` method inside the `data` dictionary:
+
+* `content_hash`: content hash of the document
+
+And optionally:
+
+* `url`: source url of the document
+* `title`: title of the document
+* `author`: author of the document
+* `file_name`: name of the document file
+* `retrieved_at`: date the document was retrieved at
+* `modified_at`: date the document was last modified
+* `published_at`: date the document was published at
+* `headers`: extra headers
+* `request_id`: id to be used as foreign_id for the document
+* `parent_foreign_id`: foreign_id of the parent document if any
+* `language`: languages used in the document
+* `countries`: countries the document relates to
+* `mime_type`: document mime type
+
+The `data` `alpeh_emit` emits to the next stages includes the following new items:
+
+* `aleph_id`: document id of the uploaded document in Alpeh
+* `aleph_document`: dictionary containing document metadata
+* `aleph_collection_id`: id of the Aleph dataset the document was uploaded into
+
+
 ### Rules
 
 You can configure rules per stage to tell certain methods which inputs to process or skip. You can nest them, and apply `not`, `and` and `or` for the combinations you desire.
