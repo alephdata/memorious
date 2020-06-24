@@ -10,8 +10,7 @@ from contextlib import contextmanager
 from servicelayer.cache import make_key
 from servicelayer.util import load_json, dump_json
 
-from memorious.core import manager, storage, conn
-from memorious.core import datastore
+from memorious.core import manager, storage, tags, datastore
 from memorious.model import Event, Queue, Crawl
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
@@ -125,15 +124,15 @@ class Context(object):
     def set_tag(self, key, value):
         data = dump_json(value)
         key = make_key(self.crawler, "tag", key)
-        return conn.set(key, data, ex=self.crawler.expire)
+        return tags.set(key, data)
 
     def get_tag(self, key):
-        value = conn.get(make_key(self.crawler, "tag", key))
+        value = tags.get(make_key(self.crawler, "tag", key))
         if value is not None:
             return load_json(value)
 
     def check_tag(self, key):
-        return conn.exists(make_key(self.crawler, "tag", key))
+        return tags.exists(make_key(self.crawler, "tag", key))
 
     def skip_incremental(self, *criteria):
         """Perform an incremental check on a set of criteria.
@@ -155,7 +154,7 @@ class Context(object):
         if self.check_tag(key):
             return True
 
-        self.set_tag(key, None)
+        self.set_tag(key, 'inc')
         return False
 
     def store_file(self, file_path, content_hash=None):

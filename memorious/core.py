@@ -5,6 +5,7 @@ from servicelayer.archive import init_archive
 from servicelayer.rate_limit import RateLimit
 from servicelayer.cache import get_redis, get_fakeredis
 from servicelayer.extensions import get_extensions
+from servicelayer.tags import Tags
 from sqlalchemy.pool import NullPool
 from werkzeug.local import LocalProxy
 
@@ -24,8 +25,6 @@ def load_manager():
 
 def load_datastore():
     if not hasattr(settings, '_datastore'):
-        if not settings.DATASTORE_URI:
-            raise RuntimeError("No $MEMORIOUS_DATASTORE_URI.")
         # do not pool connections for the datastore
         engine_kwargs = {'poolclass': NullPool}
         settings._datastore = dataset.connect(settings.DATASTORE_URI,
@@ -33,6 +32,12 @@ def load_datastore():
         # Use bigint to store integers by default
         settings._datastore.types.integer = settings._datastore.types.bigint
     return settings._datastore
+
+
+def load_tags():
+    if not hasattr(settings, '_tags'):
+        settings._tags = Tags(settings.TAGS_TABLE, uri=settings.DATASTORE_URI)
+    return settings._tags
 
 
 def is_sync_mode():
@@ -49,6 +54,7 @@ def connect_redis():
 
 manager = LocalProxy(load_manager)
 datastore = LocalProxy(load_datastore)
+tags = LocalProxy(load_tags)
 conn = LocalProxy(connect_redis)
 
 # File storage layer for blobs on local file system or S3

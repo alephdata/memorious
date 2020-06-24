@@ -4,11 +4,11 @@ import yaml
 import logging
 from datetime import timedelta, datetime
 from importlib import import_module
-from servicelayer.jobs import Dataset, Job
 from servicelayer.cache import make_key
+from servicelayer.jobs import Dataset, Job
 
 from memorious import settings
-from memorious.core import conn
+from memorious.core import conn, tags
 from memorious.model import Event, Crawl, Queue
 from memorious.logic.stage import CrawlerStage
 
@@ -91,6 +91,10 @@ class Crawler(object):
         self.queue.cancel()
         Event.delete(self)
         Crawl.flush(self)
+        self.flush_tags()
+
+    def flush_tags(self):
+        tags.delete(prefix=make_key(self, 'tag'))
 
     def flush_events(self):
         Event.delete(self)
@@ -104,7 +108,7 @@ class Crawler(object):
         if self.last_run is None:
             return False
         now = datetime.utcnow()
-        return self.last_run < now - timedelta(seconds=settings.CRAWLER_TIMEOUT) # noqa
+        return self.last_run < now - timedelta(seconds=settings.CRAWLER_TIMEOUT)  # noqa
 
     def timeout(self):
         log.warning("Crawler timed out: %s. Aggregator won't be run", self.name)  # noqa
@@ -155,15 +159,6 @@ class Crawler(object):
     def pending(self):
         status = self.queue.get_status()
         return status.get('pending')
-
-    def flush_tags(self):
-        pipe = conn.pipeline()
-        count = 0
-        for key in conn.scan_iter(make_key(self, 'tag', '*')):
-            pipe.delete(key)
-            count += 1
-        pipe.execute()
-        log.info("Deleted %d tags", count)
 
     def get(self, name):
         return self.stages.get(name)
