@@ -25,7 +25,7 @@
             <td>{{crawler.description}}</td>
             <th width="15%">Schedule</th>
             <td>
-                <select name="schedule" id="schedule" data-crawler="{{ crawler }}">
+                <select name="schedule" class="schedule" data-crawler="{{ crawler }}">
                     {% for schedule in crawler.SCHEDULES %}
                         <option value="{{ schedule }}"
                             {% if schedule == crawler.schedule %}

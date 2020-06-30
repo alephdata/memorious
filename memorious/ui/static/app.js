@@ -1,9 +1,6 @@
-const schedule = document.querySelector('#schedule');
-
-schedule.addEventListener('change', (event) => {
+function changeSchedule (event) {
   let val = event.target.value;
   let crawler = event.target.getAttribute('data-crawler')
-  console.log(event.target);
   fetch(`/invoke/${crawler}/change-schedule`, {
       method: 'POST',
       headers: {
@@ -11,4 +8,8 @@ schedule.addEventListener('change', (event) => {
       },
       body: JSON.stringify({'schedule': val})
   });
+}
+
+[...document.querySelectorAll('.schedule')].forEach((item) => {
+  item.addEventListener('change', changeSchedule);
 });
