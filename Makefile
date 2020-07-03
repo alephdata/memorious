@@ -30,7 +30,7 @@ ui:
 	python memorious/ui/views.py
 
 shell:
-	$(DOCKER) sh
+	$(COMPOSE) run worker sh
 
 image:
 	docker build -t alephdata/memorious .

@@ -33,6 +33,14 @@ class CrawlerStage(object):
         """Total operations performed for this stage"""
         return Crawl.op_count(self.crawler, self)
 
+    @property
+    def namespaced_name(self):
+        return "{0}.{1}".format(self.crawler, self.name)
+
+    @classmethod
+    def detach_namespace(self, namespaced_name):
+        return namespaced_name.split('.')[-1]
+
     def __str__(self):
         return self.name
 

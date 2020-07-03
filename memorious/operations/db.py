@@ -2,6 +2,7 @@ import datetime
 from banal import ensure_list
 
 from memorious.core import datastore, get_rate_limit
+from memorious.model import Queue
 from memorious import settings
 
 
@@ -17,7 +18,9 @@ def _upsert(context, params, data):
             return
     data["__first_seen"] = data["__last_seen"]
     rate_limit = get_rate_limit("db", limit=settings.DB_RATE_LIMIT)
-    rate_limit.comply()
+    rate_limit.update()
+    if not rate_limit.check():
+        Queue.timeout(context.stage, rate_limit=rate_limit)
     table.insert(data)
 
 

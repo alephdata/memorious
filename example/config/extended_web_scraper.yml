@@ -17,6 +17,8 @@ pipeline:
   fetch:
     # Download the page passed from the login stage.
     method: fetch
+    params:
+      http_rate_limit: 12
     handle:
       pass: crawl 
   crawl:

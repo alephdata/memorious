@@ -6,6 +6,7 @@ import requests
 import requests_ftp
 
 from memorious.core import get_rate_limit
+from memorious.model import Queue
 from memorious import settings
 
 
@@ -20,14 +21,17 @@ def ftp_fetch(context, data):
     resource = urlparse(url).netloc or url
     # a bit weird to have a http rate limit while using ftp
     limit = context.get('http_rate_limit', settings.HTTP_RATE_LIMIT)
-    rate_limit = get_rate_limit(resource, limit=limit)
+    limit = limit / 60  # per minute to per second for stricter enforcement
+    rate_limit = get_rate_limit(resource, limit=limit, interval=1, unit=1)
 
     cached = context.get_tag(url)
     if cached is not None:
         context.emit(rule='pass', data=cached)
         return
 
-    rate_limit.comply()
+    rate_limit.update()
+    if not rate_limit.check():
+        Queue.timeout(context.stage, rate_limit=rate_limit)
     resp = session.retr(url, auth=(username, password))
     if resp.status_code < 399:
         data.update({
@@ -38,7 +42,9 @@ def ftp_fetch(context, data):
         context.set_tag(url, data)
         context.emit(rule='pass', data=data)
     else:
-        rate_limit.comply()
+        rate_limit.update()
+        if not rate_limit.check():
+            Queue.timeout(context.stage, rate_limit=rate_limit)
         resp = session.nlst(url, auth=(username, password))
         for child in resp.iter_lines(decode_unicode=True):
             child_data = data.copy()

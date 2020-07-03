@@ -61,6 +61,7 @@ class Context(object):
                 self.log.info("Skipping emit due to sampling rate")
                 return
         state = self.dump_state()
+        stage = self.crawler.get(stage)
         delay = delay or self.params.get('delay', 0) or self.crawler.delay
         self.sleep(delay)
         Queue.queue(stage, state, data)

@@ -128,7 +128,8 @@ class Crawler(object):
         self.cancel()
         # Flush out previous events data but keep the counts:
         Event.delete_data(self)
-        Queue.queue(self.init_stage, state, {})
+        init_stage = self.get(self.init_stage)
+        Queue.queue(init_stage, state, {})
 
     @property
     def is_running(self):

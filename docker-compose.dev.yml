@@ -15,6 +15,14 @@ services:
     volumes:
       - ./build/redis-data:/data
 
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+    - "8081:8081"
+
   worker:
     build: .
     command: sh /crawlers/scripts/worker.sh
