@@ -148,7 +148,7 @@ class Context(object):
             return False
 
         # this is pure convenience, and will probably backfire at some point.
-        key = make_key(*criteria)
+        key = make_key('inc', *criteria)
         if key is None:
             return False
 
