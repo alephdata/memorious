@@ -196,9 +196,7 @@ class ContextHttpResponse(object):
         limit = self.context.get('http_rate_limit', settings.HTTP_RATE_LIMIT)
         limit = limit / 60  # per minute to per second for stricter enforcement
         rate_limit = get_rate_limit(resource, limit=limit, interval=1, unit=1)
-        rate_limit.update()
-        if not rate_limit.check():
-            Queue.timeout(self.context.stage, rate_limit=rate_limit)
+        self.context.enforce_rate_limit(rate_limit)
 
     @property
     def url(self):

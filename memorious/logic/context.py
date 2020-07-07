@@ -212,5 +212,15 @@ class Context(object):
             raise RuntimeError('[%r] has no stage: %s' % (crawler, stage))
         return cls(crawler, stage, state)
 
+    def enforce_rate_limit(self, rate_limit):
+        """
+        Enforce rate limit for a resource. If rate limit is exceeded, put the
+        offending stage on a timeout (don't execute tasks for that stage for
+        some time)
+        """
+        rate_limit.update()
+        if not rate_limit.check():
+            Queue.timeout(self.stage, rate_limit=rate_limit)
+
     def __repr__(self):
         return '<Context(%r, %r)>' % (self.crawler, self.stage)

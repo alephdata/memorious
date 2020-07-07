@@ -29,9 +29,7 @@ def ftp_fetch(context, data):
         context.emit(rule='pass', data=cached)
         return
 
-    rate_limit.update()
-    if not rate_limit.check():
-        Queue.timeout(context.stage, rate_limit=rate_limit)
+    context.enforce_rate_limit(rate_limit)
     resp = session.retr(url, auth=(username, password))
     if resp.status_code < 399:
         data.update({
@@ -42,9 +40,7 @@ def ftp_fetch(context, data):
         context.set_tag(url, data)
         context.emit(rule='pass', data=data)
     else:
-        rate_limit.update()
-        if not rate_limit.check():
-            Queue.timeout(context.stage, rate_limit=rate_limit)
+        context.enforce_rate_limit(rate_limit)
         resp = session.nlst(url, auth=(username, password))
         for child in resp.iter_lines(decode_unicode=True):
             child_data = data.copy()
