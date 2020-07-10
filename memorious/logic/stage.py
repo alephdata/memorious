@@ -1,3 +1,4 @@
+import re
 from importlib import import_module
 from servicelayer.extensions import get_entry_point
 
@@ -10,6 +11,7 @@ class CrawlerStage(object):
     def __init__(self, crawler, name, config):
         self.crawler = crawler
         self.name = name
+        self.validate_name()
         self.config = config
         self.method_name = config.get('method')
         self.params = config.get('params') or {}
@@ -27,6 +29,11 @@ class CrawlerStage(object):
         package, method = self.method_name.rsplit(':', 1)
         module = import_module(package)
         return getattr(module, method)
+
+    def validate_name(self):
+        if not re.match(r'^[A-Za-z0-9_-]+$', self.name):
+            raise ValueError("Invalid stage name: %s. "
+                             "Allowed characters: A-Za-z0-9_-" % self.name)
 
     @property
     def op_count(self):
