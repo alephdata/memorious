@@ -61,6 +61,7 @@ class Context(object):
                 self.log.info("Skipping emit due to sampling rate")
                 return
         state = self.dump_state()
+        stage = self.crawler.get(stage)
         delay = delay or self.params.get('delay', 0) or self.crawler.delay
         self.sleep(delay)
         Queue.queue(stage, state, data)
@@ -147,7 +148,7 @@ class Context(object):
             return False
 
         # this is pure convenience, and will probably backfire at some point.
-        key = make_key(*criteria)
+        key = make_key('inc', *criteria)
         if key is None:
             return False
 
@@ -210,6 +211,16 @@ class Context(object):
         if stage is None:
             raise RuntimeError('[%r] has no stage: %s' % (crawler, stage))
         return cls(crawler, stage, state)
+
+    def enforce_rate_limit(self, rate_limit):
+        """
+        Enforce rate limit for a resource. If rate limit is exceeded, put the
+        offending stage on a timeout (don't execute tasks for that stage for
+        some time)
+        """
+        rate_limit.update()
+        if not rate_limit.check():
+            Queue.timeout(self.stage, rate_limit=rate_limit)
 
     def __repr__(self):
         return '<Context(%r, %r)>' % (self.crawler, self.stage)

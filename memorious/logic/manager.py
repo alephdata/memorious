@@ -23,7 +23,12 @@ class CrawlerManager(object):
                 if not (fnmatch(file_name, '*.yaml') or fnmatch(file_name, '*.yml')):  # noqa
                     continue
                 source_file = os.path.join(root, file_name)
-                crawler = Crawler(self, source_file)
+                try:
+                    crawler = Crawler(self, source_file)
+                except ValueError as ex:
+                    log.warn("Skipping %s due to the following error", file_name)  # noqa
+                    log.warn(str(ex))
+                    continue
                 self.crawlers[crawler.name] = crawler
 
     def run_scheduled(self):

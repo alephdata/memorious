@@ -17,6 +17,7 @@ from servicelayer.settings import REDIS_SHORT
 
 from memorious import settings
 from memorious.core import conn, storage, get_rate_limit
+from memorious.model import Queue
 from memorious.logic.mime import NON_HTML
 from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
@@ -193,8 +194,9 @@ class ContextHttpResponse(object):
     def _rate_limit(self, url):
         resource = urlparse(url).netloc or url
         limit = self.context.get('http_rate_limit', settings.HTTP_RATE_LIMIT)
-        rate_limit = get_rate_limit(resource, limit=limit)
-        rate_limit.comply()
+        limit = limit / 60  # per minute to per second for stricter enforcement
+        rate_limit = get_rate_limit(resource, limit=limit, interval=1, unit=1)
+        self.context.enforce_rate_limit(rate_limit)
 
     @property
     def url(self):

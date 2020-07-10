@@ -2,6 +2,7 @@ import os
 import io
 import yaml
 import logging
+import re
 from datetime import timedelta, datetime
 from importlib import import_module
 from servicelayer.cache import make_key
@@ -34,6 +35,7 @@ class Crawler(object):
 
         self.name = os.path.basename(source_file)
         self.name = self.config.get('name', self.name)
+        self.validate_name()
         self.description = self.config.get('description', self.name)
         self.category = self.config.get('category', 'scrape')
         self._schedule = self.config.get('schedule', 'disabled')
@@ -63,6 +65,11 @@ class Crawler(object):
         if now > last_run + self.delta:
             return True
         return False
+
+    def validate_name(self):
+        if not re.match(r'^[A-Za-z0-9_-]+$', self.name):
+            raise ValueError("Invalid crawler name: %s. "
+                             "Allowed characters: A-Za-z0-9_-" % self.name)
 
     @property
     def schedule(self):
@@ -128,7 +135,8 @@ class Crawler(object):
         self.cancel()
         # Flush out previous events data but keep the counts:
         Event.delete_data(self)
-        Queue.queue(self.init_stage, state, {})
+        init_stage = self.get(self.init_stage)
+        Queue.queue(init_stage, state, {})
 
     @property
     def is_running(self):
