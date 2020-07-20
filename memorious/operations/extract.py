@@ -33,17 +33,14 @@ def extract_zip(file_path, extract_dir, context):
         if zip_ref.testzip() is not None:
             context.log.warning("Bad zip file: %s", file_path)
         zip_ref.extractall(extract_dir)
-        extracted_files = []
         for name in zip_ref.namelist():
             file_path = os.path.join(extract_dir, name)
             if os.path.isfile(file_path):
-                extracted_files.append(file_path)
-        return extracted_files
+                yield file_path
 
 
 def extract_tar(file_path, extract_dir, context):
     with tarfile.open(file_path, "r:*") as tar_ref:
-        extracted_files = []
         for name in tar_ref.getnames():
             # Make it safe. See warning at
             # https://docs.python.org/2/library/tarfile.html#tarfile.TarFile.extractall  # noqa
@@ -56,8 +53,7 @@ def extract_tar(file_path, extract_dir, context):
                 tar_ref.extract(name, extract_dir)
                 file_path = os.path.join(extract_dir, name)
                 if os.path.isfile(file_path):
-                    extracted_files.append(file_path)
-        return extracted_files
+                    yield file_path
 
 
 def extract_7zip(file_path, extract_dir, context):
@@ -68,11 +64,10 @@ def extract_7zip(file_path, extract_dir, context):
             "Couldn't extract file: %s", file_path
         )
         return
-    extracted_files = []
     for root, directories, filenames in os.walk(extract_dir):
         for filename in filenames:
-            extracted_files.append(os.path.join(root, filename))
-    return extracted_files
+            file_path = os.path.join(root, filename)
+            yield file_path
 
 
 def extract(context, data):
