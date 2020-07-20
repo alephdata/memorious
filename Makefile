@@ -13,7 +13,7 @@ clean:
 build:
 	docker build -t alephdata/memorious .
 
-dev: build
+dev:
 	$(COMPOSE) build
 	$(COMPOSE) up
 
