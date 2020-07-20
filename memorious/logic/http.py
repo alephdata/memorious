@@ -17,7 +17,6 @@ from servicelayer.settings import REDIS_SHORT
 
 from memorious import settings
 from memorious.core import conn, storage, get_rate_limit
-from memorious.model import Queue
 from memorious.logic.mime import NON_HTML
 from memorious.exc import ParseError
 from memorious.helpers.ua import UserAgent
