@@ -4,30 +4,29 @@ from memorious.helpers.rule import RULES, Rule, DomainRule, UrlPatternRule
 
 
 spec = {
-    'and': [
-        {'domain': 'occrp.org'},
-        {'not': {
-            'or': [
-                {'domain': 'vis.occrp.org'},
-                {'domain': 'tech.occrp.org'},
-                {'domain': 'data.occrp.org'},
-                {'mime_group': 'assets'},
-                {'mime_group': 'images'},
-                {'pattern': 'https://www.occrp.org/en/component/.*'},
-                {'pattern': 'https://www.occrp.org/en/donate.*'},
-                {'pattern': 'https://www.occrp.org/.*start=.*'},
-                {'pattern': 'https://www.occrp.org/ru/.*'}
-            ]
-        }}
+    "and": [
+        {"domain": "occrp.org"},
+        {
+            "not": {
+                "or": [
+                    {"domain": "vis.occrp.org"},
+                    {"domain": "tech.occrp.org"},
+                    {"domain": "data.occrp.org"},
+                    {"mime_group": "assets"},
+                    {"mime_group": "images"},
+                    {"pattern": "https://www.occrp.org/en/component/.*"},
+                    {"pattern": "https://www.occrp.org/en/donate.*"},
+                    {"pattern": "https://www.occrp.org/.*start=.*"},
+                    {"pattern": "https://www.occrp.org/ru/.*"},
+                ]
+            }
+        },
     ]
 }
 
 invalid_spec = {
-    "and": [
-        {'domain': 'occrp.org'},
-        {"not": {'domain': 'vis.occrp.org'}}
-    ],
-    "not": {'mime_group': 'images'},
+    "and": [{"domain": "occrp.org"}, {"not": {"domain": "vis.occrp.org"}}],
+    "not": {"mime_group": "images"},
 }
 
 rule = {}

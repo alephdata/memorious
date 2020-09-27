@@ -6,26 +6,23 @@ import subprocess
 from memorious.util import random_filename
 
 ZIP_MIME_TYPES = [
-    'application/zip',
-    'application/x-zip',
-    'multipart/x-zip',
-    'application/zip-compressed',
-    'application/x-zip-compressed',
+    "application/zip",
+    "application/x-zip",
+    "multipart/x-zip",
+    "application/zip-compressed",
+    "application/x-zip-compressed",
 ]
 
 TAR_MIME_TYPES = [
-    'application/tar',
-    'application/x-tar',
-    'application/x-tgz',
-    'application/x-gtar',
-    'application/x-gzip',
-    'application/gzip',
+    "application/tar",
+    "application/x-tar",
+    "application/x-tgz",
+    "application/x-gtar",
+    "application/x-gzip",
+    "application/gzip",
 ]
 
-SEVENZIP_MIME_TYPES = [
-    'application/x-7z-compressed',
-    'application/7z-compressed'
-]
+SEVENZIP_MIME_TYPES = ["application/x-7z-compressed", "application/7z-compressed"]
 
 
 def extract_zip(file_path, extract_dir, context):
@@ -46,8 +43,7 @@ def extract_tar(file_path, extract_dir, context):
             # https://docs.python.org/2/library/tarfile.html#tarfile.TarFile.extractall  # noqa
             if name.startswith("..") or name.startswith("/"):
                 context.log.info(
-                    "Bad path %s while extracting archive at %s",
-                    name, file_path
+                    "Bad path %s while extracting archive at %s", name, file_path
                 )
             else:
                 tar_ref.extract(name, extract_dir)
@@ -57,12 +53,9 @@ def extract_tar(file_path, extract_dir, context):
 
 
 def extract_7zip(file_path, extract_dir, context):
-    return_code = subprocess.call(
-        ['7z', 'x', file_path, '-r', '-o%s' % extract_dir])
+    return_code = subprocess.call(["7z", "x", file_path, "-r", "-o%s" % extract_dir])
     if return_code != 0:
-        context.log.warning(
-            "Couldn't extract file: %s", file_path
-        )
+        context.log.warning("Couldn't extract file: %s", file_path)
         return
     for root, directories, filenames in os.walk(extract_dir):
         for filename in filenames:
@@ -83,15 +76,13 @@ def extract(context, data):
         elif content_type in SEVENZIP_MIME_TYPES:
             extracted_files = extract_7zip(file_path, extract_dir, context)
         else:
-            context.log.warning(
-                "Unsupported archive content type: %s", content_type
-            )
+            context.log.warning("Unsupported archive content type: %s", content_type)
             return
         extracted_content_hashes = {}
         for path in extracted_files:
             relative_path = os.path.relpath(path, extract_dir)
             content_hash = context.store_file(path)
             extracted_content_hashes[relative_path] = content_hash
-            data['content_hash'] = content_hash
-            data['file_name'] = relative_path
+            data["content_hash"] = content_hash
+            data["file_name"] = relative_path
             context.emit(data=data.copy())

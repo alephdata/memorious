@@ -16,24 +16,28 @@ class CrawlerManager(object):
 
     def load_path(self, path):
         if not os.path.isdir(path):
-            log.warning('Crawler config path %s not found.', path)
+            log.warning("Crawler config path %s not found.", path)
 
         for root, _, file_names in os.walk(path):
             for file_name in file_names:
-                if not (fnmatch(file_name, '*.yaml') or fnmatch(file_name, '*.yml')):  # noqa
+                if not (
+                    fnmatch(file_name, "*.yaml") or fnmatch(file_name, "*.yml")
+                ):  # noqa
                     continue
                 source_file = os.path.join(root, file_name)
                 try:
                     crawler = Crawler(self, source_file)
                 except ValueError as ex:
-                    log.warn("Skipping %s due to the following error", file_name)  # noqa
+                    log.warn(
+                        "Skipping %s due to the following error", file_name
+                    )  # noqa
                     log.warn(str(ex))
                     continue
                 self.crawlers[crawler.name] = crawler
 
     def run_scheduled(self):
         num_running = self.num_running
-        log.info('Checking schedule: %s crawlers.' % len(self.crawlers))
+        log.info("Checking schedule: %s crawlers." % len(self.crawlers))
         for crawler in self:
             if crawler.delta is None:
                 continue
@@ -41,7 +45,7 @@ class CrawlerManager(object):
                 continue
             if num_running >= settings.MAX_SCHEDULED:
                 continue
-            log.info('[%s] due, queueing...', crawler.name)
+            log.info("[%s] due, queueing...", crawler.name)
             crawler.run()
             num_running += 1
 

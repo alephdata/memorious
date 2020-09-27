@@ -12,11 +12,10 @@ log = logging.getLogger(__name__)
 
 class MemoriousWorker(Worker):
     def boot(self):
-        self.scheduler = get_rate_limit('scheduler',
-                                        unit=60,
-                                        interval=settings.SCHEDULER_INTERVAL,
-                                        limit=1)
-        self.hourly = get_rate_limit('hourly', unit=3600, interval=1, limit=1)
+        self.scheduler = get_rate_limit(
+            "scheduler", unit=60, interval=settings.SCHEDULER_INTERVAL, limit=1
+        )
+        self.hourly = get_rate_limit("hourly", unit=3600, interval=1, limit=1)
 
     def periodic(self):
         if self.hourly.check():
@@ -48,17 +47,17 @@ class MemoriousWorker(Worker):
 
     def get_stages(self):
         all_stages = set({stage.namespaced_name for _, stage in manager.stages})  # noqa
-        stages_on_timeout_key = make_key('memorious', 'timeout_stages')
+        stages_on_timeout_key = make_key("memorious", "timeout_stages")
         stages_on_timeout = conn.smembers(stages_on_timeout_key)
         if stages_on_timeout:
             return list(all_stages - set(stages_on_timeout))
         return all_stages
 
     def timeout_expiration_check(self):
-        stages_on_timeout_key = make_key('memorious', 'timeout_stages')
+        stages_on_timeout_key = make_key("memorious", "timeout_stages")
         stages_on_timeout = conn.smembers(stages_on_timeout_key)
         for stage in stages_on_timeout:
-            key = make_key('memorious', 'timeout', stage)
+            key = make_key("memorious", "timeout", stage)
             if not conn.get(key):
                 conn.srem(stages_on_timeout_key, stage)
 

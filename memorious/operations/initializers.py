@@ -12,17 +12,17 @@ def seed(context, data):
 
         https://crawl.site/entries/%(number)s.html
     """
-    for key in ('url', 'urls'):
+    for key in ("url", "urls"):
         for url in ensure_list(context.params.get(key)):
             url = url % data
-            context.emit(data={'url': url})
+            context.emit(data={"url": url})
 
 
 def enumerate(context, data):
     """Iterate through a set of items and emit each one of them."""
-    items = ensure_list(context.params.get('items'))
+    items = ensure_list(context.params.get("items"))
     for item in items:
-        data['item'] = item
+        data["item"] = item
         context.emit(data=data)
 
 
@@ -42,16 +42,16 @@ def sequence(context, data):
     If an optional ``tag`` is given, each number will be emitted only once
     across multiple runs of the crawler.
     """
-    number = data.get('number', context.params.get('start', 1))
-    stop = context.params.get('stop')
-    step = context.params.get('step', 1)
-    delay = context.params.get('delay')
-    prefix = context.params.get('tag')
+    number = data.get("number", context.params.get("start", 1))
+    stop = context.params.get("stop")
+    step = context.params.get("step", 1)
+    delay = context.params.get("delay")
+    prefix = context.params.get("tag")
     while True:
-        tag = None if prefix is None else '%s:%s' % (prefix, number)
+        tag = None if prefix is None else "%s:%s" % (prefix, number)
 
         if tag is None or not context.check_tag(tag):
-            data['number'] = number
+            data["number"] = number
             context.emit(data=data)
 
         if tag is not None:
@@ -64,40 +64,40 @@ def sequence(context, data):
             break
 
         if delay is not None:
-            data['number'] = number
+            data["number"] = number
             context.recurse(data=data, delay=delay)
             break
 
 
 def dates(context, data):
-    format = context.params.get('format', '%Y-%m-%d')
-    delta = timedelta(days=context.params.get('days', 0),
-                      weeks=context.params.get('weeks', 0))
+    format = context.params.get("format", "%Y-%m-%d")
+    delta = timedelta(
+        days=context.params.get("days", 0), weeks=context.params.get("weeks", 0)
+    )
     if delta == timedelta():
         context.log.error("No interval given: %r", context.params)
         return
 
-    if 'end' in context.params:
-        current = context.params.get('end')
+    if "end" in context.params:
+        current = context.params.get("end")
         current = datetime.strptime(current, format)
     else:
         current = datetime.utcnow()
 
-    if 'current' in data:
-        current = datetime.strptime(data.get('current'), format)
+    if "current" in data:
+        current = datetime.strptime(data.get("current"), format)
 
-    if 'begin' in context.params:
-        begin = context.params.get('begin')
+    if "begin" in context.params:
+        begin = context.params.get("begin")
         begin = datetime.strptime(begin, format)
     else:
-        steps = context.params.get('steps', 100)
+        steps = context.params.get("steps", 100)
         begin = current - (delta * steps)
 
-    context.emit(data={
-        'date': current.strftime(format),
-        'date_iso': current.isoformat()
-    })
+    context.emit(
+        data={"date": current.strftime(format), "date_iso": current.isoformat()}
+    )
     current = current - delta
     if current >= begin:
-        data = {'current': current.strftime(format)}
+        data = {"current": current.strftime(format)}
         context.recurse(data=data)

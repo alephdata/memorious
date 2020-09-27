@@ -27,10 +27,10 @@ class Context(object):
         self.stage = stage
         self.state = state
         self.params = stage.params
-        self.incremental = state.get('incremental')
-        self.run_id = state.get('run_id') or uuid.uuid1().hex
+        self.incremental = state.get("incremental")
+        self.run_id = state.get("run_id") or uuid.uuid1().hex
         self.work_path = mkdtemp()
-        self.log = logging.getLogger('%s.%s' % (crawler.name, stage.name))
+        self.log = logging.getLogger("%s.%s" % (crawler.name, stage.name))
         self.http = ContextHttp(self)
         self.datastore = datastore
         self.check = ContextCheck(self)
@@ -42,8 +42,7 @@ class Context(object):
             value = os.path.expandvars(value)
         return value
 
-    def emit(self, rule='pass', stage=None, data={}, delay=None,
-             optional=False):
+    def emit(self, rule="pass", stage=None, data={}, delay=None, optional=False):
         """Invoke the next stage, either based on a handling rule, or by
         calling the `pass` rule by default."""
         if stage is None:
@@ -56,21 +55,19 @@ class Context(object):
         if settings.DEBUG:
             # sampling rate is a float between 0.0 to 1.0. If it's 0.2, we
             # aim to execute only 20% of the crawler's tasks.
-            sampling_rate = self.get('sampling_rate')
+            sampling_rate = self.get("sampling_rate")
             if sampling_rate and random.random() > float(sampling_rate):
                 self.log.info("Skipping emit due to sampling rate")
                 return
         state = self.dump_state()
         stage = self.crawler.get(stage)
-        delay = delay or self.params.get('delay', 0) or self.crawler.delay
+        delay = delay or self.params.get("delay", 0) or self.crawler.delay
         self.sleep(delay)
         Queue.queue(stage, state, data)
 
     def recurse(self, data={}, delay=None):
         """Have a stage invoke itself with a modified set of arguments."""
-        return self.emit(stage=self.stage.name,
-                         data=data,
-                         delay=delay)
+        return self.emit(stage=self.stage.name, data=data, delay=delay)
 
     def execute(self, data):
         """Execute the crawler and create a database record of having done
@@ -80,11 +77,13 @@ class Context(object):
 
         try:
             Crawl.operation_start(self.crawler, self.stage, self.run_id)
-            self.log.info('[%s->%s(%s)]: %s',
-                          self.crawler.name,
-                          self.stage.name,
-                          self.stage.method_name,
-                          self.run_id)
+            self.log.info(
+                "[%s->%s(%s)]: %s",
+                self.crawler.name,
+                self.stage.name,
+                self.stage.method_name,
+                self.run_id,
+            )
             return self.stage.method(self, data)
         except QueueTooBigError as qtbe:
             self.emit_warning(str(qtbe))
@@ -106,21 +105,25 @@ class Context(object):
         if len(args):
             message = message % args
         self.log.warning(message)
-        return Event.save(self.crawler,
-                          self.stage,
-                          Event.LEVEL_WARNING,
-                          self.run_id,
-                          error=type,
-                          message=message)
+        return Event.save(
+            self.crawler,
+            self.stage,
+            Event.LEVEL_WARNING,
+            self.run_id,
+            error=type,
+            message=message,
+        )
 
     def emit_exception(self, exc):
         self.log.exception(exc)
-        return Event.save(self.crawler,
-                          self.stage,
-                          Event.LEVEL_ERROR,
-                          self.run_id,
-                          error=exc.__class__.__name__,
-                          message=str(exc))
+        return Event.save(
+            self.crawler,
+            self.stage,
+            Event.LEVEL_ERROR,
+            self.run_id,
+            error=exc.__class__.__name__,
+            message=str(exc),
+        )
 
     def set_tag(self, key, value):
         data = dump_json(value)
@@ -148,14 +151,14 @@ class Context(object):
             return False
 
         # this is pure convenience, and will probably backfire at some point.
-        key = make_key('inc', *criteria)
+        key = make_key("inc", *criteria)
         if key is None:
             return False
 
         if self.check_tag(key):
             return True
 
-        self.set_tag(key, 'inc')
+        self.set_tag(key, "inc")
         return False
 
     def store_file(self, file_path, content_hash=None):
@@ -163,12 +166,12 @@ class Context(object):
         stages."""
         return storage.archive_file(file_path, content_hash=content_hash)
 
-    def store_data(self, data, encoding='utf-8'):
+    def store_data(self, data, encoding="utf-8"):
         """Put the given content into a file, possibly encoding it as UTF-8
         in the process."""
         path = random_filename(self.work_path)
         try:
-            with open(path, 'wb') as fh:
+            with open(path, "wb") as fh:
                 if isinstance(data, str):
                     data = data.encode(encoding)
                 if data is not None:
@@ -181,10 +184,10 @@ class Context(object):
                 pass
 
     @contextmanager
-    def load_file(self, content_hash, file_name=None, read_mode='rb'):
-        file_path = storage.load_file(content_hash,
-                                      file_name=file_name,
-                                      temp_path=self.work_path)
+    def load_file(self, content_hash, file_name=None, read_mode="rb"):
+        file_path = storage.load_file(
+            content_hash, file_name=file_name, temp_path=self.work_path
+        )
         if file_path is None:
             yield None
         else:
@@ -192,24 +195,23 @@ class Context(object):
                 with open(file_path, mode=read_mode) as fh:
                     yield fh
             finally:
-                storage.cleanup_file(content_hash,
-                                     temp_path=self.work_path)
+                storage.cleanup_file(content_hash, temp_path=self.work_path)
 
     def dump_state(self):
         state = deepcopy(self.state)
-        state['crawler'] = self.crawler.name
-        state['run_id'] = self.run_id
+        state["crawler"] = self.crawler.name
+        state["run_id"] = self.run_id
         return state
 
     @classmethod
     def from_state(cls, state, stage):
-        state_crawler = state.get('crawler')
+        state_crawler = state.get("crawler")
         crawler = manager.get(state_crawler)
         if crawler is None:
             raise RuntimeError("Missing crawler: [%s]" % state_crawler)
         stage = crawler.get(stage)
         if stage is None:
-            raise RuntimeError('[%r] has no stage: %s' % (crawler, stage))
+            raise RuntimeError("[%r] has no stage: %s" % (crawler, stage))
         return cls(crawler, stage, state)
 
     def enforce_rate_limit(self, rate_limit):
@@ -223,4 +225,4 @@ class Context(object):
             Queue.timeout(self.stage, rate_limit=rate_limit)
 
     def __repr__(self):
-        return '<Context(%r, %r)>' % (self.crawler, self.stage)
+        return "<Context(%r, %r)>" % (self.crawler, self.stage)

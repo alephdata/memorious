@@ -21,17 +21,17 @@ class Rule(object):
     @staticmethod
     def get_rule(spec):
         if not isinstance(spec, dict):
-            raise Exception('Not a valid rule: %r' % spec)
+            raise Exception("Not a valid rule: %r" % spec)
         if len(spec) > 1:
-            raise Exception('Ambiguous rules: %r' % spec)
+            raise Exception("Ambiguous rules: %r" % spec)
         for rule_name, value in spec.items():
             rule_cls = RULES.get(rule_name)
             if rule_cls is None:
-                raise Exception('Unknown rule: %s' % rule_name)
+                raise Exception("Unknown rule: %s" % rule_name)
             rule = rule_cls(value)
             rule.configure()
             return rule
-        raise Exception('Empty rule: %s' % spec)
+        raise Exception("Empty rule: %s" % spec)
 
 
 class ListRule(Rule):
@@ -85,7 +85,6 @@ class MatchAllRule(Rule):
 
 
 class MimeTypeRule(Rule):
-
     def configure(self):
         self.clean = normalize_mimetype(self.value)
 
@@ -94,9 +93,8 @@ class MimeTypeRule(Rule):
 
 
 class MimeGroupRule(Rule):
-
     def apply(self, res):
-        if res.content_type.startswith('%s/' % self.value):
+        if res.content_type.startswith("%s/" % self.value):
             return True
         return res.content_type in GROUPS.get(self.value, [])
 
@@ -109,14 +107,14 @@ class DomainRule(Rule):
             return
         pr = urlparse(domain)
         domain = pr.hostname or pr.path
-        domain = domain.strip('.').lower()
+        domain = domain.strip(".").lower()
         return domain
 
     def configure(self):
         if not isinstance(self.value, str):
             raise Exception("Not a domain: %r", self.value)
         self.domain = self.clean_domain(self.value)
-        self.sub_domain = '.%s' % self.domain
+        self.sub_domain = ".%s" % self.domain
 
     def apply(self, res):
         hostname = self.clean_domain(res.url)
@@ -130,7 +128,6 @@ class DomainRule(Rule):
 
 
 class UrlPatternRule(Rule):
-
     def configure(self):
         if not isinstance(self.value, str):
             raise Exception("Not a regex: %r", self.value)
@@ -143,13 +140,13 @@ class UrlPatternRule(Rule):
 
 
 RULES = {}
-RULES['or'] = OrRule
-RULES['any'] = OrRule
-RULES['and'] = AndRule
-RULES['all'] = AndRule
-RULES['not'] = NotRule
-RULES['match_all'] = MatchAllRule
-RULES['domain'] = DomainRule
-RULES['mime_type'] = MimeTypeRule
-RULES['mime_group'] = MimeGroupRule
-RULES['pattern'] = UrlPatternRule
+RULES["or"] = OrRule
+RULES["any"] = OrRule
+RULES["and"] = AndRule
+RULES["all"] = AndRule
+RULES["not"] = NotRule
+RULES["match_all"] = MatchAllRule
+RULES["domain"] = DomainRule
+RULES["mime_type"] = MimeTypeRule
+RULES["mime_group"] = MimeGroupRule
+RULES["pattern"] = UrlPatternRule

@@ -18,37 +18,38 @@ log = logging.getLogger(__name__)
 
 class Crawler(object):
     """A processing graph that constitutes a crawler."""
+
     SCHEDULES = {
-        'disabled': None,
-        'hourly': timedelta(hours=1),
-        'daily': timedelta(days=1),
-        'weekly': timedelta(weeks=1),
-        'monthly': timedelta(weeks=4)
+        "disabled": None,
+        "hourly": timedelta(hours=1),
+        "daily": timedelta(days=1),
+        "weekly": timedelta(weeks=1),
+        "monthly": timedelta(weeks=4),
     }
 
     def __init__(self, manager, source_file):
         self.manager = manager
         self.source_file = source_file
-        with io.open(source_file, encoding='utf-8') as fh:
+        with io.open(source_file, encoding="utf-8") as fh:
             self.config_yaml = fh.read()
             self.config = yaml.safe_load(self.config_yaml)
 
         self.name = os.path.basename(source_file)
-        self.name = self.config.get('name', self.name)
+        self.name = self.config.get("name", self.name)
         self.validate_name()
-        self.description = self.config.get('description', self.name)
-        self.category = self.config.get('category', 'scrape')
-        self._schedule = self.config.get('schedule', 'disabled')
-        self.init_stage = self.config.get('init', 'init')
+        self.description = self.config.get("description", self.name)
+        self.category = self.config.get("category", "scrape")
+        self._schedule = self.config.get("schedule", "disabled")
+        self.init_stage = self.config.get("init", "init")
         self.delta = Crawler.SCHEDULES.get(self.schedule)
-        self.delay = int(self.config.get('delay', 0))
-        self.expire = int(self.config.get('expire', settings.EXPIRE)) * 84600
-        self.stealthy = self.config.get('stealthy', False)
+        self.delay = int(self.config.get("delay", 0))
+        self.expire = int(self.config.get("expire", settings.EXPIRE)) * 84600
+        self.stealthy = self.config.get("stealthy", False)
         self.queue = Dataset(conn, self.name)
-        self.aggregator_config = self.config.get('aggregator', {})
+        self.aggregator_config = self.config.get("aggregator", {})
 
         self.stages = {}
-        for name, stage in self.config.get('pipeline', {}).items():
+        for name, stage in self.config.get("pipeline", {}).items():
             self.stages[name] = CrawlerStage(self, name, stage)
 
     def check_due(self):
@@ -67,14 +68,16 @@ class Crawler(object):
         return False
 
     def validate_name(self):
-        if not re.match(r'^[A-Za-z0-9_-]+$', self.name):
-            raise ValueError("Invalid crawler name: %s. "
-                             "Allowed characters: A-Za-z0-9_-" % self.name)
+        if not re.match(r"^[A-Za-z0-9_-]+$", self.name):
+            raise ValueError(
+                "Invalid crawler name: %s. "
+                "Allowed characters: A-Za-z0-9_-" % self.name
+            )
 
     @property
     def schedule(self):
         schedule = Crawl.get_schedule(self) or self._schedule
-        return schedule if schedule in self.SCHEDULES else 'disabled'
+        return schedule if schedule in self.SCHEDULES else "disabled"
 
     @property
     def aggregator_method(self):
@@ -82,8 +85,8 @@ class Crawler(object):
             method = self.aggregator_config.get("method")
             if not method:
                 return
-            if ':' in method:
-                package, method = method.rsplit(':', 1)
+            if ":" in method:
+                package, method = method.rsplit(":", 1)
                 module = import_module(package)
                 return getattr(module, method)
 
@@ -101,7 +104,7 @@ class Crawler(object):
         self.flush_tags()
 
     def flush_tags(self):
-        tags.delete(prefix=make_key(self, 'tag'))
+        tags.delete(prefix=make_key(self, "tag"))
 
     def flush_events(self):
         Event.delete(self)
@@ -124,12 +127,12 @@ class Crawler(object):
     def run(self, incremental=None, run_id=None):
         """Queue the execution of a particular crawler."""
         state = {
-            'crawler': self.name,
-            'run_id': run_id or Job.random_id(),
-            'incremental': settings.INCREMENTAL
+            "crawler": self.name,
+            "run_id": run_id or Job.random_id(),
+            "incremental": settings.INCREMENTAL,
         }
         if incremental is not None:
-            state['incremental'] = incremental
+            state["incremental"] = incremental
 
         # Cancel previous runs:
         self.cancel()
@@ -166,7 +169,7 @@ class Crawler(object):
     @property
     def pending(self):
         status = self.queue.get_status()
-        return status.get('pending')
+        return status.get("pending")
 
     def get(self, name):
         return self.stages.get(name)
@@ -178,4 +181,4 @@ class Crawler(object):
         return iter(self.stages.values())
 
     def __repr__(self):
-        return '<Crawler(%s)>' % self.name
+        return "<Crawler(%s)>" % self.name

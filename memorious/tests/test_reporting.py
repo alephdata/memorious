@@ -5,7 +5,6 @@ from memorious.model import Crawl
 
 
 class TestReporting(object):
-
     def test_operation_reporting(self, crawler, context):
         conn.flushall()
         assert len(crawler.runs) == 0

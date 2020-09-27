@@ -1,5 +1,3 @@
-
-
 class ViewForm(dict):
     """Helper for VIEWSTATE in ASP-driven web sites."""
 
@@ -7,11 +5,11 @@ class ViewForm(dict):
         if data is not None:
             self.update(data)
         self.element = element
-        for inp in element.findall('.//input'):
-            name = inp.get('name')
+        for inp in element.findall(".//input"):
+            name = inp.get("name")
             if name is None:
                 continue
-            self[name] = inp.get('value', '')
+            self[name] = inp.get("value", "")
 
     def clear(self, name):
         self.pop(name, None)

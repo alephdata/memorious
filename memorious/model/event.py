@@ -13,19 +13,20 @@ log = logging.getLogger(__name__)
 
 class Event(object):
     """Document errors and warnings caused during tasks."""
-    LEVEL_WARNING = 'warning'
-    LEVEL_ERROR = 'error'
+
+    LEVEL_WARNING = "warning"
+    LEVEL_ERROR = "error"
     LEVELS = [LEVEL_WARNING, LEVEL_ERROR]
 
     @classmethod
     def save(cls, crawler, stage, level, run_id, error=None, message=None):
         """Create an event, possibly based on an exception."""
         event = {
-            'stage': stage.name,
-            'level': level,
-            'timestamp': pack_now(),
-            'error': error,
-            'message': message
+            "stage": stage.name,
+            "level": level,
+            "timestamp": pack_now(),
+            "error": error,
+            "message": message,
         }
         data = dump_json(event)
         keys = [
@@ -112,7 +113,7 @@ class Event(object):
             return results
         for event in events:
             result = load_json(event)
-            result["timestamp"] = unpack_datetime(result['timestamp'])
+            result["timestamp"] = unpack_datetime(result["timestamp"])
             results.append(result)
         return results
 

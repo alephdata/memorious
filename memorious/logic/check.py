@@ -5,7 +5,6 @@ from dateutil.parser import parse
 
 
 class ContextCheck(object):
-
     def __init__(self, context):
         self.context = context
 
@@ -20,7 +19,7 @@ class ContextCheck(object):
         value = stringify(value)
         if value is not None:
             return
-        self.shout('Value %r is empty', strict, value)
+        self.shout("Value %r is empty", strict, value)
 
     def is_numeric(self, value, strict=False):
         """if value is numeric"""
@@ -28,7 +27,7 @@ class ContextCheck(object):
         if value is not None:
             if value.isnumeric():
                 return
-        self.shout('value %r is not numeric', strict, value)
+        self.shout("value %r is not numeric", strict, value)
 
     def is_integer(self, value, strict=False):
         """if value is an integer"""
@@ -38,7 +37,7 @@ class ContextCheck(object):
         value = stringify(value)
         if value is not None and value.isnumeric():
             return
-        self.shout('value %r is not an integer', strict, value)
+        self.shout("value %r is not an integer", strict, value)
 
     def match_date(self, value, strict=False):
         """if value is a date"""
@@ -46,7 +45,7 @@ class ContextCheck(object):
         try:
             parse(value)
         except Exception:
-            self.shout('Value %r is not a valid date', strict, value)
+            self.shout("Value %r is not a valid date", strict, value)
 
     def match_regexp(self, value, q, strict=False):
         """if value matches a regexp q"""
@@ -55,7 +54,7 @@ class ContextCheck(object):
         if value is not None:
             if mr.match(value):
                 return
-        self.shout('%r not matching the regexp %r', strict, value, q)
+        self.shout("%r not matching the regexp %r", strict, value, q)
 
     def has_length(self, value, q, strict=False):
         """if value has a length of q"""
@@ -63,11 +62,11 @@ class ContextCheck(object):
         if value is not None:
             if len(value) == q:
                 return
-        self.shout('Value %r not matching length %r', strict, value, q)
+        self.shout("Value %r not matching length %r", strict, value, q)
 
     def must_contain(self, value, q, strict=False):
         """if value must contain q"""
         if value is not None:
             if value.find(q) != -1:
                 return
-        self.shout('Value %r does not contain %r', strict, value, q)
+        self.shout("Value %r does not contain %r", strict, value, q)

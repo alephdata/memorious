@@ -15,12 +15,12 @@ def clean_html(context, data):
         context.emit(data=data)
         return
 
-    remove_paths = context.params.get('remove_paths')
+    remove_paths = context.params.get("remove_paths")
     for path in ensure_list(remove_paths):
         for el in doc.xpath(path):
             el.drop_tree()
 
     html_text = html.tostring(doc, pretty_print=True)
     content_hash = context.store_data(html_text)
-    data['content_hash'] = content_hash
+    data["content_hash"] = content_hash
     context.emit(data=data)

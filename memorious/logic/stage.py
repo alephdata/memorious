@@ -13,27 +13,28 @@ class CrawlerStage(object):
         self.name = name
         self.validate_name()
         self.config = config
-        self.method_name = config.get('method')
-        self.params = config.get('params') or {}
-        self.handlers = config.get('handle') or {}
+        self.method_name = config.get("method")
+        self.params = config.get("params") or {}
+        self.handlers = config.get("handle") or {}
 
     @property
     def method(self):
         # method A: via a named Python entry point
-        func = get_entry_point('memorious.operations', self.method_name)
+        func = get_entry_point("memorious.operations", self.method_name)
         if func is not None:
             return func
         # method B: direct import from a module
-        if ':' not in self.method_name:
+        if ":" not in self.method_name:
             raise ValueError("Unknown method: %s", self.method_name)
-        package, method = self.method_name.rsplit(':', 1)
+        package, method = self.method_name.rsplit(":", 1)
         module = import_module(package)
         return getattr(module, method)
 
     def validate_name(self):
-        if not re.match(r'^[A-Za-z0-9_-]+$', self.name):
-            raise ValueError("Invalid stage name: %s. "
-                             "Allowed characters: A-Za-z0-9_-" % self.name)
+        if not re.match(r"^[A-Za-z0-9_-]+$", self.name):
+            raise ValueError(
+                "Invalid stage name: %s. " "Allowed characters: A-Za-z0-9_-" % self.name
+            )
 
     @property
     def op_count(self):
@@ -46,10 +47,10 @@ class CrawlerStage(object):
 
     @classmethod
     def detach_namespace(self, namespaced_name):
-        return namespaced_name.split('.')[-1]
+        return namespaced_name.split(".")[-1]
 
     def __str__(self):
         return self.name
 
     def __repr__(self):
-        return '<CrawlerStage(%r, %s)>' % (self.crawler, self.name)
+        return "<CrawlerStage(%r, %s)>" % (self.crawler, self.name)

@@ -45,12 +45,14 @@ class Crawl(object):
             start = conn.get(make_key(crawler, "run", run_id, "start"))
             end = conn.get(make_key(crawler, "run", run_id, "end"))
             total_ops = conn.get(make_key(crawler, "run", run_id, "total_ops"))
-            runs.append({
-                'run_id': run_id,
-                'total_ops': unpack_int(total_ops),
-                'start': unpack_datetime(start, datetime.utcnow()),
-                'end': unpack_datetime(end)
-            })
+            runs.append(
+                {
+                    "run_id": run_id,
+                    "total_ops": unpack_int(total_ops),
+                    "start": unpack_datetime(start, datetime.utcnow()),
+                    "end": unpack_datetime(end),
+                }
+            )
         return runs
 
     @classmethod
@@ -58,7 +60,9 @@ class Crawl(object):
         if not conn.sismember(make_key(crawler, "runs"), run_id):
             conn.sadd(make_key(crawler, "runs"), run_id)
             conn.expire(make_key(crawler, "runs"), REDIS_LONG)
-            conn.set(make_key(crawler, "run", run_id, "start"), pack_now(), ex=REDIS_LONG)  # noqa
+            conn.set(
+                make_key(crawler, "run", run_id, "start"), pack_now(), ex=REDIS_LONG
+            )  # noqa
         conn.incr(make_key(crawler, "run", run_id))
         conn.incr(make_key(crawler, "run", run_id, "total_ops"))
         conn.incr(make_key(crawler, stage))
@@ -71,7 +75,9 @@ class Crawl(object):
         conn.set(make_key(crawler, "last_run"), pack_now(), ex=REDIS_LONG)
         pending = conn.decr(make_key(crawler, "run", run_id))
         if unpack_int(pending) == 0:
-            conn.set(make_key(crawler, "run", run_id, "end"), pack_now(), ex=REDIS_LONG)  # noqa
+            conn.set(
+                make_key(crawler, "run", run_id, "end"), pack_now(), ex=REDIS_LONG
+            )  # noqa
 
     @classmethod
     def flush(cls, crawler):

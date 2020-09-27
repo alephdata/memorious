@@ -15,8 +15,9 @@ log = logging.getLogger(__name__)
 
 
 def load_manager():
-    if not hasattr(settings, '_manager'):
+    if not hasattr(settings, "_manager"):
         from memorious.logic.manager import CrawlerManager
+
         settings._manager = CrawlerManager()
         if settings.CONFIG_PATH:
             settings._manager.load_path(settings.CONFIG_PATH)
@@ -24,18 +25,19 @@ def load_manager():
 
 
 def load_datastore():
-    if not hasattr(settings, '_datastore'):
+    if not hasattr(settings, "_datastore"):
         # do not pool connections for the datastore
-        engine_kwargs = {'poolclass': NullPool}
-        settings._datastore = dataset.connect(settings.DATASTORE_URI,
-                                              engine_kwargs=engine_kwargs)
+        engine_kwargs = {"poolclass": NullPool}
+        settings._datastore = dataset.connect(
+            settings.DATASTORE_URI, engine_kwargs=engine_kwargs
+        )
         # Use bigint to store integers by default
         settings._datastore.types.integer = settings._datastore.types.bigint
     return settings._datastore
 
 
 def load_tags():
-    if not hasattr(settings, '_tags'):
+    if not hasattr(settings, "_tags"):
         settings._tags = Tags(settings.TAGS_TABLE, uri=settings.DATASTORE_URI)
     return settings._tags
 
@@ -62,7 +64,7 @@ storage = init_archive()
 
 
 def init_memorious():
-    for func in get_extensions('memorious.plugins'):
+    for func in get_extensions("memorious.plugins"):
         func()
 
 

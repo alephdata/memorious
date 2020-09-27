@@ -14,9 +14,7 @@ settings.TESTING = True
 
 def get_crawler_dir():
     file_path = os.path.realpath(__file__)
-    crawler_dir = os.path.normpath(os.path.join(
-        file_path, "../testdata/config"
-    ))
+    crawler_dir = os.path.normpath(os.path.join(file_path, "../testdata/config"))
     return crawler_dir
 
 

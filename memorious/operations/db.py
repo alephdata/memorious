@@ -31,8 +31,10 @@ def _recursive_upsert(context, params, data):
         child_data_list = ensure_list(data.pop(key))
         if isinstance(child_data_list, dict):
             child_data_list = [child_data_list]
-        if not (isinstance(child_data_list, list) and
-                all(isinstance(i, dict) for i in child_data_list)):
+        if not (
+            isinstance(child_data_list, list)
+            and all(isinstance(i, dict) for i in child_data_list)
+        ):
             context.log.warn(
                 "Expecting a dict or a lost of dicts as children for key", key
             )
