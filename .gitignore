@@ -2,6 +2,7 @@
 *.egg-info
 *.pyc
 *.rdb
+*.store
 .vscode/*
 dist/*
 build/*
