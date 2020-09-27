@@ -56,6 +56,7 @@ setup(
             "parse = memorious.operations.parse:parse",
             "clean_html = memorious.operations.clean:clean_html",
             "seed = memorious.operations.initializers:seed",
+            "tee = memorious.operations.initializers:tee",
             "sequence = memorious.operations.initializers:sequence",
             "dates = memorious.operations.initializers:dates",
             "enumerate = memorious.operations.initializers:enumerate",

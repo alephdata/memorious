@@ -26,6 +26,12 @@ def enumerate(context, data):
         context.emit(data=data)
 
 
+def tee(context, data):
+    """Trigger multiple subsequent stages in parallel."""
+    for rule, _ in context.stage.handlers.items():
+        context.emit(rule=rule, data=data)
+
+
 def sequence(context, data):
     """Generate a sequence of numbers.
 
