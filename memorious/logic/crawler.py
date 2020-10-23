@@ -7,6 +7,7 @@ from datetime import timedelta, datetime
 from importlib import import_module
 from servicelayer.cache import make_key
 from servicelayer.jobs import Dataset, Job
+from servicelayer.extensions import get_entry_point
 
 from memorious import settings
 from memorious.core import conn, tags
@@ -85,10 +86,16 @@ class Crawler(object):
             method = self.aggregator_config.get("method")
             if not method:
                 return
+            # method A: via a named Python entry point
+            func = get_entry_point("memorious.operations", method)
+            if func is not None:
+                return func
+            # method B: direct import from a module
             if ":" in method:
                 package, method = method.rsplit(":", 1)
                 module = import_module(package)
                 return getattr(module, method)
+            raise ValueError("Unknown method: %s", self.method_name)
 
     def aggregate(self, context):
         if self.aggregator_method:
