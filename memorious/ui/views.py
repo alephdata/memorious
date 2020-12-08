@@ -1,3 +1,4 @@
+import os
 import math
 from urllib.parse import urlencode
 import logging
@@ -10,7 +11,9 @@ from memorious.core import settings, manager, init_memorious
 from memorious.model import Event, Crawl
 
 PAGE_SIZE = 50
-app = Flask(__name__)
+app = Flask(
+    __name__, template_folder=os.path.join(os.path.dirname(__file__), "templates")
+)
 init_memorious()
 if settings.DEBUG:
     logging.basicConfig(level=logging.DEBUG)
