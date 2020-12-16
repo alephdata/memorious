@@ -99,6 +99,6 @@ def session(context, data):
         proxies = {"http": proxy, "https": proxy}
         context.http.session.proxies = proxies
 
-    # Explictly save the session because no actual HTTP requests were made.
+    # Explicitly save the session because no actual HTTP requests were made.
     context.http.save()
     context.emit(data=data)
