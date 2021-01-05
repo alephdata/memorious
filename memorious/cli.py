@@ -20,10 +20,6 @@ def cli(debug, cache, incremental):
     settings.HTTP_CACHE = cache
     settings.INCREMENTAL = incremental
     settings.DEBUG = debug
-    if settings.DEBUG:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
     init_memorious()
 
 
