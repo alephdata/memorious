@@ -1,10 +1,8 @@
-from datetime import datetime
-import uuid
 import structlog
-from structlog.contextvars import clear_contextvars, bind_contextvars
 
 from servicelayer.worker import Worker
 from servicelayer.cache import make_key
+from servicelayer.logs import apply_task_context
 
 from memorious import settings
 from memorious.logic.context import Context
@@ -35,7 +33,7 @@ class MemoriousWorker(Worker):
         self.timeout_expiration_check()
 
     def handle(self, task):
-        self.setup_logging_context(task)
+        apply_task_context(task)
         data = task.payload
         stage = CrawlerStage.detach_namespace(task.stage.stage)
         state = task.context
@@ -65,17 +63,6 @@ class MemoriousWorker(Worker):
             key = make_key("memorious", "timeout", stage)
             if not conn.get(key):
                 conn.srem(stages_on_timeout_key, stage)
-
-    def setup_logging_context(self, task):
-        # Setup context for structured logging
-        clear_contextvars()
-        bind_contextvars(
-            job_id=task.job.id,
-            stage=task.stage.stage,
-            dataset=task.job.dataset.name,
-            start_time=datetime.utcnow().isoformat(),
-            trace_id=str(uuid.uuid4()),
-        )
 
 
 def get_worker():
