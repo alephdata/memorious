@@ -15,10 +15,6 @@ app = Flask(
     __name__, template_folder=os.path.join(os.path.dirname(__file__), "templates")
 )
 init_memorious()
-if settings.DEBUG:
-    logging.basicConfig(level=logging.DEBUG)
-else:
-    logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 

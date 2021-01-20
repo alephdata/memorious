@@ -45,6 +45,8 @@ setup(
         "stringcase",
         "flask",
         "babel",
+        "colorama",
+        "structlog",
     ],
     entry_points={
         "console_scripts": ["memorious = memorious.cli:main"],

@@ -1,13 +1,15 @@
-import logging
+import structlog
+
 from servicelayer.worker import Worker
 from servicelayer.cache import make_key
+from servicelayer.logs import apply_task_context
 
 from memorious import settings
 from memorious.logic.context import Context
 from memorious.logic.stage import CrawlerStage
 from memorious.core import manager, conn, get_rate_limit
 
-log = logging.getLogger(__name__)
+log = structlog.get_logger(__name__)
 
 
 class MemoriousWorker(Worker):
@@ -31,6 +33,7 @@ class MemoriousWorker(Worker):
         self.timeout_expiration_check()
 
     def handle(self, task):
+        apply_task_context(task)
         data = task.payload
         stage = CrawlerStage.detach_namespace(task.stage.stage)
         state = task.context

@@ -6,6 +6,7 @@ from servicelayer.rate_limit import RateLimit
 from servicelayer.cache import get_redis, get_fakeredis
 from servicelayer.extensions import get_extensions
 from servicelayer.tags import Tags
+from servicelayer.logs import configure_logging
 from sqlalchemy.pool import NullPool
 from werkzeug.local import LocalProxy
 
@@ -64,6 +65,10 @@ storage = init_archive()
 
 
 def init_memorious():
+    if settings.DEBUG:
+        configure_logging(level=logging.DEBUG)
+    else:
+        configure_logging(level=logging.INFO)
     for func in get_extensions("memorious.plugins"):
         func()
 
