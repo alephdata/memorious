@@ -1,4 +1,4 @@
-FROM alpine:3.12
+FROM alpine:3.13.0
 
 RUN apk add --no-cache python3 py3-pip py3-icu py3-pillow py3-lxml py3-psycopg2 p7zip tesseract-ocr
 RUN pip3 install --no-cache-dir -U pip setuptools six wheel gunicorn
