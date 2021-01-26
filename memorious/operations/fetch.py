@@ -1,3 +1,4 @@
+from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from requests.exceptions import RequestException
 from servicelayer.cache import make_key
@@ -48,6 +49,7 @@ def dav_index(context, data):
     # it they are "standards compliant" and it should thus work for
     # other DAV servers.
     url = data.get("url")
+    context.log.info("Fetching WebDAV path: %s" % url)
     result = context.http.request("PROPFIND", url)
     for resp in result.xml.findall("./{DAV:}response"):
         href = resp.findtext("./{DAV:}href")
@@ -55,21 +57,18 @@ def dav_index(context, data):
             continue
 
         rurl = urljoin(url, href)
+        if rurl == url:
+            continue
         rdata = data.copy()
         rdata["url"] = rurl
         rdata["foreign_id"] = rurl
-        if rdata["url"] == url:
-            continue
+        rdata["file_name"] = Path(urlparse(href).path).name
+        rdata["parent_foreign_id"] = data.get("foreign_id")
 
+        rule = "file"
         if resp.find(".//{DAV:}collection") is not None:
-            rdata["parent_foreign_id"] = rurl
-            context.log.info("Fetching contents of folder: %s" % rurl)
-            context.recurse(data=rdata)
-        else:
-            rdata["parent_foreign_id"] = url
-
-        # Do GET requests on the urls
-        fetch(context, rdata)
+            rule = "folder"
+        context.emit(data=rdata, rule=rule)
 
 
 def session(context, data):
