@@ -4,7 +4,10 @@ from urllib.parse import urljoin, urlparse, unquote
 
 def _get_url_file_name(url):
     path = urlparse(url).path
-    path = unquote(path)
+    try:
+        path = unquote(path)
+    except (TypeError, ValueError):
+        pass
     return Path(path).name
 
 
