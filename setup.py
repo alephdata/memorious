@@ -54,8 +54,8 @@ setup(
         "memorious.operations": [
             "memorious = memorious.cli:main",
             "fetch = memorious.operations.fetch:fetch",
-            "dav_index = memorious.operations.fetch:dav_index",
             "session = memorious.operations.fetch:session",
+            "dav_index = memorious.operations.webdav:dav_index",
             "parse = memorious.operations.parse:parse",
             "clean_html = memorious.operations.clean:clean_html",
             "seed = memorious.operations.initializers:seed",
