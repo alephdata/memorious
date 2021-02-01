@@ -44,13 +44,16 @@ def run(crawler):
 
 @cli.command("sync")
 @click.argument("crawler")
-def sync_run(crawler):
+@click.option("--flush", is_flag=True, default=False)
+def sync_run(crawler, flush=False):
     """Run a specified crawler in synchronous mode."""
     # Use fakeredis:
     settings.sls.REDIS_URL = None
     # Disable timeouts:
     settings.CRAWLER_TIMEOUT = settings.CRAWLER_TIMEOUT * 1000
     crawler = get_crawler(crawler)
+    if flush:
+        crawler.flush()
     crawler.run()
     worker = get_worker()
     worker.sync()
