@@ -1,14 +1,15 @@
-FROM alpine:3.13.0
+FROM alephdata/followthemoney
 
-RUN apk add --no-cache python3 py3-pip py3-icu py3-pillow py3-lxml py3-psycopg2 p7zip tesseract-ocr
-RUN pip3 install --no-cache-dir -U pip setuptools six wheel gunicorn
-RUN apk add --no-cache --virtual=build_deps python3-dev g++ tesseract-ocr-dev musl-dev libffi-dev openssl-dev && \
-    pip3 install --no-cache-dir tesserocr regex
-ENV OMP_THREAD_LIMIT=1
+RUN apt-get -qq -y update \
+    && apt-get -qq -y install python3-pil \
+    tesseract-ocr libtesseract-dev libleptonica-dev pkg-config tesseract-ocr-eng \
+    && apt-get -qq -y autoremove \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY setup.py /memorious/
-RUN pip3 install --no-cache-dir -e /memorious
-COPY memorious /memorious/memorious
+COPY . /memorious
+RUN pip3 install --no-cache-dir -e "/memorious[dev,ocr]"
+WORKDIR /memorious
 
 ENV MEMORIOUS_BASE_PATH=/data \
     MEMORIOUS_INCREMENTAL=true

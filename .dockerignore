@@ -7,3 +7,5 @@ docker-compose.*
 .tox
 .gitignore
 __pycache__
+*.store
+docker-compose.dev.yml
