@@ -50,7 +50,7 @@ class Context(object):
         if optional and stage is None:
             return
         if stage is None or stage not in self.crawler.stages:
-            self.log.info("No next stage: %s (%s)" % (stage, rule))
+            self.log.info("No next stage: %s (%s)", stage, rule)
             return
         if settings.DEBUG:
             # sampling rate is a float between 0.0 to 1.0. If it's 0.2, we
@@ -69,8 +69,10 @@ class Context(object):
         self.sleep(delay)
         Queue.queue(stage, state, data)
 
-    def recurse(self, data={}, delay=None):
+    def recurse(self, data=None, delay=None):
         """Have a stage invoke itself with a modified set of arguments."""
+        if data is None:
+            data = {}
         return self.emit(stage=self.stage.name, data=data, delay=delay)
 
     def execute(self, data):
