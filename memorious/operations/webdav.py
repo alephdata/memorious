@@ -24,16 +24,15 @@ def dav_index(context, data):
         if href is None:
             continue
 
-        rurl = urljoin(url, href)
-        if rurl == url:
+        child_url = urljoin(url, href)
+        if child_url == url:
             continue
-        rdata = data.copy()
-        rdata["url"] = rurl
-        rdata["foreign_id"] = rurl
-        rdata["file_name"] = _get_url_file_name(href)
-        rdata["parent_foreign_id"] = data.get("foreign_id")
+        child = dict(data)
+        child["url"] = child_url
+        child["foreign_id"] = child_url
+        child["file_name"] = _get_url_file_name(href)
 
         rule = "file"
         if resp.find(".//{DAV:}collection") is not None:
             rule = "folder"
-        context.emit(data=rdata, rule=rule)
+        context.emit(data=child, rule=rule)

@@ -46,8 +46,8 @@ def aleph_emit(context, data):
     mime_type = context.params.get("mime_type")
     meta["mime_type"] = data.get("mime_type", mime_type)
 
-    if data.get("parent_foreign_id"):
-        meta["parent"] = {"foreign_id": data.get("parent_foreign_id")}
+    if data.get("aleph_folder_id"):
+        meta["parent"] = {"id": data.get("aleph_folder_id")}
 
     meta = clean_dict(meta)
     # pprint(meta)
@@ -87,23 +87,15 @@ def aleph_folder(context, data):
     if api is None:
         return
     collection_id = get_collection_id(context, api)
-    source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id")
     if foreign_id is None:
         context.log.warning("No folder foreign ID!")
-        return
-    # Fetch document id from cache
-    document_id = context.get_tag(make_key(collection_id, foreign_id))
-    if document_id:
-        context.log.info("Skip aleph folder: %s", foreign_id)
-        data["aleph_id"] = document_id
-        context.emit(data=data, optional=True)
         return
 
     meta = {
         "crawler": context.crawler.name,
         "foreign_id": foreign_id,
-        "source_url": source_url,
+        "source_url": data.get("source_url", data.get("url")),
         "title": data.get("title"),
         "file_name": data.get("file_name"),
         "retrieved_at": data.get("retrieved_at"),
@@ -111,8 +103,8 @@ def aleph_folder(context, data):
         "published_at": data.get("published_at"),
     }
 
-    if data.get("parent_foreign_id"):
-        meta["parent"] = {"foreign_id": data.get("parent_foreign_id")}
+    if data.get("aleph_folder_id"):
+        meta["parent"] = {"id": data.get("aleph_folder_id")}
 
     meta = clean_dict(meta)
     # pprint(meta)
@@ -128,8 +120,7 @@ def aleph_folder(context, data):
             context.log.info("Aleph folder entity ID: %s", document_id)
             # Save the document id in cache for future use
             context.set_tag(make_key(collection_id, foreign_id), document_id)
-            data["aleph_id"] = document_id
-            data["aleph_document"] = meta
+            data["aleph_folder_id"] = document_id
             data["aleph_collection_id"] = collection_id
             context.emit(data=data, optional=True)
             return
