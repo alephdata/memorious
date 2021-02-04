@@ -111,25 +111,27 @@ class Context(object):
         if len(args):
             message = message % args
         self.log.warning(message)
-        return Event.save(
-            self.crawler,
-            self.stage,
-            Event.LEVEL_WARNING,
-            self.run_id,
-            error=type,
-            message=message,
-        )
+        if not is_sync_mode():
+            return Event.save(
+                self.crawler,
+                self.stage,
+                Event.LEVEL_WARNING,
+                self.run_id,
+                error=type,
+                message=message,
+            )
 
     def emit_exception(self, exc):
         self.log.exception(exc)
-        return Event.save(
-            self.crawler,
-            self.stage,
-            Event.LEVEL_ERROR,
-            self.run_id,
-            error=exc.__class__.__name__,
-            message=str(exc),
-        )
+        if not is_sync_mode():
+            return Event.save(
+                self.crawler,
+                self.stage,
+                Event.LEVEL_ERROR,
+                self.run_id,
+                error=exc.__class__.__name__,
+                message=str(exc),
+            )
 
     def set_tag(self, key, value):
         data = dump_json(value)

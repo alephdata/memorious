@@ -93,9 +93,7 @@ class ContextHttp(object):
         session = pickle.dumps(self.session)
         session = codecs.encode(session, "base64")
         key = sha1(session).hexdigest()[:15]
-        key = make_key(
-            self.context.crawler, "session", self.context.run_id, key
-        )  # noqa
+        key = make_key(self.context.crawler, "session", self.context.run_id, key)
         conn.set(key, session, ex=REDIS_SHORT)
         self.context.state[self.STATE_SESSION] = key
 

@@ -7,16 +7,15 @@ from servicelayer.logs import apply_task_context
 from memorious import settings
 from memorious.logic.context import Context
 from memorious.logic.stage import CrawlerStage
-from memorious.core import manager, conn, get_rate_limit
+from memorious.core import manager, conn, get_rate_limit, is_sync_mode
 
 log = structlog.get_logger(__name__)
 
 
 class MemoriousWorker(Worker):
     def boot(self):
-        self.scheduler = get_rate_limit(
-            "scheduler", unit=60, interval=settings.SCHEDULER_INTERVAL, limit=1
-        )
+        intv = settings.SCHEDULER_INTERVAL
+        self.scheduler = get_rate_limit("scheduler", unit=60, interval=intv, limit=1)
         self.hourly = get_rate_limit("hourly", unit=3600, interval=1, limit=1)
 
     def periodic(self):
@@ -52,11 +51,13 @@ class MemoriousWorker(Worker):
         all_stages = set({stage.namespaced_name for _, stage in manager.stages})  # noqa
         stages_on_timeout_key = make_key("memorious", "timeout_stages")
         stages_on_timeout = conn.smembers(stages_on_timeout_key)
-        if stages_on_timeout:
+        if stages_on_timeout and not is_sync_mode():
             return list(all_stages - set(stages_on_timeout))
         return all_stages
 
     def timeout_expiration_check(self):
+        if is_sync_mode():
+            return
         stages_on_timeout_key = make_key("memorious", "timeout_stages")
         stages_on_timeout = conn.smembers(stages_on_timeout_key)
         for stage in stages_on_timeout:
