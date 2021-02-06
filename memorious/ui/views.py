@@ -1,5 +1,4 @@
 import os
-import math
 from urllib.parse import urlencode
 import logging
 from flask import Flask, request, redirect, jsonify
@@ -8,12 +7,10 @@ from babel.numbers import format_number
 from babel.dates import format_date, format_datetime
 
 from memorious.core import settings, manager, init_memorious
-from memorious.model import Event, Crawl
+from memorious.model import Crawl
 
-PAGE_SIZE = 50
-app = Flask(
-    __name__, template_folder=os.path.join(os.path.dirname(__file__), "templates")
-)
+template_folder = os.path.join(os.path.dirname(__file__), "templates")
+app = Flask(__name__, template_folder=template_folder)
 init_memorious()
 log = logging.getLogger(__name__)
 
@@ -74,7 +71,7 @@ def index():
     """Generate a list of all crawlers, alphabetically, with op counts."""
     crawlers = []
     for crawler in manager:
-        data = Event.get_counts(crawler)
+        data = {"crawler": crawler}
         data["last_active"] = crawler.last_run
         data["total_ops"] = crawler.op_count
         data["running"] = crawler.is_running
@@ -88,38 +85,12 @@ def crawler(name):
     crawler = get_crawler(name)
     stages = []
     for stage in crawler:
-        data = Event.get_stage_counts(crawler, stage)
+        data = {"stage": stage}
         data["total_ops"] = stage.op_count
-        data["stage"] = stage
         stages.append(data)
     runs = list(crawler.runs)
-    for run in runs:
-        run.update(Event.get_run_counts(crawler, run["run_id"]))
     runs = sorted(runs, key=lambda r: r.get("start"), reverse=True)
     return render_template("crawler.html", crawler=crawler, stages=stages, runs=runs)
-
-
-@app.route("/crawlers/<name>/events")
-def events(name):
-    crawler = get_crawler(name)
-    page = int(request.args.get("page", 1))
-    start = (max(1, page) - 1) * PAGE_SIZE
-    end = start + PAGE_SIZE
-    run_id = request.args.get("run_id")
-    level = request.args.get("level")
-    stage_name = request.args.get("stage_name")
-
-    if stage_name:
-        events = Event.get_stage_events(crawler, stage_name, start, end, level)
-    elif run_id:
-        events = Event.get_run_events(crawler, run_id, start, end, level)
-    else:
-        events = Event.get_crawler_events(crawler, start, end, level)
-    total = len(events)
-    pages = int(math.ceil((float(total) / PAGE_SIZE)))
-    return render_template(
-        "events.html", crawler=crawler, results=events, page=page, pages=pages
-    )
 
 
 @app.route("/crawlers/<name>/config")
@@ -146,13 +117,6 @@ def crawler_cancel(crawler):
 def crawler_flush(crawler):
     crawler = get_crawler(crawler)
     crawler.flush()
-    return redirect_crawler(crawler)
-
-
-@app.route("/invoke/<crawler>/flush-events", methods=["POST"])
-def crawler_flush_events(crawler):
-    crawler = get_crawler(crawler)
-    crawler.flush_events()
     return redirect_crawler(crawler)
 
 

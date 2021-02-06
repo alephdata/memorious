@@ -77,7 +77,7 @@ class Crawl(object):
         if unpack_int(pending) == 0:
             conn.set(
                 make_key(crawler, "run", run_id, "end"), pack_now(), ex=REDIS_LONG
-            )  # noqa
+            )
 
     @classmethod
     def flush(cls, crawler):
