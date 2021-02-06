@@ -55,6 +55,7 @@ class ContextHttp(object):
         params=None,
         json=None,
         allow_redirects=True,
+        timeout=settings.HTTP_TIMEOUT,
         lazy=False,
     ):
         if is_mapping(params):
@@ -65,7 +66,7 @@ class ContextHttp(object):
             method, url, data=data, headers=headers, json=json, auth=auth, params=params
         )
         response = ContextHttpResponse(
-            self, request=request, allow_redirects=allow_redirects
+            self, request=request, allow_redirects=allow_redirects, timeout=timeout
         )
         if not lazy:
             response.fetch()
@@ -111,11 +112,12 @@ class ContextHttpResponse(object):
 
     CACHE_METHODS = ["GET", "HEAD"]
 
-    def __init__(self, http, request=None, allow_redirects=True):
+    def __init__(self, http, request=None, allow_redirects=True, timeout=None):
         self.http = http
         self.context = http.context
         self.request = request
         self.allow_redirects = allow_redirects
+        self.timeout = timeout
         self._response = None
         self._status_code = None
         self._url = None
@@ -161,6 +163,7 @@ class ContextHttpResponse(object):
                 prepared,
                 stream=True,
                 verify=False,
+                timeout=self.timeout,
                 allow_redirects=self.allow_redirects,
             )
 

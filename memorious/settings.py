@@ -52,6 +52,9 @@ MAX_QUEUE_LENGTH = env.to_int("MEMORIOUS_MAX_QUEUE_LENGTH", 50000)
 # HTTP request configuration
 HTTP_CACHE = env.to_bool("MEMORIOUS_HTTP_CACHE", default=True)
 
+# HTTP request timeout
+HTTP_TIMEOUT = float(env.to_int("MEMORIOUS_HTTP_TIMEOUT", 30))
+
 # HTTP user agent default
 USER_AGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.1)"
 USER_AGENT = "%s aleph.memorious/%s" % (USER_AGENT, VERSION)
