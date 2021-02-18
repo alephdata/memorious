@@ -11,7 +11,7 @@ from servicelayer.cache import make_key
 from servicelayer.util import load_json, dump_json
 
 from memorious.core import manager, storage, tags, datastore, is_sync_mode
-from memorious.model import Event, Queue, Crawl
+from memorious.model import Queue, Crawl
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
 from memorious.util import random_filename
@@ -50,7 +50,7 @@ class Context(object):
         if optional and stage is None:
             return
         if stage is None or stage not in self.crawler.stages:
-            self.log.info("No next stage: %s (%s)" % (stage, rule))
+            self.log.info("No next stage: %s (%s)", stage, rule)
             return
         if settings.DEBUG:
             # sampling rate is a float between 0.0 to 1.0. If it's 0.2, we
@@ -69,8 +69,10 @@ class Context(object):
         self.sleep(delay)
         Queue.queue(stage, state, data)
 
-    def recurse(self, data={}, delay=None):
+    def recurse(self, data=None, delay=None):
         """Have a stage invoke itself with a modified set of arguments."""
+        if data is None:
+            data = {}
         return self.emit(stage=self.stage.name, data=data, delay=delay)
 
     def execute(self, data):
@@ -105,29 +107,11 @@ class Context(object):
     def emit_heartbeat(self):
         Crawl.heartbeat(self.crawler)
 
-    def emit_warning(self, message, type=None, *args):
-        if len(args):
-            message = message % args
-        self.log.warning(message)
-        return Event.save(
-            self.crawler,
-            self.stage,
-            Event.LEVEL_WARNING,
-            self.run_id,
-            error=type,
-            message=message,
-        )
+    def emit_warning(self, message, *args):
+        self.log.warning(message, *args)
 
     def emit_exception(self, exc):
         self.log.exception(exc)
-        return Event.save(
-            self.crawler,
-            self.stage,
-            Event.LEVEL_ERROR,
-            self.run_id,
-            error=exc.__class__.__name__,
-            message=str(exc),
-        )
 
     def set_tag(self, key, value):
         data = dump_json(value)
