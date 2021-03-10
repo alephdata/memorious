@@ -59,15 +59,26 @@ class Context(object):
             if sampling_rate and random.random() > float(sampling_rate):
                 self.log.info("Skipping emit due to sampling rate")
                 return
+        state = self.dump_state()
+        delay = delay or self.params.get("delay", 0) or self.crawler.delay
+        self.sleep(delay)
         if is_sync_mode():
             # In sync mode we use a in-memory backend for the task queue.
             # Make a copy of the data to avoid mutation in that case.
             data = deepcopy(data)
-        state = self.dump_state()
-        stage = self.crawler.get(stage)
-        delay = delay or self.params.get("delay", 0) or self.crawler.delay
-        self.sleep(delay)
-        Queue.queue(stage, state, data)
+            # Stop execution if we are too deep in a single execution branch
+            call_stack_depth = data.get("_call_stack_depth", 0)
+            if call_stack_depth > settings.MAX_CALL_STACK_DEPTH:
+                self.log.warning(
+                    f"Call depth exceeds maximum allowed depth of {settings.MAX_CALL_STACK_DEPTH}. Stopping execution."
+                )
+            data["_call_stack_depth"] = call_stack_depth + 1
+            # Skip the queue and execute tasks depth first
+            context = Context.from_state(state, stage)
+            context.execute(data)
+        else:
+            stage = self.crawler.get(stage)
+            Queue.queue(stage, state, data)
 
     def recurse(self, data=None, delay=None):
         """Have a stage invoke itself with a modified set of arguments."""

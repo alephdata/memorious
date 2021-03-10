@@ -67,3 +67,6 @@ DATASTORE_URI = env.get("MEMORIOUS_DATASTORE_URI", DATASTORE_URI)
 
 # Tags cache table name
 TAGS_TABLE = env.get("MEMORIOUS_TAGS_TABLE", "memorious_tags")
+
+# Max call stack depth when executing in depth-first in sync mode
+MAX_CALL_STACK_DEPTH = env.to_int("MEMORIOUS_MAX_CALL_STACK_DEPTH", 10000)
