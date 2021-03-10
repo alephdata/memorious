@@ -7,6 +7,7 @@ import random
 from copy import deepcopy
 from tempfile import mkdtemp
 from contextlib import contextmanager
+from structlog.contextvars import clear_contextvars, bind_contextvars
 from servicelayer.cache import make_key
 from servicelayer.util import load_json, dump_json
 
@@ -60,6 +61,7 @@ class Context(object):
                 self.log.info("Skipping emit due to sampling rate")
                 return
         state = self.dump_state()
+        stage = self.crawler.get(stage)
         delay = delay or self.params.get("delay", 0) or self.crawler.delay
         self.sleep(delay)
         if is_sync_mode():
@@ -74,10 +76,17 @@ class Context(object):
                 )
             data["_call_stack_depth"] = call_stack_depth + 1
             # Skip the queue and execute tasks depth first
-            context = Context.from_state(state, stage)
+            context = Context.from_state(state, stage.name)
+            clear_contextvars()
+            bind_contextvars(
+                job_id=context.run_id,
+                stage=stage.namespaced_name,
+                dataset=context.crawler.name,
+                start_time=time.time(),
+                trace_id=str(uuid.uuid4()),
+            )
             context.execute(data)
         else:
-            stage = self.crawler.get(stage)
             Queue.queue(stage, state, data)
 
     def recurse(self, data=None, delay=None):
