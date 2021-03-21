@@ -1,7 +1,6 @@
 from collections import namedtuple
 import pytest
-from memorious.helpers.rule import RULES, Rule, DomainRule, UrlPatternRule
-
+from memorious.helpers.rule import RULES, Rule, DomainRule, UrlPatternRule, XpathRule
 
 spec = {
     "and": [
@@ -18,6 +17,7 @@ spec = {
                     {"pattern": "https://www.occrp.org/en/donate.*"},
                     {"pattern": "https://www.occrp.org/.*start=.*"},
                     {"pattern": "https://www.occrp.org/ru/.*"},
+                    {"xpath": "//div[@title=\"buyer-name\"]/text()"}
                 ]
             }
         },

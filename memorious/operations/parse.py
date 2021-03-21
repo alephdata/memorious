@@ -1,5 +1,6 @@
 import logging
 from banal import ensure_list
+from newspaper import Article
 from urllib.parse import urljoin
 from normality import collapse_spaces
 from servicelayer.cache import make_key
@@ -91,6 +92,15 @@ def parse_for_metadata(context, data, html):
     return data
 
 
+def parse_article(context: object, data: dict, article: Article) -> None:
+    content = context.params.get("content", {})
+
+    for key, value in content.items():
+        item = getattr(article, value, None)
+        if item is not None:
+            data[key] = item          
+
+
 def parse(context, data):
     with context.http.rehash(data) as result:
         if result.html is not None:
@@ -101,3 +111,17 @@ def parse(context, data):
         rules = context.params.get("store") or {"match_all": {}}
         if Rule.get_rule(rules).apply(result):
             context.emit(rule="store", data=data)
+
+
+def article(context, data):
+    with context.http.rehash(data) as result:
+        news_article = Article(url=data['url'])
+        news_article.download()
+        news_article.parse()
+
+        parse_article(context, data, news_article)
+
+        if news_article.is_parsed == True:
+            rules = context.params.get("match") or {"match_all": {}}
+            if Rule.get_rule(rules).apply(result):
+                context.emit(rule="store", data=data)

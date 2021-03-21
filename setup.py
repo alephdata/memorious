@@ -48,6 +48,7 @@ setup(
         "stringcase",
         "flask",
         "babel",
+        "newspaper3k >= 0.2.8",
     ],
     entry_points={
         "console_scripts": ["memorious = memorious.cli:main"],
@@ -56,6 +57,7 @@ setup(
             "fetch = memorious.operations.fetch:fetch",
             "session = memorious.operations.fetch:session",
             "dav_index = memorious.operations.webdav:dav_index",
+            "article = memorious.operations.parse:article",
             "parse = memorious.operations.parse:parse",
             "clean_html = memorious.operations.clean:clean_html",
             "seed = memorious.operations.initializers:seed",
