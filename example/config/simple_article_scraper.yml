@@ -1,0 +1,37 @@
+# Example scraper to demonstrate Memorious XPath narrowing
+name: article_scraper
+description: Articles to scrape
+# Uncomment to run this scraper automatically:
+# schedule: weekly
+pipeline:
+  init:
+    # Start URL
+    method: seed
+    params:
+      urls:
+        - https://www.occrp.org/en/daily/14082-riviera-maya-gang-members-sentenced-in-romania
+    handle:
+      pass: fetch
+  fetch:
+    # Download the page passed from the seed stage.
+    method: fetch
+    handle:
+      pass: parse
+  parse:
+    method: article
+    params:
+      match:
+        or:
+          - pattern: .*stories.*
+          - xpath: .//div[@class="occrp-story"]
+      content:
+        author: 'authors'
+        title: 'title'
+        body: 'text'
+    handle:
+      store: store
+  store:
+    # Store the crawled documents to a directory
+    method: directory
+    params:
+      path: /data/results
