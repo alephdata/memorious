@@ -59,3 +59,10 @@ class TestUrlPatternRule(object):
         assert rule.apply(res)
         res = Response(url="http://not-occrp.org")
         assert rule.apply(res) is False
+
+
+class TestXpathRule(object):
+    def test_xpath(self):
+        rule = XpathRule("//div[@title=\"buyer-name\"]/text()")
+        rule.configure();
+        assert rule.apply("<div title=\"buyer-name\">Something</div>")

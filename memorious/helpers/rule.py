@@ -141,14 +141,16 @@ class UrlPatternRule(Rule):
 
 
 class XpathRule(Rule):
-    def configure(self) -> None:
+    def configure(self: object) -> None:
+        if not isinstance(self.value, str):
+            raise Exception("Not an xpath: %r", self.value)
         self.xpath = self.value
 
-    def apply(self, res) -> bool:
+    def apply(self: object, res: object) -> bool:
         markup = html.fromstring(res.text)
-        if markup.xpath(self.xpath) is None:
-            return False
-        return True
+        if markup.xpath(self.xpath) is not None:
+            return True
+        return False
 
 
 RULES = {}
