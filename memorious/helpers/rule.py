@@ -1,6 +1,7 @@
 import re
 from urllib.parse import urlparse
 from pantomime import normalize_mimetype
+from lxml import html
 
 from memorious.logic.mime import GROUPS
 
@@ -139,6 +140,17 @@ class UrlPatternRule(Rule):
         return False
 
 
+class XpathRule(Rule):
+    def configure(self) -> None:
+        self.xpath = self.value
+
+    def apply(self, res) -> bool:
+        markup = html.fromstring(res.text)
+        if markup.xpath(self.xpath) is None:
+            return False
+        return True
+
+
 RULES = {}
 RULES["or"] = OrRule
 RULES["any"] = OrRule
@@ -150,3 +162,4 @@ RULES["domain"] = DomainRule
 RULES["mime_type"] = MimeTypeRule
 RULES["mime_group"] = MimeGroupRule
 RULES["pattern"] = UrlPatternRule
+RULES["xpath"] = XpathRule
