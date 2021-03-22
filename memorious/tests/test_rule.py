@@ -63,6 +63,8 @@ class TestUrlPatternRule(object):
 
 class TestXpathRule(object):
     def test_xpath(self):
-        rule = XpathRule("//div[@title=\"buyer-name\"]/text()")
+        rule = XpathRule("//div[@class=\"section-title\"]/text()")
         rule.configure();
-        assert rule.apply("<div title=\"buyer-name\">Something</div>")
+        Response = namedtuple("Response", "text")
+        res = Response(text="<div class=\"section-title\">text</div>")
+        assert rule.apply(res)
