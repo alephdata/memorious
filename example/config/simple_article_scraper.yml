@@ -25,8 +25,9 @@ pipeline:
           - pattern: .*stories.*
           - xpath: .//div[@class="occrp-story"]
       content:
-        author: 'authors'
         title: 'title'
+        author: 'authors'
+        publishedAt: 'publish_date'
         body: 'text'
     handle:
       store: store
