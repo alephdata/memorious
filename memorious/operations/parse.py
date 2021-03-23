@@ -115,7 +115,7 @@ def parse(context, data):
 
 def article(context, data):
     with context.http.rehash(data) as result:
-        news_article = Article(url=data['url'])
+        news_article = Article(url=data["url"])
         news_article.download()
         news_article.parse()
 
