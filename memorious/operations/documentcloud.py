@@ -40,18 +40,21 @@ def documentcloud_query(context, data):
     page = data.get("page", 1)
 
     search_url = urljoin(host, "/api/documents/search")
+
     res = context.http.get(
-        search_url, params={"q": query, "per_page": 100, "page": page}
+        search_url, params={"q": query, "per_page": 100,
+                            "page": page, "expand": "organization"}
     )
 
     documents = res.json.get("results", [])
+
     for document in documents:
         doc = {
             "foreign_id": "%s:%s" % (instance, document.get("id")),
-            "url": "{}/documents/{}-{}".format(DOCUMENT_HOST, document.get("id"), document.get("slug")),
-            "source_url": "{}/documents/{}/{}.pdf".format(ASSET_HOST, document.get("id"), document.get("slug")),
+            "url": "{}/documents/{}/{}.pdf".format(ASSET_HOST, document.get("id"), document.get("slug")),
+            "source_url": "{}/documents/{}-{}".format(DOCUMENT_HOST, document.get("id"), document.get("slug")),
             "title": document.get("title"),
-            # "author": document.get("author"),
+            "author": document.get("organization", {}).get("name"),
             "file_name": "{}.pdf".format(document.get("slug")),
             "mime_type": "application/pdf",
         }
