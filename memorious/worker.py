@@ -45,12 +45,14 @@ class MemoriousWorker(Worker):
             state = task.context
             context = Context.from_state(state, stage)
             context.crawler.aggregate(context)
+            if is_sync_mode():
+                self.shutdown()
         self.timeout_expiration_check()
 
     def get_stages(self):
         all_stages = set({stage.namespaced_name for _, stage in manager.stages})  # noqa
         stages_on_timeout_key = make_key("memorious", "timeout_stages")
-        stages_on_timeout = conn.smembers(stages_on_timeout_key)
+        stages_on_timeout = self.conn.smembers(stages_on_timeout_key)
         if stages_on_timeout and not is_sync_mode():
             return list(all_stages - set(stages_on_timeout))
         return all_stages
@@ -59,12 +61,15 @@ class MemoriousWorker(Worker):
         if is_sync_mode():
             return
         stages_on_timeout_key = make_key("memorious", "timeout_stages")
-        stages_on_timeout = conn.smembers(stages_on_timeout_key)
+        stages_on_timeout = self.conn.smembers(stages_on_timeout_key)
         for stage in stages_on_timeout:
             key = make_key("memorious", "timeout", stage)
-            if not conn.get(key):
-                conn.srem(stages_on_timeout_key, stage)
+            if not self.conn.get(key):
+                self.conn.srem(stages_on_timeout_key, stage)
 
 
-def get_worker():
-    return MemoriousWorker(conn=conn)
+def get_worker(num_threads=None):
+    return MemoriousWorker(
+        conn=conn,
+        num_threads=num_threads or settings.sls.WORKER_THREADS,
+    )
