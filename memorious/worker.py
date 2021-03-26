@@ -45,6 +45,8 @@ class MemoriousWorker(Worker):
             state = task.context
             context = Context.from_state(state, stage)
             context.crawler.aggregate(context)
+            if is_sync_mode():
+                self.shutdown()
         self.timeout_expiration_check()
 
     def get_stages(self):

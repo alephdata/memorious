@@ -44,6 +44,8 @@ def load_tags():
 
 
 def is_sync_mode():
+    if hasattr(settings, "_sync_mode"):
+        return bool(settings._sync_mode)
     if settings.TESTING or settings.DEBUG:
         return True
     return sls.REDIS_URL is None

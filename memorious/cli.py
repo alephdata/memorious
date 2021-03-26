@@ -3,7 +3,7 @@ import logging
 from tabulate import tabulate
 
 from memorious import settings
-from memorious.core import manager, init_memorious, is_sync_mode
+from memorious.core import manager, init_memorious, is_sync_mode, conn
 from memorious.worker import get_worker
 
 log = logging.getLogger(__name__)
@@ -46,13 +46,17 @@ def run(crawler):
 @click.argument("crawler")
 @click.option("--threads", type=int, default=None)
 @click.option("--flush", is_flag=True, default=False)
-def sync_run(crawler, threads=None, flush=False):
+@click.option("--flushall", is_flag=True, default=False)
+def sync_run(crawler, threads=None, flush=False, flushall=False):
     """Run a specified crawler in synchronous mode."""
+    settings._sync_mode = True
     # Disable timeouts:
     settings.CRAWLER_TIMEOUT = settings.CRAWLER_TIMEOUT * 1000
     crawler = get_crawler(crawler)
     if flush:
         crawler.flush()
+    if flushall:
+        conn.flushall()
     crawler.run()
     if threads is not None:
         if settings.sls.REDIS_URL is None:
