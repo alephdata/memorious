@@ -43,6 +43,8 @@ services:
         REDIS_URL: redis://redis:6379/0
         MEMORIOUS_DATASTORE_URI: postgresql://datastore:datastore@datastore/datastore
         WORKER_THREADS: 20
+    ports:
+      - "5678:5678"
 
   ui:
     build: .
