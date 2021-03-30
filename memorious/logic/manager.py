@@ -2,7 +2,6 @@ import os
 import logging
 from fnmatch import fnmatch
 
-from memorious import settings
 from memorious.logic.crawler import Crawler
 
 log = logging.getLogger(__name__)
@@ -34,20 +33,6 @@ class CrawlerManager(object):
                     log.warn(str(ex))
                     continue
                 self.crawlers[crawler.name] = crawler
-
-    def run_scheduled(self):
-        num_running = self.num_running
-        log.info("Checking schedule: %s crawlers." % len(self.crawlers))
-        for crawler in self:
-            if crawler.delta is None:
-                continue
-            if not crawler.check_due():
-                continue
-            if num_running >= settings.MAX_SCHEDULED:
-                continue
-            log.info("[%s] due, queueing...", crawler.name)
-            crawler.run()
-            num_running += 1
 
     @property
     def num_running(self):

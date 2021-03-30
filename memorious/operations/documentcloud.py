@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 from urllib.parse import urljoin
 
@@ -42,8 +41,8 @@ def documentcloud_query(context, data):
     search_url = urljoin(host, "/api/documents/search")
 
     res = context.http.get(
-        search_url, params={"q": query, "per_page": 100,
-                            "page": page, "expand": "organization"}
+        search_url,
+        params={"q": query, "per_page": 100, "page": page, "expand": "organization"},
     )
 
     documents = res.json.get("results", [])
@@ -51,8 +50,12 @@ def documentcloud_query(context, data):
     for document in documents:
         doc = {
             "foreign_id": "%s:%s" % (instance, document.get("id")),
-            "url": "{}/documents/{}/{}.pdf".format(ASSET_HOST, document.get("id"), document.get("slug")),
-            "source_url": "{}/documents/{}-{}".format(DOCUMENT_HOST, document.get("id"), document.get("slug")),
+            "url": "{}/documents/{}/{}.pdf".format(
+                ASSET_HOST, document.get("id"), document.get("slug")
+            ),
+            "source_url": "{}/documents/{}-{}".format(
+                DOCUMENT_HOST, document.get("id"), document.get("slug")
+            ),
             "title": document.get("title"),
             "author": document.get("organization", {}).get("name"),
             "file_name": "{}.pdf".format(document.get("slug")),

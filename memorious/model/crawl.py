@@ -21,10 +21,6 @@ class Crawl(object):
         return unpack_datetime(last_run)
 
     @classmethod
-    def heartbeat(cls, crawler):
-        conn.set(make_key(crawler, "last_run"), pack_now())
-
-    @classmethod
     def op_count(cls, crawler, stage=None):
         """Total operations performed for this crawler"""
         if stage:
@@ -75,9 +71,7 @@ class Crawl(object):
         conn.set(make_key(crawler, "last_run"), pack_now(), ex=REDIS_LONG)
         pending = conn.decr(make_key(crawler, "run", run_id))
         if unpack_int(pending) == 0:
-            conn.set(
-                make_key(crawler, "run", run_id, "end"), pack_now(), ex=REDIS_LONG
-            )
+            conn.set(make_key(crawler, "run", run_id, "end"), pack_now(), ex=REDIS_LONG)
 
     @classmethod
     def flush(cls, crawler):
@@ -117,13 +111,3 @@ class Crawl(object):
     def is_aborted(cls, crawler, run_id):
         key = make_key(crawler, "runs_abort")
         return conn.sismember(key, run_id)
-
-    @classmethod
-    def set_schedule(cls, crawler, schedule):
-        key = make_key(crawler, "schedule")
-        conn.set(key, schedule)
-
-    @classmethod
-    def get_schedule(cls, crawler):
-        key = make_key(crawler, "schedule")
-        return conn.get(key)
