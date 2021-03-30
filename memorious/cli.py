@@ -3,7 +3,7 @@ import logging
 from tabulate import tabulate
 
 from memorious import settings
-from memorious.core import manager, init_memorious, is_sync_mode, conn
+from memorious.core import manager, init_memorious, conn
 from memorious.worker import get_worker
 
 log = logging.getLogger(__name__)
@@ -31,34 +31,21 @@ def get_crawler(name):
     return crawler
 
 
-@cli.command()
-@click.argument("crawler")
-def run(crawler):
-    """Run a specified crawler."""
-    crawler = get_crawler(crawler)
-    crawler.run()
-    if is_sync_mode():
-        worker = get_worker()
-        worker.sync()
-
-
-@cli.command("sync")
+@cli.command("run")
 @click.argument("crawler")
 @click.option("--threads", type=int, default=None)
 @click.option("--flush", is_flag=True, default=False)
 @click.option("--flushall", is_flag=True, default=False)
-def sync_run(crawler, threads=None, flush=False, flushall=False):
+def run(crawler, threads=None, flush=False, flushall=False):
     """Run a specified crawler in synchronous mode."""
-    settings._sync_mode = True
-    # Disable timeouts:
-    settings.CRAWLER_TIMEOUT = settings.CRAWLER_TIMEOUT * 1000
     crawler = get_crawler(crawler)
+    settings._crawler = crawler
     if flush:
         crawler.flush()
     if flushall:
         conn.flushall()
     crawler.run()
-    if threads is not None:
+    if threads is not None and threads > 1:
         if settings.sls.REDIS_URL is None:
             log.warning(
                 "REDIS_URL not set. Can't run in multithreaded mode without Redis. Exiting."
@@ -100,30 +87,52 @@ def flush_tags(crawler):
     crawler.flush_tags()
 
 
-@cli.command()
-def process():
-    """Start the queue and process tasks as they come. Blocks while waiting"""
-    worker = get_worker()
-    worker.run()
-
-
 @cli.command("list")
 def index():
     """List the available crawlers."""
     crawler_list = []
     for crawler in manager:
-        is_due = "yes" if crawler.check_due() else "no"
         crawler_list.append(
             [
                 crawler.name,
                 crawler.description,
-                crawler.schedule,
-                is_due,
-                crawler.pending,
             ]
         )
-    headers = ["Name", "Description", "Schedule", "Due", "Pending"]
+    headers = [
+        "Name",
+        "Description",
+    ]
     print(tabulate(crawler_list, headers=headers))
+
+
+@cli.command("status")
+@click.argument("crawler")
+def status(crawler):
+    """Status of a crawler."""
+    crawler = get_crawler(crawler)
+    prop_list = []
+    last_run = crawler.last_run
+    if last_run:
+        last_run = last_run.isoformat() + " UTC"
+    prop_list.append(
+        [
+            crawler.name,
+            crawler.description,
+            crawler.is_running,
+            last_run,
+            crawler.op_count,
+            crawler.pending,
+        ]
+    )
+    headers = [
+        "Name",
+        "Description",
+        "Running?",
+        "Last Active",
+        "Op Count",
+        "Pending Ops",
+    ]
+    print(tabulate(prop_list, headers=headers))
 
 
 @cli.command()

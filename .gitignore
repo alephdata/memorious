@@ -9,7 +9,6 @@ build/*
 data/*
 ui/data/*
 env*
-celerybeat-schedule*
 *.sh
 .DS_Store
 *.sqlite3

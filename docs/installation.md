@@ -11,10 +11,10 @@ We recommend using [Docker Compose](https://docs.docker.com/compose/) to run you
 
 ## Run a crawler
 
-* You can access the Memorious CLI through the `worker` container:
+* You can access the Memorious CLI through the `shell` container:
 
 ```
-docker-compose run --rm worker /bin/sh
+docker-compose run --rm shell
 ```
 
 To see the crawlers available to you:
@@ -30,20 +30,6 @@ memorious run my_crawler
 ```
 See [Usage](https://memorious.readthedocs.io/en/latest/usage.html) (or run `memorious --help`) for the complete list of Memorious commands.
 
-## Check worker logs
-
-* You can check the worker logs:
-
-```
-docker-compose logs worker -f
-```
-
-## Access Memorious UI
-
-* The Memorious UI is available at [http://localhost:8000/](http://localhost:8000/)
-
-![memorious ui](docs/memorious-ui.png)
-
 
 *Note: you can use any directory structure you like, `src` and `config` are not required, and nor is separation of YAML and Python files. So long as the `MEMORIOUS_CONFIG_PATH` environment variable points to a directory containing, within any level of directory nesting, your YAML files, Memorious will find them.*
 
@@ -57,14 +43,10 @@ Your Memorious instance is configured by a set of environment variables that con
 * ``MEMORIOUS_EXPIRE``: how many days until cached crawled data expires. Defaults to 1 day.
 * ``MEMORIOUS_DB_RATE_LIMIT``: maximum number of database inserts per minute. Defaults to 6000.
 * ``MEMORIOUS_HTTP_RATE_LIMIT``: maximum number of http calls to a host per minute. Defaults to 120.
-* ``MEMORIOUS_SCHEDULER_INTERVAL``: how many seconds to wait in-between before checking whether any scheduled crawlers are available to run. Defaults to 60.
 * ``MEMORIOUS_HTTP_CACHE``: HTTP request configuration.
 * ``MEMORIOUS_USER_AGENT``: Custom User-Agent string for Memorious.
 * ``MEMORIOUS_DATASTORE_URI``: connection path for an operational database (which crawlers can send data to using the `db` method). Defaults to a local `datastore.sqllite3`.
 
-* ``MEMORIOUS_MAX_SCHEDULED``: maximum number of scheduled crawlers to run at the same time.
-
-* ``WORKER_THREADS``: how many threads to use for execution.
 * ``REDIS_URL``: address of Redis instance to use for crawler logs (uses a temporary FakeRedis if missing).
 * ``ARCHIVE_TYPE``: either `file`(local file system is used for storage) or `s3`(Amazon S3 is used) or `gs`(Google Cloud Storage is used).
 * ``ARCHIVE_PATH``: local directory to use for storage if `ARCHIVE_TYPE` is `file`

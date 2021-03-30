@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from servicelayer.cache import make_key
 from servicelayer.util import load_json, dump_json
 
-from memorious.core import manager, storage, tags, datastore, is_sync_mode
+from memorious.core import manager, storage, tags, datastore
 from memorious.model import Queue, Crawl
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
@@ -59,10 +59,9 @@ class Context(object):
             if sampling_rate and random.random() > float(sampling_rate):
                 self.log.info("Skipping emit due to sampling rate")
                 return
-        if is_sync_mode():
-            # In sync mode we use a in-memory backend for the task queue.
-            # Make a copy of the data to avoid mutation in that case.
-            data = deepcopy(data)
+        # In sync mode we use a in-memory backend for the task queue.
+        # Make a copy of the data to avoid mutation in that case.
+        data = deepcopy(data)
         state = self.dump_state()
         stage = self.crawler.get(stage)
         delay = delay or self.params.get("delay", 0) or self.crawler.delay
@@ -101,11 +100,7 @@ class Context(object):
 
     def sleep(self, seconds):
         for sec in range(seconds):
-            self.emit_heartbeat()
             time.sleep(1)
-
-    def emit_heartbeat(self):
-        Crawl.heartbeat(self.crawler)
 
     def emit_warning(self, message, *args):
         self.log.warning(message, *args)
