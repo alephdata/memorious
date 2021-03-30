@@ -11,4 +11,3 @@ ENV MEMORIOUS_BASE_PATH=/data \
     ARCHIVE_PATH=/data/archive \
     REDIS_URL=redis://redis:6379/0 \
     MEMORIOUS_DATASTORE_URI=postgresql://datastore:datastore@datastore/datastore \
-    WORKER_THREADS=20
