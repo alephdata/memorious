@@ -1,6 +1,5 @@
 import os
 import pkg_resources
-import multiprocessing
 from servicelayer import env
 from servicelayer import settings as sls
 
@@ -34,14 +33,6 @@ DB_RATE_LIMIT = env.to_int("MEMORIOUS_DB_RATE_LIMIT", 6000)
 
 # How many http requests to a host per minute
 HTTP_RATE_LIMIT = env.to_int("MEMORIOUS_HTTP_RATE_LIMIT", 120)
-
-# How many seconds to wait before trying to run scheduled crawlers
-SCHEDULER_INTERVAL = env.to_int("MEMORIOUS_SCHEDULER_INTERVAL", 60)
-
-# Max scheduled tasks at the same time
-MAX_SCHEDULED = max(
-    env.to_int("MEMORIOUS_MAX_SCHEDULED", multiprocessing.cpu_count()), 20
-)  # noqa
 
 # Max number of tasks in a stage's task queue
 MAX_QUEUE_LENGTH = env.to_int("MEMORIOUS_MAX_QUEUE_LENGTH", 50000)
