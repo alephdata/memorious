@@ -7,6 +7,7 @@ from normality import safe_filename
 from pantomime import normalize_mimetype
 
 from memorious import settings
+from memorious.core import storage
 
 
 def _get_directory_path(context):
@@ -64,3 +65,13 @@ def directory(context, data):
         meta_path = os.path.join(path, "%s.json" % content_hash)
         with open(meta_path, "w") as fh:
             json.dump(data, fh)
+
+
+def cleanup_archive(context, data):
+    """Remove a blob from the archive after we're done with it"""
+    print("Hello!")
+    content_hash = data.get("content_hash")
+    if content_hash is None:
+        context.emit_warning("No content hash in data.")
+        return
+    storage.delete_file(content_hash)
