@@ -69,7 +69,6 @@ def directory(context, data):
 
 def cleanup_archive(context, data):
     """Remove a blob from the archive after we're done with it"""
-    print("Hello!")
     content_hash = data.get("content_hash")
     if content_hash is None:
         context.emit_warning("No content hash in data.")
