@@ -1,3 +1,4 @@
+import sys
 import click
 import logging
 from tabulate import tabulate
@@ -56,11 +57,9 @@ def run(crawler, threads=None, flush=False, flushall=False):
                 "Can't run in multithreaded mode with sqlite database. Exiting."
             )
             return
-        worker = get_worker(num_threads=threads)  # multithreaded worker
-        worker.run()
-    else:
-        worker = get_worker()
-        worker.sync()
+    worker = get_worker(num_threads=threads)
+    code = worker.run(blocking=False)
+    sys.exit(code)
 
 
 @cli.command()

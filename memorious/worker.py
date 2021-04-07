@@ -3,7 +3,6 @@ import structlog
 from servicelayer.worker import Worker
 from servicelayer.logs import apply_task_context
 
-from memorious import settings
 from memorious.logic.context import Context
 from memorious.logic.stage import CrawlerStage
 from memorious.core import conn, crawler
@@ -26,14 +25,10 @@ class MemoriousWorker(Worker):
             state = task.context
             context = Context.from_state(state, stage)
             context.crawler.aggregate(context)
-            self.shutdown()
 
     def get_stages(self):
         return [stage.namespaced_name for stage in crawler.stages.values()]
 
 
 def get_worker(num_threads=None):
-    return MemoriousWorker(
-        conn=conn,
-        num_threads=num_threads or settings.sls.WORKER_THREADS,
-    )
+    return MemoriousWorker(conn=conn, num_threads=num_threads)
