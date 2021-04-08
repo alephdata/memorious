@@ -100,6 +100,7 @@ class Crawler(object):
             "crawler": self.name,
             "run_id": run_id or Job.random_id(),
             "incremental": settings.INCREMENTAL,
+            "continue_on_error": settings.CONTINUE_ON_ERROR,
         }
         if incremental is not None:
             state["incremental"] = incremental

@@ -28,6 +28,7 @@ class Context(object):
         self.state = state
         self.params = stage.params
         self.incremental = state.get("incremental")
+        self.continue_on_error = state.get("continue_on_error")
         self.run_id = state.get("run_id") or uuid.uuid1().hex
         self.work_path = mkdtemp()
         self.log = logging.getLogger("%s.%s" % (crawler.name, stage.name))
@@ -94,6 +95,8 @@ class Context(object):
             self.emit_warning(str(qtbe))
         except Exception as exc:
             self.emit_exception(exc)
+            if not self.continue_on_error:
+                raise exc
         finally:
             Crawl.operation_end(self.crawler, self.run_id)
             shutil.rmtree(self.work_path)

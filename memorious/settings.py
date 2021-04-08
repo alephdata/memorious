@@ -25,6 +25,9 @@ CONFIG_PATH = env.get("MEMORIOUS_CONFIG_PATH")
 # Try and run scrapers in a way that only acquires new data
 INCREMENTAL = env.to_bool("MEMORIOUS_INCREMENTAL", default=True)
 
+# Continue running the crawler even when we encounter an error
+CONTINUE_ON_ERROR = env.to_bool("MEMORIOUS_CONTINUE_ON_ERROR", default=False)
+
 # How many days until an incremental crawl expires
 EXPIRE = env.to_int("MEMORIOUS_EXPIRE", 1)
 

@@ -35,12 +35,14 @@ def get_crawler(name):
 @cli.command("run")
 @click.argument("crawler")
 @click.option("--threads", type=int, default=None)
+@click.option("--continue-on-error", is_flag=True, default=False)
 @click.option("--flush", is_flag=True, default=False)
 @click.option("--flushall", is_flag=True, default=False)
-def run(crawler, threads=None, flush=False, flushall=False):
+def run(crawler, threads=None, continue_on_error=False, flush=False, flushall=False):
     """Run a specified crawler in synchronous mode."""
     crawler = get_crawler(crawler)
     settings._crawler = crawler
+    settings.CONTINUE_ON_ERROR = continue_on_error
     if flush:
         crawler.flush()
     if flushall:
