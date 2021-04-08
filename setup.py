@@ -66,6 +66,7 @@ setup(
             "inspect = memorious.operations.debug:inspect",
             "documentcloud_query = memorious.operations.documentcloud:documentcloud_query",  # noqa
             "directory = memorious.operations.store:directory",
+            "cleanup_archive = memorious.operations.store:cleanup_archive",
             "extract = memorious.operations.extract:extract",
             "db = memorious.operations.db:db",
             "ftp_fetch = memorious.operations.ftp:ftp_fetch",

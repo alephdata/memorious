@@ -1,4 +1,4 @@
-from six.moves.urllib.parse import urljoin
+from urllib.parse import urljoin
 import datafreeze
 
 
@@ -60,6 +60,7 @@ def crawl(context, data):
         # If 'rule' is not set, it defaults to 'pass', which triggers the
         # final 'store' stage.
         context.emit(data=quote_data)
+    context.emit(rule="cleanup", data={"content_hash": response.content_hash})
 
 
 def store(context, data):

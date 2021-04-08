@@ -350,6 +350,11 @@ The `data` `alpeh_emit` emits to the next stages includes the following new item
 * `aleph_document`: dictionary containing document metadata
 * `aleph_collection_id`: id of the Aleph dataset the document was uploaded into
 
+#### Cleaning up stored data
+
+Sometimes we want to delete a stored file after processing it. `cleanup_archive` method can delete a stored blob by its content hash.
+The method requires the content hash of the stored file as the value for the `content_hash` key in the `data` dictionary.
+
 
 ### Rules
 
