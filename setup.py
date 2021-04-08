@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="memorious",
-    version="2.0.0",
+    version="2.1.0",
     description="A minimalistic, recursive web crawling library for Python.",
     long_description="",
     classifiers=[
