@@ -1,4 +1,4 @@
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 from requests.exceptions import RequestException
 from servicelayer.cache import make_key
 
@@ -40,36 +40,6 @@ def fetch(context, data):
             context.recurse(data=data, delay=2 ** attempt)
         else:
             context.emit_warning("Fetch fail [%s]: %s" % (url, ce))
-
-
-def dav_index(context, data):
-    """List files in a WebDAV directory."""
-    # This is made to work with ownCloud/nextCloud, but some rumor has
-    # it they are "standards compliant" and it should thus work for
-    # other DAV servers.
-    url = data.get("url")
-    result = context.http.request("PROPFIND", url)
-    for resp in result.xml.findall("./{DAV:}response"):
-        href = resp.findtext("./{DAV:}href")
-        if href is None:
-            continue
-
-        rurl = urljoin(url, href)
-        rdata = data.copy()
-        rdata["url"] = rurl
-        rdata["foreign_id"] = rurl
-        if rdata["url"] == url:
-            continue
-
-        if resp.find(".//{DAV:}collection") is not None:
-            rdata["parent_foreign_id"] = rurl
-            context.log.info("Fetching contents of folder: %s" % rurl)
-            context.recurse(data=rdata)
-        else:
-            rdata["parent_foreign_id"] = url
-
-        # Do GET requests on the urls
-        fetch(context, rdata)
 
 
 def session(context, data):

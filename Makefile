@@ -15,8 +15,7 @@ build:
 
 dev:
 	$(COMPOSE) build
-	$(COMPOSE) up
-
+	$(COMPOSE) run shell
 
 rebuild:
 	docker build --pull --no-cache -t alephdata/memorious .
@@ -26,11 +25,8 @@ test:
 	memorious list
 	pytest --cov=memorious --cov-report term-missing
 
-ui:
-	python memorious/ui/views.py
-
 shell:
-	$(COMPOSE) run worker sh
+	$(COMPOSE) run shell
 
 image:
 	docker build -t alephdata/memorious .

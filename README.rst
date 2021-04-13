@@ -9,18 +9,13 @@ Memorious
 
 .. image:: https://github.com/alephdata/memorious/workflows/memorious/badge.svg
 
-``memorious`` is a distributed web scraping toolkit. It is a light-weight tool
-that schedules, monitors and supports scrapers that collect structured or
-un-structured data. This includes the following use cases:
+``memorious`` is a light-weight web scraping toolkit. It supports scrapers that
+collect structured or un-structured data. This includes the following use cases:
 
-* Maintain an overview of a fleet of crawlers
-* Schedule crawler execution in regular intervals
-* Store execution information and error messages
-* Distribute scraping tasks across multiple machines
 * Make crawlers modular and simple tasks re-usable
+* Provide utility functions to do common tasks such as data storage, HTTP session management
+* Integrate crawlers with the Aleph and FollowTheMoney ecosystem
 * Get out of your way as much as possible
-
-.. image:: docs/memorious-ui.png
 
 Design
 ------

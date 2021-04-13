@@ -8,7 +8,6 @@ The first few lines of your config are to set up your crawler:
 
 * `name`: A unique slug, eg. "my_crawler", which you can pass to `memorious run` to start your crawler.
 * `description`: An optional description, will be shown when you run `list`.
-* `schedule`: one of `disabled`, `hourly`, `daily`, `weekly` or `monthly`. `disabled` by default.
 
 Optionally, the crawler can take the following configurations too:
 
@@ -350,6 +349,11 @@ The `data` `alpeh_emit` emits to the next stages includes the following new item
 * `aleph_id`: document id of the uploaded document in Alpeh
 * `aleph_document`: dictionary containing document metadata
 * `aleph_collection_id`: id of the Aleph dataset the document was uploaded into
+
+#### Cleaning up stored data
+
+Sometimes we want to delete a stored file after processing it. `cleanup_archive` method can delete a stored blob by its content hash.
+The method requires the content hash of the stored file as the value for the `content_hash` key in the `data` dictionary.
 
 
 ### Rules

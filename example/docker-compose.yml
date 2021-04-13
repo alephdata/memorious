@@ -15,9 +15,9 @@ services:
     volumes:
       - ./build/redis-data:/data
 
-  worker:
+  shell:
     build: .
-    command: memorious process
+    command: /bin/bash
     links:
       - redis
       - datastore
@@ -27,18 +27,3 @@ services:
       - "./src:/crawlers/src"
     tmpfs:
       - "/tmp"
-
-  ui:
-    build: .
-    command: gunicorn -t 900 -w 4 -b 0.0.0.0:8000 --log-level info --log-file - memorious.ui.views:app
-    links:
-      - redis
-      - datastore
-    volumes:
-      - "./build/data:/data"
-      - "./config:/crawlers/config"
-      - "./src:/crawlers/src"
-    tmpfs:
-      - "/tmp"
-    ports:
-      - "8000:8000"

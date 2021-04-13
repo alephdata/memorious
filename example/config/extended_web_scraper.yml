@@ -1,8 +1,6 @@
 # Example scraper to demonstrate extending Memorious
 name: quote_scraper
 description: Quotes to scraper
-# Uncomment to run this scraper automatically:
-# schedule: weekly
 # delay: 2
 pipeline:
   init:
@@ -18,15 +16,17 @@ pipeline:
     # Download the page passed from the login stage.
     method: fetch
     params:
-      http_rate_limit: 12
+      http_rate_limit: 60
     handle:
-      pass: crawl 
+      pass: crawl
   crawl:
     # Crawl the HTML of the page passed in to extract specific things.
     method: example.quotes:crawl
     handle:
       # If the 'fetch' rule is invoked, re-trigger the fetch stage
       fetch: fetch
+      # If the 'cleanup' rule is invoked, delete the downloaded page from archive
+      cleanup: cleanup
       # Otherwise, pass data on to the store stage
       pass: store
   store:
@@ -34,6 +34,8 @@ pipeline:
     method: example.quotes:store
     params:
       table: example_quotes
+  cleanup:
+    method: cleanup_archive
 aggregator:
   method: example.quotes:export
   params:

@@ -1,6 +1,5 @@
 import os
 import pkg_resources
-import multiprocessing
 from servicelayer import env
 from servicelayer import settings as sls
 
@@ -26,6 +25,9 @@ CONFIG_PATH = env.get("MEMORIOUS_CONFIG_PATH")
 # Try and run scrapers in a way that only acquires new data
 INCREMENTAL = env.to_bool("MEMORIOUS_INCREMENTAL", default=True)
 
+# Continue running the crawler even when we encounter an error
+CONTINUE_ON_ERROR = env.to_bool("MEMORIOUS_CONTINUE_ON_ERROR", default=False)
+
 # How many days until an incremental crawl expires
 EXPIRE = env.to_int("MEMORIOUS_EXPIRE", 1)
 
@@ -35,22 +37,14 @@ DB_RATE_LIMIT = env.to_int("MEMORIOUS_DB_RATE_LIMIT", 6000)
 # How many http requests to a host per minute
 HTTP_RATE_LIMIT = env.to_int("MEMORIOUS_HTTP_RATE_LIMIT", 120)
 
-# How many seconds to wait before trying to run scheduled crawlers
-SCHEDULER_INTERVAL = env.to_int("MEMORIOUS_SCHEDULER_INTERVAL", 60)
-
-# Max scheduled tasks at the same time
-MAX_SCHEDULED = max(
-    env.to_int("MEMORIOUS_MAX_SCHEDULED", multiprocessing.cpu_count()), 20
-)  # noqa
-
-# How many seconds to wait before timing out a crawler
-CRAWLER_TIMEOUT = env.to_int("MEMORIOUS_CRAWLER_TIMEOUT", 3600 * 6)
-
 # Max number of tasks in a stage's task queue
 MAX_QUEUE_LENGTH = env.to_int("MEMORIOUS_MAX_QUEUE_LENGTH", 50000)
 
 # HTTP request configuration
 HTTP_CACHE = env.to_bool("MEMORIOUS_HTTP_CACHE", default=True)
+
+# HTTP request timeout
+HTTP_TIMEOUT = float(env.to_int("MEMORIOUS_HTTP_TIMEOUT", 30))
 
 # HTTP user agent default
 USER_AGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.1)"

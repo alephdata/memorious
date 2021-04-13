@@ -1,6 +1,5 @@
 import logging
 import dataset
-from servicelayer import settings as sls
 from servicelayer.archive import init_archive
 from servicelayer.rate_limit import RateLimit
 from servicelayer.cache import get_redis, get_fakeredis
@@ -43,10 +42,10 @@ def load_tags():
     return settings._tags
 
 
-def is_sync_mode():
-    if settings.TESTING or settings.DEBUG:
-        return True
-    return sls.REDIS_URL is None
+def get_crawler():
+    if not hasattr(settings, "_crawler"):
+        return RuntimeError("No current crawler. Quiting.")
+    return settings._crawler
 
 
 def connect_redis():
@@ -59,6 +58,7 @@ manager = LocalProxy(load_manager)
 datastore = LocalProxy(load_datastore)
 tags = LocalProxy(load_tags)
 conn = LocalProxy(connect_redis)
+crawler = LocalProxy(get_crawler)
 
 # File storage layer for blobs on local file system or S3
 storage = init_archive()

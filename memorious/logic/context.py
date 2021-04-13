@@ -10,8 +10,8 @@ from contextlib import contextmanager
 from servicelayer.cache import make_key
 from servicelayer.util import load_json, dump_json
 
-from memorious.core import manager, storage, tags, datastore, is_sync_mode
-from memorious.model import Event, Queue, Crawl
+from memorious.core import manager, storage, tags, datastore
+from memorious.model import Queue, Crawl
 from memorious.logic.http import ContextHttp
 from memorious.logic.check import ContextCheck
 from memorious.util import random_filename
@@ -28,6 +28,7 @@ class Context(object):
         self.state = state
         self.params = stage.params
         self.incremental = state.get("incremental")
+        self.continue_on_error = state.get("continue_on_error")
         self.run_id = state.get("run_id") or uuid.uuid1().hex
         self.work_path = mkdtemp()
         self.log = logging.getLogger("%s.%s" % (crawler.name, stage.name))
@@ -50,7 +51,7 @@ class Context(object):
         if optional and stage is None:
             return
         if stage is None or stage not in self.crawler.stages:
-            self.log.info("No next stage: %s (%s)" % (stage, rule))
+            self.log.info("No next stage: %s (%s)", stage, rule)
             return
         if settings.DEBUG:
             # sampling rate is a float between 0.0 to 1.0. If it's 0.2, we
@@ -59,18 +60,19 @@ class Context(object):
             if sampling_rate and random.random() > float(sampling_rate):
                 self.log.info("Skipping emit due to sampling rate")
                 return
-        if is_sync_mode():
-            # In sync mode we use a in-memory backend for the task queue.
-            # Make a copy of the data to avoid mutation in that case.
-            data = deepcopy(data)
+        # In sync mode we use a in-memory backend for the task queue.
+        # Make a copy of the data to avoid mutation in that case.
+        data = deepcopy(data)
         state = self.dump_state()
         stage = self.crawler.get(stage)
         delay = delay or self.params.get("delay", 0) or self.crawler.delay
         self.sleep(delay)
         Queue.queue(stage, state, data)
 
-    def recurse(self, data={}, delay=None):
+    def recurse(self, data=None, delay=None):
         """Have a stage invoke itself with a modified set of arguments."""
+        if data is None:
+            data = {}
         return self.emit(stage=self.stage.name, data=data, delay=delay)
 
     def execute(self, data):
@@ -93,41 +95,21 @@ class Context(object):
             self.emit_warning(str(qtbe))
         except Exception as exc:
             self.emit_exception(exc)
+            if not self.continue_on_error:
+                raise exc
         finally:
             Crawl.operation_end(self.crawler, self.run_id)
             shutil.rmtree(self.work_path)
 
     def sleep(self, seconds):
         for sec in range(seconds):
-            self.emit_heartbeat()
             time.sleep(1)
 
-    def emit_heartbeat(self):
-        Crawl.heartbeat(self.crawler)
-
-    def emit_warning(self, message, type=None, *args):
-        if len(args):
-            message = message % args
-        self.log.warning(message)
-        return Event.save(
-            self.crawler,
-            self.stage,
-            Event.LEVEL_WARNING,
-            self.run_id,
-            error=type,
-            message=message,
-        )
+    def emit_warning(self, message, *args):
+        self.log.warning(message, *args)
 
     def emit_exception(self, exc):
         self.log.exception(exc)
-        return Event.save(
-            self.crawler,
-            self.stage,
-            Event.LEVEL_ERROR,
-            self.run_id,
-            error=exc.__class__.__name__,
-            message=str(exc),
-        )
 
     def set_tag(self, key, value):
         data = dump_json(value)
