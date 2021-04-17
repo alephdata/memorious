@@ -94,7 +94,8 @@ def parse_for_metadata(context, data, html):
 
 def parse_article(context: object, data: dict, article: Article) -> None:
     content = context.params.get("content", {})
-
+    data["schema"] = "Article"
+    
     for key, value in content.items():
         item = getattr(article, value, None)
         if item is not None:
@@ -118,7 +119,6 @@ def article(context, data):
         news_article = Article(url=data["url"])
         news_article.download()
         news_article.parse()
-
         parse_article(context, data, news_article)
 
         if news_article.is_parsed == True:

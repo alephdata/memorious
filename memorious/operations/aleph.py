@@ -10,21 +10,9 @@ from alephclient.errors import AlephException
 from memorious.core import get_rate_limit  # type: ignore
 
 
-def aleph_emit(context, data):
-    api = get_api(context)
-    if api is None:
-        return
-    collection_id = get_collection_id(context, api)
-    content_hash = data.get("content_hash")
+def _create_meta_object(context, data, include_languages=True) -> dict:
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
-    # Fetch document id from cache
-    document_id = context.get_tag(make_key(collection_id, foreign_id, content_hash))
-    if document_id:
-        context.log.info("Skip aleph upload: %s", foreign_id)
-        data["aleph_id"] = document_id
-        context.emit(data=data, optional=True)
-        return
 
     meta = {
         "crawler": context.crawler.name,
@@ -39,18 +27,38 @@ def aleph_emit(context, data):
         "headers": data.get("headers", {}),
     }
 
-    languages = context.params.get("languages")
-    meta["languages"] = data.get("languages", languages)
-    countries = context.params.get("countries")
-    meta["countries"] = data.get("countries", countries)
-    mime_type = context.params.get("mime_type")
-    meta["mime_type"] = data.get("mime_type", mime_type)
+    if include_languages:
+        languages = context.params.get("languages")
+        meta["languages"] = data.get("languages", languages)
+        countries = context.params.get("countries")
+        meta["countries"] = data.get("countries", countries)
+        mime_type = context.params.get("mime_type")
+        meta["mime_type"] = data.get("mime_type", mime_type)
 
     if data.get("aleph_folder_id"):
         meta["parent"] = {"id": data.get("aleph_folder_id")}
 
-    meta = clean_dict(meta)
-    # pprint(meta)
+    return meta
+
+
+def aleph_emit(context, data):
+    api = get_api(context)
+    if api is None:
+        return
+    collection_id = get_collection_id(context, api)
+    content_hash = data.get("content_hash")
+    source_url = data.get("source_url", data.get("url"))
+    foreign_id = data.get("foreign_id", data.get("request_id", source_url))
+    # Fetch document id from cache
+    document_id = context.get_tag(
+        make_key(collection_id, foreign_id, content_hash))
+    if document_id:
+        context.log.info("Skip aleph upload: %s", foreign_id)
+        data["aleph_id"] = document_id
+        context.emit(data=data, optional=True)
+        return
+
+    meta = clean_dict(_create_meta_object(context, data))
     label = meta.get("file_name", meta.get("source_url"))
     context.log.info("Upload: %s", label)
     with context.load_file(content_hash) as fh:
@@ -68,7 +76,8 @@ def aleph_emit(context, data):
                 context.log.info("Aleph document entity ID: %s", document_id)
                 # Save the document id in cache for future use
                 context.set_tag(
-                    make_key(collection_id, foreign_id, content_hash), document_id
+                    make_key(collection_id, foreign_id,
+                             content_hash), document_id
                 )
                 data["aleph_id"] = document_id
                 data["aleph_document"] = meta
@@ -92,22 +101,7 @@ def aleph_folder(context, data):
         context.log.warning("No folder foreign ID!")
         return
 
-    meta = {
-        "crawler": context.crawler.name,
-        "foreign_id": foreign_id,
-        "source_url": data.get("source_url", data.get("url")),
-        "title": data.get("title"),
-        "file_name": data.get("file_name"),
-        "retrieved_at": data.get("retrieved_at"),
-        "modified_at": data.get("modified_at"),
-        "published_at": data.get("published_at"),
-    }
-
-    if data.get("aleph_folder_id"):
-        meta["parent"] = {"id": data.get("aleph_folder_id")}
-
-    meta = clean_dict(meta)
-    # pprint(meta)
+    meta = clean_dict(_create_meta_object(context, data, False))
     label = meta.get("file_name", meta.get("source_url"))
     context.log.info("Make folder: %s", label)
     for try_number in range(api.retries):
@@ -131,6 +125,67 @@ def aleph_folder(context, data):
             backoff(ae, try_number)
 
 
+def aleph_entity(context, data):
+    api = get_api(context)
+    if api is None:
+        return
+    collection_id = get_collection_id(context, api)
+    content_hash = data.get("content_hash")
+    source_url = data.get("source_url", data.get("url"))
+    foreign_id = data.get("foreign_id", data.get("request_id", source_url))
+    # Fetch document id from cache
+    document_id = context.get_tag(
+        make_key(collection_id, foreign_id, content_hash))
+    if document_id:
+        context.log.info("Skip aleph upload: %s", foreign_id)
+        data["aleph_id"] = document_id
+        context.emit(data=data, optional=True)
+        return
+    else:
+        document_id = uuid.uuid4().hex
+
+    meta = clean_dict(_create_meta_object(context, data))
+    label = meta.get("file_name", meta.get("source_url"))
+    context.log.info("Upload: %s", label)
+    with context.load_file(content_hash) as fh:
+        if fh is None:
+            return
+        file_path = Path(fh.name).resolve()
+
+        for try_number in range(api.retries):
+            rate = settings.MEMORIOUS_RATE_LIMIT
+            rate_limit = get_rate_limit("aleph", limit=rate)
+            rate_limit.comply()
+
+            try:
+                api.write_entities(collection_id, [{
+                    "id": document_id,
+                    "schema": "Article",
+                    "properties": {
+                        "description": "This is the description, it is a description... yeah",
+                        "title": data.get("title"),
+                        "author": data.get("author"),
+                        "bodyText": data.get("bodyText")
+                    }}])
+
+                context.log.info("Aleph document entity ID: %s", document_id)
+                # Save the document id in cache for future use
+                context.set_tag(
+                    make_key(collection_id, foreign_id,
+                             content_hash), document_id
+                )
+                data["aleph_id"] = content_hash
+                data["aleph_document"] = meta
+                data["aleph_collection_id"] = collection_id
+                context.emit(data=data, optional=True)
+                return
+            except AlephException as exc:
+                if try_number > api.retries or not exc.transient:
+                    context.emit_warning("Error: %s" % exc)
+                    return
+                backoff(exc, try_number)
+
+
 def get_api(context):
     if not settings.HOST:
         context.log.warning("No $ALEPHCLIENT_HOST, skipping upload...")
@@ -147,6 +202,7 @@ def get_collection_id(context, api):
     if not hasattr(context.stage, "aleph_cid"):
         foreign_id = context.get("collection", context.crawler.name)
         config = {"label": context.crawler.description}
-        collection = api.load_collection_by_foreign_id(foreign_id, config=config)
+        collection = api.load_collection_by_foreign_id(
+            foreign_id, config=config)
         context.stage.aleph_cid = collection.get("id")
     return context.stage.aleph_cid

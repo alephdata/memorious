@@ -9,7 +9,7 @@ pipeline:
     method: seed
     params:
       urls:
-        - https://www.occrp.org/en/daily/14082-riviera-maya-gang-members-sentenced-in-romania
+        - https://www.occrp.org/en/investigations
     handle:
       pass: fetch
   fetch:
@@ -28,11 +28,11 @@ pipeline:
         title: 'title'
         author: 'authors'
         publishedAt: 'publish_date'
-        body: 'text'
+        bodyText: 'text'
     handle:
       store: store
   store:
     # Store the crawled documents to a directory
-    method: directory
+    method: aleph_entity
     params:
       path: /data/results
