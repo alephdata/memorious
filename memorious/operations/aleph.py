@@ -50,8 +50,7 @@ def aleph_emit(context, data):
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
     # Fetch document id from cache
-    document_id = context.get_tag(
-        make_key(collection_id, foreign_id, content_hash))
+    document_id = context.get_tag(make_key(collection_id, foreign_id, content_hash))
     if document_id:
         context.log.info("Skip aleph upload: %s", foreign_id)
         data["aleph_id"] = document_id
@@ -76,8 +75,7 @@ def aleph_emit(context, data):
                 context.log.info("Aleph document entity ID: %s", document_id)
                 # Save the document id in cache for future use
                 context.set_tag(
-                    make_key(collection_id, foreign_id,
-                             content_hash), document_id
+                    make_key(collection_id, foreign_id, content_hash), document_id
                 )
                 data["aleph_id"] = document_id
                 data["aleph_document"] = meta
@@ -134,8 +132,7 @@ def aleph_entity(context, data):
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
     # Fetch document id from cache
-    document_id = context.get_tag(
-        make_key(collection_id, foreign_id, content_hash))
+    document_id = context.get_tag(make_key(collection_id, foreign_id, content_hash))
     if document_id:
         context.log.info("Skip aleph upload: %s", foreign_id)
         data["aleph_id"] = document_id
@@ -158,17 +155,21 @@ def aleph_entity(context, data):
             rate_limit.comply()
 
             try:
-                api.write_entities(collection_id, [{
-                    "id": document_id,
-                    "schema": data.get("schema"),
-                    "properties": data.get("properties")
-                }])
+                api.write_entities(
+                    collection_id,
+                    [
+                        {
+                            "id": document_id,
+                            "schema": data.get("schema"),
+                            "properties": data.get("properties"),
+                        }
+                    ],
+                )
 
                 context.log.info("Aleph document entity ID: %s", document_id)
                 # Save the document id in cache for future use
                 context.set_tag(
-                    make_key(collection_id, foreign_id,
-                             content_hash), document_id
+                    make_key(collection_id, foreign_id, content_hash), document_id
                 )
                 data["aleph_id"] = content_hash
                 data["aleph_document"] = meta
@@ -198,7 +199,6 @@ def get_collection_id(context, api):
     if not hasattr(context.stage, "aleph_cid"):
         foreign_id = context.get("collection", context.crawler.name)
         config = {"label": context.crawler.description}
-        collection = api.load_collection_by_foreign_id(
-            foreign_id, config=config)
+        collection = api.load_collection_by_foreign_id(foreign_id, config=config)
         context.stage.aleph_cid = collection.get("id")
     return context.stage.aleph_cid
