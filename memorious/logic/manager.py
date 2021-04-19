@@ -34,19 +34,23 @@ class CrawlerManager(object):
                     continue
                 self.crawlers[crawler.name] = crawler
 
-    @property
-    def num_running(self):
-        num = 0
-        for crawler in self:
-            if crawler.is_running:
-                num += 1
-        return num
-
-    @property
-    def stages(self):
-        for crawler in self:
-            for stage in crawler:
-                yield crawler, stage
+    def load_crawler(self, path):
+        if os.path.isfile(path):
+            file_name = os.path.basename(path)
+            if fnmatch(file_name, "*.yaml") or fnmatch(file_name, "*.yml"):
+                try:
+                    crawler = Crawler(self, path)
+                    self.crawlers[crawler.name] = crawler
+                    return crawler
+                except ValueError as ex:
+                    log.warn(
+                        "Could not load crawler %s due to the following error",
+                        file_name,
+                    )
+                    log.warn(str(ex))
+            log.warning("Crawler path %s is not a yaml file", path)
+        else:
+            log.warning("Crawler path %s is not a file path", path)
 
     def __getitem__(self, name):
         return self.crawlers.get(name)

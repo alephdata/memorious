@@ -6,7 +6,7 @@ from tabulate import tabulate
 from memorious import settings
 from memorious.core import manager, init_memorious, conn
 from memorious.worker import get_worker
-from memorious.logic.crawler import Crawler
+from memorious.logic.manager import CrawlerManager
 
 log = logging.getLogger(__name__)
 
@@ -33,15 +33,9 @@ def get_crawler(name):
     return crawler
 
 
-@cli.command("run")
-@click.argument("crawler")
-@click.option("--threads", type=int, default=None)
-@click.option("--continue-on-error", is_flag=True, default=False)
-@click.option("--flush", is_flag=True, default=False)
-@click.option("--flushall", is_flag=True, default=False)
-def run(crawler, threads=None, continue_on_error=False, flush=False, flushall=False):
-    """Run a specified crawler in synchronous mode."""
-    crawler = get_crawler(crawler)
+def run_crawler(
+    crawler, threads=None, continue_on_error=False, flush=False, flushall=False
+):
     settings._crawler = crawler
     settings.CONTINUE_ON_ERROR = continue_on_error
     if flush:
@@ -65,31 +59,49 @@ def run(crawler, threads=None, continue_on_error=False, flush=False, flushall=Fa
     sys.exit(code)
 
 
+@cli.command("run")
+@click.argument("crawler")
+@click.option("--threads", type=int, default=None)
+@click.option("--continue-on-error", is_flag=True, default=False)
+@click.option("--flush", is_flag=True, default=False)
+@click.option("--flushall", is_flag=True, default=False)
+def run(crawler, threads=None, continue_on_error=False, flush=False, flushall=False):
+    """Run a specified crawler in synchronous mode."""
+    crawler = get_crawler(crawler)
+    run_crawler(crawler)
+
+
 @cli.command()
-@click.argument("config_file", type=click.Path(exists=True))
+@click.argument(
+    "crawler_config",
+    type=click.Path(exists=True),
+)
 @click.option(
     "--src",
     required=False,
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="Source file directory used by the crawler to add to path",
 )
+@click.option("--threads", type=int, default=None)
+@click.option("--continue-on-error", is_flag=True, default=False)
 @click.option("--flush", is_flag=True, default=False)
-def file_run(config_file, src=None, flush=False):
-    # Use fakeredis:
-    settings.sls.REDIS_URL = None
-    # Disable timeouts:
-    settings.CRAWLER_TIMEOUT = settings.CRAWLER_TIMEOUT * 1000
-
-    crawler = Crawler(manager, config_file)
-    manager.crawlers = {crawler.name: crawler}
-    if flush:
-        crawler.flush()
+@click.option("--flushall", is_flag=True, default=False)
+def run_file(
+    crawler_config,
+    src=None,
+    threads=None,
+    continue_on_error=False,
+    flush=False,
+    flushall=False,
+):
+    settings._manager = CrawlerManager()
+    crawler = settings._manager.load_crawler(crawler_config)
+    if not crawler:
+        log.warning("Could not load the crawler. Exiting.")
+        return
     if src:
         sys.path.insert(0, src)
-    crawler.run()
-    worker = get_worker()
-    worker.get_stages = lambda: {stage.namespaced_name for stage in crawler}
-    worker.sync()
+    run_crawler(crawler)
 
 
 @cli.command()
