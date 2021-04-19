@@ -18,17 +18,17 @@ pipeline:
     handle:
       pass: parse
   parse:
-    method: article
+    method: example.article:parse
     params:
+      properties:
+        title: .//title/text()
+        author: .//div[@class="by"]/strong/text()
+        publishedAt: .//div[@class="date"]/text()
+        description: .//meta[@name="description"]/@content
       match:
         or:
           - pattern: .*stories.*
-          - xpath: .//div[@class="occrp-story"]
-      content:
-        title: 'title'
-        author: 'authors'
-        publishedAt: 'publish_date'
-        bodyText: 'text'
+          - xpath: .//div[@class="occrp-page"]
     handle:
       store: store
   store:

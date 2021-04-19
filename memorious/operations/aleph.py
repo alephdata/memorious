@@ -160,13 +160,9 @@ def aleph_entity(context, data):
             try:
                 api.write_entities(collection_id, [{
                     "id": document_id,
-                    "schema": "Article",
-                    "properties": {
-                        "description": "This is the description, it is a description... yeah",
-                        "title": data.get("title"),
-                        "author": data.get("author"),
-                        "bodyText": data.get("bodyText")
-                    }}])
+                    "schema": data.get("schema"),
+                    "properties": data.get("properties")
+                }])
 
                 context.log.info("Aleph document entity ID: %s", document_id)
                 # Save the document id in cache for future use
