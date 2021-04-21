@@ -41,6 +41,10 @@ def _create_meta_object(context, data, include_languages=True) -> dict:
     return meta
 
 
+def aleph_document(context, data):
+    aleph_emit(context, data)
+
+
 def aleph_emit(context, data):
     api = get_api(context)
     if api is None:

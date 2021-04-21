@@ -92,36 +92,28 @@ def parse_for_metadata(context, data, html):
     return data
 
 
-def parse_article(context: object, data: dict, article: Article) -> None:
-    content = context.params.get("content", {})
-    data["schema"] = "Article"
-    
-    for key, value in content.items():
-        item = getattr(article, value, None)
-        if item is not None:
-            data[key] = item          
+def parse_ftm(context, data, html):
+    properties = context.params.get("properties")
+    properties_dict = {}
+    for key, value in properties.items():
+        properties_dict[key] = html.xpath(value)
+
+    data["properties"] = properties_dict
+    log.warning(properties_dict)
 
 
 def parse(context, data):
     with context.http.rehash(data) as result:
+
         if result.html is not None:
             # Get extra metadata from the DOM
             parse_for_metadata(context, data, result.html)
-            parse_html(context, data, result)
+
+            if not context.params.get("schema") is None:
+                parse_ftm(context, data, result.html)
+            else:
+                parse_html(context, data, result)
 
         rules = context.params.get("store") or {"match_all": {}}
         if Rule.get_rule(rules).apply(result):
             context.emit(rule="store", data=data)
-
-
-def article(context, data):
-    with context.http.rehash(data) as result:
-        news_article = Article(url=data["url"])
-        news_article.download()
-        news_article.parse()
-        parse_article(context, data, news_article)
-
-        if news_article.is_parsed == True:
-            rules = context.params.get("match") or {"match_all": {}}
-            if Rule.get_rule(rules).apply(result):
-                context.emit(rule="store", data=data)
