@@ -20,6 +20,7 @@ pipeline:
   parse:
     method: example.article:parse
     params:
+      schema: article
       properties:
         title: .//title/text()
         author: .//div[@class="by"]/strong/text()

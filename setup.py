@@ -70,7 +70,7 @@ setup(
             "extract = memorious.operations.extract:extract",
             "db = memorious.operations.db:db",
             "ftp_fetch = memorious.operations.ftp:ftp_fetch",
-            "aleph_emit = memorious.operations.aleph:aleph_emit",
+            "aleph_emit = memorious.operations.aleph:aleph_document",
             "aleph_document = memorious.operations.aleph:aleph_document",
             "aleph_folder = memorious.operations.aleph:aleph_folder",
             "aleph_entity = memorious.operations.aleph:aleph_entity",

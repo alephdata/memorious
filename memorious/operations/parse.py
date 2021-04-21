@@ -100,7 +100,6 @@ def parse_ftm(context, data, html):
 
     data["schema"] = context.params.get("schema")
     data["properties"] = properties_dict
-    log.warning(properties_dict)
 
 
 def parse(context, data):
