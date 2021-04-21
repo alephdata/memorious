@@ -98,6 +98,7 @@ def parse_ftm(context, data, html):
     for key, value in properties.items():
         properties_dict[key] = html.xpath(value)
 
+    data["schema"] = context.params.get("schema")
     data["properties"] = properties_dict
     log.warning(properties_dict)
 
