@@ -12,7 +12,18 @@ from alephclient.errors import AlephException
 from memorious.core import get_rate_limit  # type: ignore
 
 
-def _create_meta_object(context, data, include_languages=True) -> dict:
+def _create_meta_languages(context, data) -> dict:
+    meta = {}
+    languages = context.params.get("languages")
+    meta["languages"] = data.get("languages", languages)
+    countries = context.params.get("countries")
+    meta["countries"] = data.get("countries", countries)
+    mime_type = context.params.get("mime_type")
+    meta["mime_type"] = data.get("mime_type", mime_type)
+    return meta
+
+
+def _create_meta_object(context, data) -> dict:
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
 
@@ -29,18 +40,14 @@ def _create_meta_object(context, data, include_languages=True) -> dict:
         "headers": data.get("headers", {}),
     }
 
-    if include_languages:
-        languages = context.params.get("languages")
-        meta["languages"] = data.get("languages", languages)
-        countries = context.params.get("countries")
-        meta["countries"] = data.get("countries", countries)
-        mime_type = context.params.get("mime_type")
-        meta["mime_type"] = data.get("mime_type", mime_type)
-
     if data.get("aleph_folder_id"):
         meta["parent"] = {"id": data.get("aleph_folder_id")}
 
     return meta
+
+
+def aleph_emit(context, data):
+    aleph_document(context, data)
 
 
 def aleph_document(context, data):
@@ -60,6 +67,8 @@ def aleph_document(context, data):
         return
 
     meta = clean_dict(_create_meta_object(context, data))
+    meta.update(_create_meta_languages(context, data))
+
     label = meta.get("file_name", meta.get("source_url"))
     context.log.info("Upload: %s", label)
     with context.load_file(content_hash) as fh:
@@ -101,7 +110,7 @@ def aleph_folder(context, data):
         context.log.warning("No folder foreign ID!")
         return
 
-    meta = clean_dict(_create_meta_object(context, data, False))
+    meta = clean_dict(_create_meta_object(context, data))
     label = meta.get("file_name", meta.get("source_url"))
     context.log.info("Make folder: %s", label)
     for try_number in range(api.retries):
@@ -144,6 +153,8 @@ def aleph_entity(context, data):
         document_id = uuid.uuid4().hex
 
     meta = clean_dict(_create_meta_object(context, data))
+    meta.update(_create_meta_languages(context, data))
+
     label = meta.get("file_name", meta.get("source_url"))
     context.log.info("Upload: %s", label)
     with context.load_file(content_hash) as fh:

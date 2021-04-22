@@ -111,8 +111,8 @@ def parse(context, data):
 
             if not context.params.get("schema") is None:
                 parse_ftm(context, data, result.html)
-            else:
-                parse_html(context, data, result)
+
+            parse_html(context, data, result)
 
         rules = context.params.get("store") or {"match_all": {}}
         if Rule.get_rule(rules).apply(result):

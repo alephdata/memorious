@@ -1,6 +1,6 @@
 # Example scraper to demonstrate Memorious XPath narrowing
-name: article_scraper
-description: Articles to scrape
+name: occrp_investigation
+description: A scrape of all the existing OCCRP investigations
 # Uncomment to run this scraper automatically:
 # schedule: weekly
 pipeline:
@@ -15,6 +15,10 @@ pipeline:
   fetch:
     # Download the page passed from the seed stage.
     method: fetch
+    params:
+      rules:
+        and:
+          - pattern: '.*investigations.*'
     handle:
       pass: parse
   parse:
@@ -26,12 +30,9 @@ pipeline:
         author: .//div[@class="by"]/strong/text()
         publishedAt: .//div[@class="date"]/text()
         description: .//meta[@name="description"]/@content
-      match:
-        or:
-          - pattern: .*stories.*
-          - xpath: .//div[@class="occrp-page"]
     handle:
       store: store
+      fetch: fetch
   store:
     # Store the crawled documents to a directory
     method: aleph_entity

@@ -1,4 +1,6 @@
 import logging
+import memorious.operations.parse
+
 from newspaper import Article
 
 from memorious.helpers.rule import Rule
@@ -37,7 +39,10 @@ def parse(context, data):
         news_article.parse()
         parse_article(context, data, news_article)
 
-        if news_article.is_parsed == True:
-            rules = context.params.get("match") or {"match_all": {}}
-            if Rule.get_rule(rules).apply(result):
-                context.emit(rule="store", data=data)
+        if result.html is not None:
+            memorious.operations.parse.parse_for_metadata(context, data, result.html)
+            memorious.operations.parse.parse_html(context, data, result)
+
+        rules = context.params.get("match") or {"match_all": {}}
+        if Rule.get_rule(rules).apply(result):
+            context.emit(rule="store", data=data)
