@@ -37,6 +37,7 @@ def aleph_emit(context, data):
         "modified_at": data.get("modified_at"),
         "published_at": data.get("published_at"),
         "headers": data.get("headers", {}),
+        "keywords": data.get("keywords", []),
     }
 
     languages = context.params.get("languages")
