@@ -1,5 +1,5 @@
 # Example scraper to demonstrate Memorious XPath narrowing
-name: occrp_investigation
+name: occrp_article_scraper
 description: A scrape of all the existing OCCRP investigations
 # Uncomment to run this scraper automatically:
 # schedule: weekly
@@ -24,7 +24,7 @@ pipeline:
   parse:
     method: example.article:parse
     params:
-      schema: article
+      schema: Article
       properties:
         title: .//title/text()
         author: .//div[@class="by"]/strong/text()

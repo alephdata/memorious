@@ -152,48 +152,48 @@ def aleph_entity(context, data):
     else:
         document_id = uuid.uuid4().hex
 
-    meta = clean_dict(_create_meta_object(context, data))
-    meta.update(_create_meta_languages(context, data))
+    # meta = clean_dict(_create_meta_object(context, data))
+    # meta.update(_create_meta_languages(context, data))
 
-    label = meta.get("file_name", meta.get("source_url"))
-    context.log.info("Upload: %s", label)
-    with context.load_file(content_hash) as fh:
-        if fh is None:
+    # label = meta.get("file_name", meta.get("source_url"))
+    # context.log.info("Upload: %s", label)
+    # with context.load_file(content_hash) as fh:
+    #     if fh is None:
+    #         return
+    #     file_path = Path(fh.name).resolve()
+
+    for try_number in range(api.retries):
+        rate = settings.MEMORIOUS_RATE_LIMIT
+        rate_limit = get_rate_limit("aleph", limit=rate)
+        rate_limit.comply()
+
+        try:
+            api.write_entities(
+                collection_id,
+                [
+                    {
+                        "id": document_id,
+                        "schema": data.get("schema"),
+                        "properties": data.get("properties"),
+                    }
+                ],
+            )
+
+            context.log.info("Aleph document entity ID: %s", document_id)
+            # Save the document id in cache for future use
+            context.set_tag(
+                make_key(collection_id, foreign_id, content_hash), document_id
+            )
+            data["aleph_id"] = content_hash
+            # data["aleph_document"] = meta
+            data["aleph_collection_id"] = collection_id
+            context.emit(data=data, optional=True)
             return
-        file_path = Path(fh.name).resolve()
-
-        for try_number in range(api.retries):
-            rate = settings.MEMORIOUS_RATE_LIMIT
-            rate_limit = get_rate_limit("aleph", limit=rate)
-            rate_limit.comply()
-
-            try:
-                api.write_entities(
-                    collection_id,
-                    [
-                        {
-                            "id": document_id,
-                            "schema": data.get("schema"),
-                            "properties": data.get("properties"),
-                        }
-                    ],
-                )
-
-                context.log.info("Aleph document entity ID: %s", document_id)
-                # Save the document id in cache for future use
-                context.set_tag(
-                    make_key(collection_id, foreign_id, content_hash), document_id
-                )
-                data["aleph_id"] = content_hash
-                data["aleph_document"] = meta
-                data["aleph_collection_id"] = collection_id
-                context.emit(data=data, optional=True)
+        except AlephException as exc:
+            if try_number > api.retries or not exc.transient:
+                context.emit_warning("Error: %s" % exc)
                 return
-            except AlephException as exc:
-                if try_number > api.retries or not exc.transient:
-                    context.emit_warning("Error: %s" % exc)
-                    return
-                backoff(exc, try_number)
+            backoff(exc, try_number)
 
 
 def get_api(context):
