@@ -152,16 +152,6 @@ def aleph_entity(context, data):
     else:
         document_id = uuid.uuid4().hex
 
-    # meta = clean_dict(_create_meta_object(context, data))
-    # meta.update(_create_meta_languages(context, data))
-
-    # label = meta.get("file_name", meta.get("source_url"))
-    # context.log.info("Upload: %s", label)
-    # with context.load_file(content_hash) as fh:
-    #     if fh is None:
-    #         return
-    #     file_path = Path(fh.name).resolve()
-
     for try_number in range(api.retries):
         rate = settings.MEMORIOUS_RATE_LIMIT
         rate_limit = get_rate_limit("aleph", limit=rate)
@@ -185,7 +175,6 @@ def aleph_entity(context, data):
                 make_key(collection_id, foreign_id, content_hash), document_id
             )
             data["aleph_id"] = content_hash
-            # data["aleph_document"] = meta
             data["aleph_collection_id"] = collection_id
             context.emit(data=data, optional=True)
             return
