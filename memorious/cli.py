@@ -1,6 +1,7 @@
 import click
 import logging
 import sys
+from pathlib import Path
 from tabulate import tabulate
 
 from memorious import settings
@@ -94,8 +95,10 @@ def run(crawler, threads=None, continue_on_error=False, flush=False, flushall=Fa
 @click.option(
     "--src",
     required=False,
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="Source file directory used by the crawler to add to path",
+    is_flag=True,
+    default=False,
+    help="Load source file directory used by the crawler and add it to path."
+    "Source files should be in `src` folder relative to the crawler YAML",
 )
 @click.option("--threads", type=int, default=None, help="Number of execution threads")
 @click.option(
@@ -118,7 +121,7 @@ def run(crawler, threads=None, continue_on_error=False, flush=False, flushall=Fa
 )
 def run_file(
     crawler_config,
-    src=None,
+    src=False,
     threads=None,
     continue_on_error=False,
     flush=False,
@@ -126,12 +129,14 @@ def run_file(
 ):
     """Run a crawler from a YAML config and optionally a source directory"""
     settings._manager = CrawlerManager()
+    crawler_config = Path(crawler_config)
     crawler = settings._manager.load_crawler(crawler_config)
     if not crawler:
         log.warning("Could not load the crawler. Exiting.")
         return
     if src:
-        sys.path.insert(0, src)
+        src_path = crawler_config.parent / "src"
+        sys.path.insert(0, str(src_path))
     run_crawler(crawler)
 
 

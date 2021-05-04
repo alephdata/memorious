@@ -26,31 +26,28 @@ class CrawlerManager(object):
                 source_file = os.path.join(root, file_name)
                 try:
                     crawler = Crawler(self, source_file)
-                except ValueError as ex:
-                    log.warn(
+                except ValueError:
+                    log.exception(
                         "Skipping %s due to the following error", file_name
                     )  # noqa
-                    log.warn(str(ex))
                     continue
                 self.crawlers[crawler.name] = crawler
 
     def load_crawler(self, path):
-        if os.path.isfile(path):
-            file_name = os.path.basename(path)
-            if fnmatch(file_name, "*.yaml") or fnmatch(file_name, "*.yml"):
+        if path.is_file():
+            if fnmatch(path.name, "*.yaml") or fnmatch(path.name, "*.yml"):
                 try:
                     crawler = Crawler(self, path)
                     self.crawlers[crawler.name] = crawler
                     return crawler
-                except ValueError as ex:
-                    log.warn(
+                except ValueError:
+                    log.exception(
                         "Could not load crawler %s due to the following error",
-                        file_name,
+                        path.name,
                     )
-                    log.warn(str(ex))
             log.warning("Crawler path %s is not a yaml file", path)
         else:
-            log.warning("Crawler path %s is not a file path", path)
+            log.warning("Crawler path %s is not a valid file path", path)
 
     def __getitem__(self, name):
         return self.crawlers.get(name)
