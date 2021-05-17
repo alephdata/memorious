@@ -2,7 +2,6 @@ import os
 import logging
 from fnmatch import fnmatch
 
-from memorious import settings
 from memorious.logic.crawler import Crawler
 
 log = logging.getLogger(__name__)
@@ -27,41 +26,28 @@ class CrawlerManager(object):
                 source_file = os.path.join(root, file_name)
                 try:
                     crawler = Crawler(self, source_file)
-                except ValueError as ex:
-                    log.warn(
+                except ValueError:
+                    log.exception(
                         "Skipping %s due to the following error", file_name
                     )  # noqa
-                    log.warn(str(ex))
                     continue
                 self.crawlers[crawler.name] = crawler
 
-    def run_scheduled(self):
-        num_running = self.num_running
-        log.info("Checking schedule: %s crawlers." % len(self.crawlers))
-        for crawler in self:
-            if crawler.delta is None:
-                continue
-            if not crawler.check_due():
-                continue
-            if num_running >= settings.MAX_SCHEDULED:
-                continue
-            log.info("[%s] due, queueing...", crawler.name)
-            crawler.run()
-            num_running += 1
-
-    @property
-    def num_running(self):
-        num = 0
-        for crawler in self:
-            if crawler.is_running:
-                num += 1
-        return num
-
-    @property
-    def stages(self):
-        for crawler in self:
-            for stage in crawler:
-                yield crawler, stage
+    def load_crawler(self, path):
+        if path.is_file():
+            if fnmatch(path.name, "*.yaml") or fnmatch(path.name, "*.yml"):
+                try:
+                    crawler = Crawler(self, path)
+                    self.crawlers[crawler.name] = crawler
+                    return crawler
+                except ValueError:
+                    log.exception(
+                        "Could not load crawler %s due to the following error",
+                        path.name,
+                    )
+            log.warning("Crawler path %s is not a yaml file", path)
+        else:
+            log.warning("Crawler path %s is not a valid file path", path)
 
     def __getitem__(self, name):
         return self.crawlers.get(name)

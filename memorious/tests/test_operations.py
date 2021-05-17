@@ -3,11 +3,11 @@ import json
 import pytest
 from unittest.mock import ANY
 
-from memorious.core import tags
+from memorious.core import tags, storage
 from memorious.operations.fetch import fetch, session
 from memorious.operations.parse import parse, article
 from memorious.operations.initializers import seed, sequence, dates, enumerate
-from memorious.operations.store import directory
+from memorious.operations.store import directory, cleanup_archive
 
 
 @pytest.mark.parametrize(
@@ -166,3 +166,12 @@ def test_directory(context):
         assert json.load(fh)["content_hash"] == data["content_hash"]
     with open(raw_file_path, "rb") as fh:
         assert b'"user-agent": "Memorious Test"' in fh.read()
+
+
+def test_cleanup_archive(context):
+    url = "https://httpbin.org/user-agent"
+    result = context.http.get(url, headers={"User-Agent": "Memorious Test"})
+    data = result.serialize()
+    assert storage.load_file(data["content_hash"]) is not None
+    cleanup_archive(context, data)
+    assert storage.load_file(data["content_hash"]) is None

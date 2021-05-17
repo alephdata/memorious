@@ -38,6 +38,7 @@ def _create_meta_object(context, data) -> dict:
         "modified_at": data.get("modified_at"),
         "published_at": data.get("published_at"),
         "headers": data.get("headers", {}),
+        "keywords": data.get("keywords", []),
     }
 
     if data.get("aleph_folder_id"):

@@ -21,9 +21,8 @@ services:
     environment:
       REDIS_HOSTS: local:redis:6379
     ports:
-    - "0.0.0.0:8081:8081"
-
-  worker:
+      - "0.0.0.0:8081:8081"
+  shell:
     build: .
     command: sh /crawlers/scripts/worker.sh
     links:
@@ -45,7 +44,6 @@ services:
         WORKER_THREADS: 20
     ports:
       - "0.0.0.0:5678:5678"
-
   ui:
     build: .
     command: sh /crawlers/scripts/ui.sh

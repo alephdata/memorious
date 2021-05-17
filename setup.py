@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="memorious",
-    version="1.9.0",
+    version="2.2.0",
     description="A minimalistic, recursive web crawling library for Python.",
     long_description="",
     classifiers=[
@@ -39,7 +39,7 @@ setup(
         "tabulate",
         "python-dateutil == 2.8.1",
         "dataset >= 1.0.8",
-        "servicelayer[google,amazon] == 1.17.2",
+        "servicelayer[google,amazon] == 1.18.1",
         "pantomime == 0.4.1",
         "alephclient >= 2.2.2",
         "followthemoney >= 2.3.1",
@@ -67,6 +67,7 @@ setup(
             "inspect = memorious.operations.debug:inspect",
             "documentcloud_query = memorious.operations.documentcloud:documentcloud_query",  # noqa
             "directory = memorious.operations.store:directory",
+            "cleanup_archive = memorious.operations.store:cleanup_archive",
             "extract = memorious.operations.extract:extract",
             "db = memorious.operations.db:db",
             "ftp_fetch = memorious.operations.ftp:ftp_fetch",

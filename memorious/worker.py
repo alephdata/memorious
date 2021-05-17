@@ -1,36 +1,16 @@
 import structlog
 
 from servicelayer.worker import Worker
-from servicelayer.cache import make_key
 from servicelayer.logs import apply_task_context
 
-from memorious import settings
 from memorious.logic.context import Context
 from memorious.logic.stage import CrawlerStage
-from memorious.core import manager, conn, get_rate_limit, is_sync_mode
+from memorious.core import conn, crawler
 
 log = structlog.get_logger(__name__)
 
 
 class MemoriousWorker(Worker):
-    def boot(self):
-        intv = settings.SCHEDULER_INTERVAL
-        self.scheduler = get_rate_limit("scheduler", unit=60, interval=intv, limit=1)
-        self.hourly = get_rate_limit("hourly", unit=3600, interval=1, limit=1)
-
-    def periodic(self):
-        if self.hourly.check():
-            self.hourly.update()
-            log.info("Running hourly tasks...")
-            for crawler in manager:
-                if crawler.should_timeout:
-                    crawler.timeout()
-        if self.scheduler.check() and not settings.DEBUG:
-            log.info("Running scheduled crawlers ...")
-            self.scheduler.update()
-            manager.run_scheduled()
-        self.timeout_expiration_check()
-
     def handle(self, task):
         apply_task_context(task)
         data = task.payload
@@ -45,26 +25,10 @@ class MemoriousWorker(Worker):
             state = task.context
             context = Context.from_state(state, stage)
             context.crawler.aggregate(context)
-        self.timeout_expiration_check()
 
     def get_stages(self):
-        all_stages = set({stage.namespaced_name for _, stage in manager.stages})  # noqa
-        stages_on_timeout_key = make_key("memorious", "timeout_stages")
-        stages_on_timeout = conn.smembers(stages_on_timeout_key)
-        if stages_on_timeout and not is_sync_mode():
-            return list(all_stages - set(stages_on_timeout))
-        return all_stages
-
-    def timeout_expiration_check(self):
-        if is_sync_mode():
-            return
-        stages_on_timeout_key = make_key("memorious", "timeout_stages")
-        stages_on_timeout = conn.smembers(stages_on_timeout_key)
-        for stage in stages_on_timeout:
-            key = make_key("memorious", "timeout", stage)
-            if not conn.get(key):
-                conn.srem(stages_on_timeout_key, stage)
+        return [stage.namespaced_name for stage in crawler.stages.values()]
 
 
-def get_worker():
-    return MemoriousWorker(conn=conn)
+def get_worker(num_threads=None):
+    return MemoriousWorker(conn=conn, num_threads=num_threads)
