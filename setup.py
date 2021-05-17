@@ -48,6 +48,7 @@ setup(
         "stringcase",
         "flask",
         "babel",
+        "newspaper3k >= 0.2.8",
     ],
     entry_points={
         "console_scripts": ["memorious = memorious.cli:main"],
@@ -71,7 +72,9 @@ setup(
             "db = memorious.operations.db:db",
             "ftp_fetch = memorious.operations.ftp:ftp_fetch",
             "aleph_emit = memorious.operations.aleph:aleph_emit",
+            "aleph_document = memorious.operations.aleph:aleph_document",
             "aleph_folder = memorious.operations.aleph:aleph_folder",
+            "aleph_entity = memorious.operations.aleph:aleph_entity",
             "balkhash_put = memorious.operations.ftm:ftm_store",
             "ftm_store = memorious.operations.ftm:ftm_store",
             "ftm_load_aleph = memorious.operations.ftm:ftm_load_aleph",

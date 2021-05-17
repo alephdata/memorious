@@ -5,7 +5,7 @@ from unittest.mock import ANY
 
 from memorious.core import tags, storage
 from memorious.operations.fetch import fetch, session
-from memorious.operations.parse import parse
+from memorious.operations.parse import parse, article
 from memorious.operations.initializers import seed, sequence, dates, enumerate
 from memorious.operations.store import directory, cleanup_archive
 
@@ -69,6 +69,24 @@ def test_parse(context, mocker):
     assert data["description"].startswith("This domain is for")
     assert context.emit.call_count == 3, data
 
+
+def test_parse_article(context, mocker):
+    url = "https://www.occrp.org/en/daily/14082-riviera-maya-gang-members-sentenced-in-romania"
+    result = context.http.get(url)
+    data = result.serialize()
+    context.params["content"] = {
+        "title": "title",
+        "author": "authors",
+        "publishedAt": "publish_date",
+        "body": "text",
+    }
+
+    article(context, data)
+
+    assert data["url"] == "https://www.occrp.org/en/daily/14082-riviera-maya-gang-members-sentenced-in-romania"
+    assert data["title"] == "Riviera Maya Gang Members Sentenced in Romania"
+    assert "Attila Biro" in data["author"]
+    assert data["body"].startswith("A Bucharest court")
 
 def test_seed(context, mocker):
     context.params["url"] = None

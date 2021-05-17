@@ -21,8 +21,7 @@ services:
     environment:
       REDIS_HOSTS: local:redis:6379
     ports:
-      - "8081:8081"
-
+      - "0.0.0.0:8081:8081"
   shell:
     build: .
     command: sh /crawlers/scripts/worker.sh
@@ -36,9 +35,34 @@ services:
     tmpfs:
       - "/tmp"
     environment:
-      MEMORIOUS_BASE_PATH: /data
-      MEMORIOUS_CONFIG_PATH: /crawlers/config
-      MEMORIOUS_DEBUG: "false"
-      ARCHIVE_PATH: /data/archive
-      REDIS_URL: redis://redis:6379/0
-      MEMORIOUS_DATASTORE_URI: postgresql://datastore:datastore@datastore/datastore
+        MEMORIOUS_BASE_PATH: /data
+        MEMORIOUS_CONFIG_PATH: /crawlers/config
+        MEMORIOUS_DEBUG: "false"
+        ARCHIVE_PATH: /data/archive
+        REDIS_URL: redis://redis:6379/0
+        MEMORIOUS_DATASTORE_URI: postgresql://datastore:datastore@datastore/datastore
+        WORKER_THREADS: 20
+    ports:
+      - "0.0.0.0:5678:5678"
+  ui:
+    build: .
+    command: sh /crawlers/scripts/ui.sh
+    links:
+      - redis
+      - datastore
+    volumes:
+      - "./build/data:/data"
+      - "./example:/crawlers"
+      - "./memorious:/memorious/memorious"
+    tmpfs:
+      - "/tmp"
+    ports:
+      - "0.0.0.0:8000:8000"
+    environment:
+        MEMORIOUS_BASE_PATH: /data
+        MEMORIOUS_CONFIG_PATH: /crawlers/config
+        MEMORIOUS_DEBUG: "false"
+        ARCHIVE_PATH: /data/archive
+        REDIS_URL: redis://redis:6379/0
+        MEMORIOUS_DATASTORE_URI: postgresql://datastore:datastore@datastore/datastore
+        WORKER_THREADS: 20
