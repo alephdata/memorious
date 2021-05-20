@@ -25,7 +25,7 @@ def _get_directory_path(context):
 
 def _get_file_extension(file_name, mime_type):
     if file_name is not None:
-        _, extension = os.path.split(file_name)
+        _, extension = os.path.splitext(file_name)
         extension = extension.replace(".", "")
         if len(extension) > 1:
             return extension
@@ -51,7 +51,7 @@ def directory(context, data):
 
         path = _get_directory_path(context)
         file_name = data.get("file_name", result.file_name)
-        mime_type = normalize_mimetype(data.get("headers", {}).get("Content-Type"))
+        mime_type = normalize_mimetype(data.get("headers", {}).get("content-type"))
         extension = _get_file_extension(file_name, mime_type)
         file_name = file_name or "data"
         file_name = safe_filename(file_name, extension=extension)
