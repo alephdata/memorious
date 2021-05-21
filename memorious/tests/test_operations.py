@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 import pytest
 from unittest.mock import ANY
 
@@ -127,6 +128,12 @@ def test_enumerate(context, mocker):
 
 
 def test_directory(context):
+    file_path = os.path.realpath(__file__)
+    store_dir = os.path.normpath(
+        os.path.join(file_path, "../testdata/data/store/occrp_web_site")
+    )
+    shutil.rmtree(store_dir, ignore_errors=True)
+
     # echo user-agent
     url = "https://httpbin.org/user-agent"
     result = context.http.get(url, headers={"User-Agent": "Memorious Test"})
@@ -134,10 +141,6 @@ def test_directory(context):
     directory(context, data)
 
     content_hash = data.get("content_hash")
-    file_path = os.path.realpath(__file__)
-    store_dir = os.path.normpath(
-        os.path.join(file_path, "../testdata/data/store/occrp_web_site")
-    )
 
     raw_file_path = os.path.join(store_dir, content_hash + ".data.json")
     meta_file_path = os.path.join(store_dir, content_hash + ".json")
