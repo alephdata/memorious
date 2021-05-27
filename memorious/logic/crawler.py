@@ -1,6 +1,5 @@
 import os
 import io
-import yaml
 import logging
 import re
 from datetime import timedelta
@@ -13,6 +12,7 @@ from memorious import settings
 from memorious.core import conn, tags
 from memorious.model import Crawl, Queue
 from memorious.logic.stage import CrawlerStage
+from memorious.util import load_yaml_with_env
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class Crawler(object):
         self.source_file = source_file
         with io.open(source_file, encoding="utf-8") as fh:
             self.config_yaml = fh.read()
-            self.config = yaml.safe_load(self.config_yaml)
+            self.config = load_yaml_with_env(self.config_yaml)
 
         self.name = os.path.basename(source_file)
         self.name = self.config.get("name", self.name)
