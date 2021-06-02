@@ -25,10 +25,13 @@ pipeline:
     method: example.article:parse
     params:
       schema: Article
+      store:
+        and:
+          - mime_group: web
       properties:
         title: .//title/text()
-        author: .//div[@class="by"]/strong/text()
-        publishedAt: .//div[@class="date"]/text()
+        author: .//div[@class="by" or @class="authors"]/strong/text()
+        publishedAt: .//*[@class="date"]/text()
         description: .//meta[@name="description"]/@content
     handle:
       store: store
