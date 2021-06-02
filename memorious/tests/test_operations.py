@@ -70,23 +70,24 @@ def test_parse(context, mocker):
     assert context.emit.call_count == 3, data
 
 
-def test_parse_article(context, mocker):
+def test_parse_ftm(context, mocker):
     url = "https://www.occrp.org/en/daily/14082-riviera-maya-gang-members-sentenced-in-romania"
     result = context.http.get(url)
     data = result.serialize()
-    context.params["content"] = {
-        "title": "title",
-        "author": "authors",
-        "publishedAt": "publish_date",
-        "body": "text",
+    context.params["schema"] = "Article"
+    context.params["properties"] = {
+        "title": ".//title/text()",
+        "author": ".//div[@class=\"by\" or @class=\"authors\"]/strong/text()",
+        "publishedAt": ".//*[@class=\"date\"]/text()",
+        "description": ".//meta[@name=\"description\"]/@content"
     }
 
-    article(context, data)
+    parse(context, data)
 
     assert data["url"] == "https://www.occrp.org/en/daily/14082-riviera-maya-gang-members-sentenced-in-romania"
     assert data["title"] == "Riviera Maya Gang Members Sentenced in Romania"
     assert "Attila Biro" in data["author"]
-    assert data["body"].startswith("A Bucharest court")
+    assert data["description"].startswith("A Bucharest court")
 
 def test_seed(context, mocker):
     context.params["url"] = None
