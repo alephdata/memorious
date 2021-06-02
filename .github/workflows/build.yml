@@ -47,16 +47,19 @@ jobs:
           echo "$GITHUB_REF"
       - name: Build docker image
         run: |
-          docker build -t alephdata/memorious:latest .
+          docker build -t alephdata/memorious:${GITHUB_SHA} .
       - name: Push docker image for hash
+        env:
+          DOCKER_PASSWORD: ${{ secrets.docker_password }}
+        if: env.DOCKER_PASSWORD != null
         run: |
           docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
-          docker build -t alephdata/memorious:${GITHUB_SHA} .
           docker push alephdata/memorious:${GITHUB_SHA}
       - name: Push docker image for tags
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         run: |
           docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
-          docker build -t alephdata/memorious:${GITHUB_REF/refs\/tags\//} .
+          docker tag alephdata/memorious:${GITHUB_SHA} alephdata/memorious:${GITHUB_REF/refs\/tags\//}
           docker push alephdata/memorious:${GITHUB_REF/refs\/tags\//}
+          docker tag alephdata/memorious:${GITHUB_SHA} alephdata/memorious:latest
           docker push alephdata/memorious:latest
