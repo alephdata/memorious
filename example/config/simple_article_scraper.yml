@@ -29,10 +29,10 @@ pipeline:
         and:
           - mime_group: web
       properties:
-        title: .//title/text()
-        author: .//div[@class="by" or @class="authors"]/strong/text()
+        title: .//meta[@property="og:title"]/@content
+        author: .//meta[@name="author"]/@content
         publishedAt: .//*[@class="date"]/text()
-        description: .//meta[@name="description"]/@content
+        description: .//meta[@property="og:description"]/@content
     handle:
       store: store
       fetch: fetch

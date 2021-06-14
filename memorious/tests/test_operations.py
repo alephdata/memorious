@@ -76,18 +76,20 @@ def test_parse_ftm(context, mocker):
     data = result.serialize()
     context.params["schema"] = "Article"
     context.params["properties"] = {
-        "title": ".//title/text()",
-        "author": ".//div[@class=\"by\" or @class=\"authors\"]/strong/text()",
-        "publishedAt": ".//*[@class=\"date\"]/text()",
-        "description": ".//meta[@name=\"description\"]/@content"
+        "title": './/meta[@property="og:title"]/@content',
+        "author": './/meta[@name="author"]/@content',
+        "publishedAt": './/*[@class="date"]/text()',
+        "description": './/meta[@property="og:description"]/@content',
     }
 
     parse(context, data)
 
-    # assert data["url"] == "https://www.occrp.org/en/daily/14082-riviera-maya-gang-members-sentenced-in-romania"
-    assert data["title"] == "Riviera Maya Gang Members Sentenced in Romania"
-    assert "Attila Biro" in data["author"]
-    assert data["description"].startswith("A Bucharest court")
+    props = data["properties"]
+
+    assert "Riviera Maya Gang Members Sentenced in Romania" in props["title"]
+    assert "Attila Biro" in props["author"]
+    assert props["description"][0].startswith("A Bucharest court")
+
 
 def test_seed(context, mocker):
     context.params["url"] = None

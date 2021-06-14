@@ -1,4 +1,5 @@
 import uuid
+import requests
 
 from pathlib import Path
 from pprint import pprint  # noqa
