@@ -31,18 +31,20 @@ LANGUAGES = {
 
 
 def documentcloud_query(context, data):
-    host = context.get("host", DEFAULT_HOST)
+    host = context.get("host", API_HOST)
     instance = context.get("instance", DEFAULT_INSTANCE)
     query = context.get("query")
     page = data.get("page", 1)
 
-    search_url = urljoin(host, "search/documents.json")
+    search_url = urljoin(host, "/api/documents/search")
+
     res = context.http.get(
         search_url,
         params={"q": query, "per_page": 100, "page": page, "expand": "organization"},
-
     )
-    documents = res.json.get("documents", [])
+
+    documents = res.json.get("results", [])
+
     for document in documents:
         doc = {
             "foreign_id": "%s:%s" % (instance, document.get("id")),
@@ -53,8 +55,8 @@ def documentcloud_query(context, data):
                 DOCUMENT_HOST, document.get("id"), document.get("slug")
             ),
             "title": document.get("title"),
-            "author": document.get("author"),
-            "file_name": os.path.basename(document.get("pdf_url")),
+            "author": document.get("organization", {}).get("name"),
+            "file_name": "{}.pdf".format(document.get("slug")),
             "mime_type": "application/pdf",
         }
 
@@ -64,7 +66,7 @@ def documentcloud_query(context, data):
 
         published = document.get("created_at")
         if published is not None:
-            dt = datetime.strptime(published, "%b %d, %Y")
+            dt = datetime.strptime(published, "%Y-%m-%dT%H:%M:%S.%fZ")
             doc["published_at"] = dt.isoformat()
 
         context.emit(data=doc)
