@@ -1,7 +1,10 @@
+import os
 from datetime import datetime
 from urllib.parse import urljoin
 
-DEFAULT_HOST = "https://documentcloud.org/"
+API_HOST = "https://api.www.documentcloud.org"
+ASSET_HOST = "https://assets.documentcloud.org"
+DOCUMENT_HOST = "https://www.documentcloud.org"
 DEFAULT_INSTANCE = "documentcloud"
 
 LANGUAGES = {
