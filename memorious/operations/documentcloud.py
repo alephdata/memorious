@@ -57,7 +57,7 @@ def documentcloud_query(context, data):
                 DOCUMENT_HOST, document.get("id"), document.get("slug")
             ),
             "title": document.get("title"),
-            "author": document.get("organization", {}).get("name"),
+            "publisher": document.get("organization", {}).get("name"),
             "file_name": "{}.pdf".format(document.get("slug")),
             "mime_type": "application/pdf",
         }
