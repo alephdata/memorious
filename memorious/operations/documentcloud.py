@@ -35,7 +35,11 @@ LANGUAGES = {
 def documentcloud_query(context, data):
     host = context.get("host", API_HOST)
     instance = context.get("instance", DEFAULT_INSTANCE)
-    query = context.get("query")
+    query = data.get("query", context.get("query"))
+    if isinstance(query, list):
+        for q in query:
+            data["query"] = q
+            context.recurse(data)
     page = data.get("page", 1)
 
     search_url = urljoin(host, "/api/documents/search")
@@ -57,14 +61,14 @@ def documentcloud_query(context, data):
                 DOCUMENT_HOST, document.get("id"), document.get("slug")
             ),
             "title": document.get("title"),
-            "author": document.get("organization", {}).get("name"),
+            "publisher": document.get("organization", {}).get("name"),
             "file_name": "{}.pdf".format(document.get("slug")),
             "mime_type": "application/pdf",
         }
 
         lang = LANGUAGES.get(document.get("language"))
         if lang is not None:
-            data["languages"] = [lang]
+            doc["languages"] = [lang]
 
         published = document.get("created_at")
         if published is not None:
