@@ -40,6 +40,7 @@ def documentcloud_query(context, data):
         for q in query:
             data["query"] = q
             context.recurse(data)
+        return
     page = data.get("page", 1)
 
     search_url = urljoin(host, "/api/documents/search")
