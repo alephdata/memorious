@@ -72,7 +72,10 @@ def documentcloud_query(context, data):
 
         published = document.get("created_at")
         if published is not None:
-            dt = datetime.strptime(published, "%Y-%m-%dT%H:%M:%S.%fZ")
+            try:
+                dt = datetime.strptime(published, "%Y-%m-%dT%H:%M:%S.%fZ")
+            except ValueError:
+                dt = datetime.strptime(published, "%Y-%m-%dT%H:%M:%SZ")
             doc["published_at"] = dt.isoformat()
 
         context.emit(data=doc)
