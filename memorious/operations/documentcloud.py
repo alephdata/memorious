@@ -1,6 +1,8 @@
 from datetime import datetime
 from urllib.parse import urljoin
 
+from servicelayer.cache import make_key
+
 API_HOST = "https://api.www.documentcloud.org"
 ASSET_HOST = "https://assets.documentcloud.org"
 DOCUMENT_HOST = "https://www.documentcloud.org"
@@ -45,6 +47,7 @@ def documentcloud_query(context, data):
 
     search_url = urljoin(host, "/api/documents/search")
 
+    context.log.info(f"Searching DocumentCloud for query: {query}, page: {page}")
     res = context.http.get(
         search_url,
         params={"q": query, "per_page": 100, "page": page, "expand": "organization"},
@@ -67,6 +70,21 @@ def documentcloud_query(context, data):
             "mime_type": "application/pdf",
         }
 
+        # In incremental crawling mode, skip processing this document if it has been already fully processed before.
+        # The key we check for is set in `mark_processed` after a document is fully processed.
+        # So the supplied arguments to `make_key` must match.
+        if context.incremental:
+            key = make_key(
+                context.crawler.name,
+                doc["foreign_id"],
+                document.get("file_hash"),
+            )
+            if context.check_tag(key):
+                context.log.info(
+                    f"Skipping processing of document: {doc['foreign_id']}"
+                )
+                continue
+
         lang = LANGUAGES.get(document.get("language"))
         if lang is not None:
             doc["languages"] = [lang]
@@ -82,4 +100,21 @@ def documentcloud_query(context, data):
         context.emit(data=doc)
 
     if len(documents):
-        context.recurse(data={"page": page + 1})
+        context.recurse(data={"page": page + 1, "query": query})
+
+
+def documentcloud_mark_processed(context, data):
+    """Create a persistent tag to indicate that a document has been fully processed
+
+    On subsequent runs, we can check and skip processing this document earlier in the
+    pipeline.
+    """
+    key = make_key(
+        context.crawler.name,
+        data["foreign_id"],
+        data["content_hash"],
+    )
+    context.log.info(
+        f"Document with foreign id {data['foreign_id']} has been processed"
+    )
+    context.set_tag(key, "processed")

@@ -65,6 +65,7 @@ setup(
             "enumerate = memorious.operations.initializers:enumerate",
             "inspect = memorious.operations.debug:inspect",
             "documentcloud_query = memorious.operations.documentcloud:documentcloud_query",  # noqa
+            "documentcloud_mark_processed = memorious.operations.documentcloud:documentcloud_mark_processed",  # noqa
             "directory = memorious.operations.store:directory",
             "cleanup_archive = memorious.operations.store:cleanup_archive",
             "extract = memorious.operations.extract:extract",
