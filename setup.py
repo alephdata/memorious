@@ -41,7 +41,7 @@ setup(
         "dataset >= 1.0.8",
         "servicelayer[google,amazon] == 1.18.2",
         "pantomime == 0.4.1",
-        "alephclient >= 2.2.2",
+        "alephclient >= 2.3.0",
         "followthemoney >= 2.3.1",
         "followthemoney-store >= 3.0.1",
         "dateparser",

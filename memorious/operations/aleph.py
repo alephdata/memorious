@@ -160,15 +160,13 @@ def aleph_entity(context, data):
         rate_limit.comply()
 
         try:
-            api.write_entities(
+            api.write_entity(
                 collection_id,
-                [
-                    {
-                        "id": document_id,
-                        "schema": data.get("schema"),
-                        "properties": data.get("properties"),
-                    }
-                ],
+                {
+                    "id": document_id,
+                    "schema": data.get("schema"),
+                    "properties": data.get("properties"),
+                },
             )
 
             context.log.info("Aleph document entity ID: %s", document_id)
