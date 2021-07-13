@@ -38,6 +38,6 @@ pipeline:
       fetch: fetch
   store:
     # Store the crawled documents to a directory
-    method: aleph_entity
+    method: aleph_emit_entity
     params:
       path: /data/results

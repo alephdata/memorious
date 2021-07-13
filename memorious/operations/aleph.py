@@ -49,10 +49,10 @@ def _create_meta_object(context, data) -> dict:
 
 
 def aleph_emit(context, data):
-    aleph_document(context, data)
+    aleph_emit_document(context, data)
 
 
-def aleph_document(context, data):
+def aleph_emit_document(context, data):
     api = get_api(context)
     if api is None:
         return
@@ -136,7 +136,7 @@ def aleph_folder(context, data):
             backoff(ae, try_number)
 
 
-def aleph_entity(context, data):
+def aleph_emit_entity(context, data):
     api = get_api(context)
     if api is None:
         return
