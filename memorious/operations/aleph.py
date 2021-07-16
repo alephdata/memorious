@@ -162,8 +162,8 @@ def aleph_emit_entity(context, data):
         try:
             api.write_entity(
                 collection_id,
+                entity_id,
                 {
-                    "id": entity_id,
                     "schema": data.get("schema"),
                     "properties": data.get("properties"),
                 },
