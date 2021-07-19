@@ -37,7 +37,7 @@ setup(
         "PyYAML == 5.4.1",
         "normality >= 2.1.1, < 3.0.0",
         "tabulate",
-        "python-dateutil == 2.8.1",
+        "python-dateutil == 2.8.2",
         "dataset >= 1.0.8",
         "servicelayer[google,amazon] == 1.18.2",
         "pantomime == 0.4.1",
