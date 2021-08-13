@@ -19,6 +19,18 @@ pipeline:
       rules:
         and:
           - pattern: '.*investigations.*'
+          - domain: occrp.org
+          - not:
+              or:
+                - domain: vis.occrp.org
+                - domain: tech.occrp.org
+                - domain: data.occrp.org
+                - mime_group: assets
+                - mime_group: images
+                - pattern: "https://www.occrp.org/en/component/.*"
+                - pattern: "https://www.occrp.org/en/donate.*"
+                - pattern: "https://www.occrp.org/.*start=.*"
+                - pattern: "https://www.occrp.org/ru/.*"
     handle:
       pass: parse
   parse:
