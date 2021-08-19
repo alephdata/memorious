@@ -1,8 +1,8 @@
 import logging
 import memorious.operations.parse
+import hashlib
 
 from newspaper import Article
-
 from memorious.helpers.rule import Rule
 
 log = logging.getLogger(__name__)
@@ -13,6 +13,7 @@ def parse_article(context: object, data: dict, article: Article) -> None:
         if result.html is not None:
             properties = context.params.get("properties")
             data["schema"] = "Article"
+            data["entity_id"] = hashlib.md5(data["url"].encode("utf-8")).hexdigest()
             data["properties"] = {
                 "title": result.html.xpath(properties["title"])
                 if properties.get("title")

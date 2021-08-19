@@ -141,14 +141,14 @@ def aleph_emit_entity(context, data):
     if api is None:
         return
     collection_id = get_collection_id(context, api)
-    content_hash = data.get("content_hash")
+    entity_id = data.get("entity_id")
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
     # Fetch id from cache
-    entity_id = context.get_tag(make_key(collection_id, foreign_id, content_hash))
-    if entity_id:
+    cached_key = context.get_tag(make_key(collection_id, foreign_id, entity_id))
+    if cached_key:
         context.log.info("Skip aleph upload: %s", foreign_id)
-        data["aleph_id"] = entity_id
+        data["aleph_id"] = cached_key
         context.emit(data=data, optional=True)
         return
     else:
@@ -158,23 +158,20 @@ def aleph_emit_entity(context, data):
         rate = settings.MEMORIOUS_RATE_LIMIT
         rate_limit = get_rate_limit("aleph", limit=rate)
         rate_limit.comply()
-
         try:
             api.write_entity(
                 collection_id,
-                entity_id,
                 {
                     "schema": data.get("schema"),
                     "properties": data.get("properties"),
                 },
+                entity_id,
             )
 
             context.log.info("Aleph document entity ID: %s", entity_id)
             # Save the document id in cache for future use
-            context.set_tag(
-                make_key(collection_id, foreign_id, content_hash), entity_id
-            )
-            data["aleph_id"] = content_hash
+            context.set_tag(make_key(collection_id, foreign_id, entity_id), entity_id)
+            data["aleph_id"] = entity_id
             data["aleph_collection_id"] = collection_id
             context.emit(data=data, optional=True)
             return
