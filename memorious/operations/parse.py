@@ -1,6 +1,5 @@
 import logging
 from banal import ensure_list
-from newspaper import Article
 from urllib.parse import urljoin
 from normality import collapse_spaces
 from servicelayer.cache import make_key

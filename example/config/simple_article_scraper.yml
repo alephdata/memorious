@@ -1,6 +1,6 @@
 # Example scraper to demonstrate Memorious XPath narrowing
-name: occrp_article_scraper
-description: A scrape of all the existing OCCRP investigations
+name: occrp_entity_scraper
+description: A simple scrape of all the existing OCCRP investigations
 # Uncomment to run this scraper automatically:
 # schedule: weekly
 pipeline:

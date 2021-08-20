@@ -1,6 +1,3 @@
-import uuid
-import requests
-
 from pathlib import Path
 from pprint import pprint  # noqa
 from banal import clean_dict  # type: ignore
@@ -146,13 +143,12 @@ def aleph_emit_entity(context, data):
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
     # Fetch id from cache
     cached_key = context.get_tag(make_key(collection_id, foreign_id, entity_id))
+
     if cached_key:
-        context.log.info("Skip aleph upload: %s", foreign_id)
+        context.log.info("Skip entity creation: {}".format(foreign_id))
         data["aleph_id"] = cached_key
         context.emit(data=data, optional=True)
         return
-    else:
-        entity_id = uuid.uuid4().hex
 
     for try_number in range(api.retries):
         rate = settings.MEMORIOUS_RATE_LIMIT
@@ -168,10 +164,13 @@ def aleph_emit_entity(context, data):
                 entity_id,
             )
 
-            context.log.info("Aleph document entity ID: %s", entity_id)
+            aleph_id = res.get("id")
+            context.log.info("Aleph entity ID: %s", aleph_id)
+
             # Save the entity id in cache for future use
             context.set_tag(make_key(collection_id, foreign_id, entity_id), entity_id)
-            data["aleph_id"] = res["id"]
+
+            data["aleph_id"] = aleph_id
             data["aleph_collection_id"] = collection_id
             context.emit(data=data, optional=True)
             return
