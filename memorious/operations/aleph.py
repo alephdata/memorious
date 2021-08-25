@@ -168,7 +168,7 @@ def aleph_emit_entity(context, data):
             context.log.info("Aleph entity ID: %s", aleph_id)
 
             # Save the entity id in cache for future use
-            context.set_tag(make_key(collection_id, foreign_id, entity_id), entity_id)
+            context.set_tag(make_key(collection_id, foreign_id, entity_id), aleph_id)
 
             data["aleph_id"] = aleph_id
             data["aleph_collection_id"] = collection_id
