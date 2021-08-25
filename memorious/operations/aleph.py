@@ -10,7 +10,7 @@ from alephclient.errors import AlephException
 from memorious.core import get_rate_limit  # type: ignore
 
 
-def _create_meta_languages(context, data) -> dict:
+def _create_document_metadata(context, data) -> dict:
     meta = {}
     languages = context.params.get("languages")
     meta["languages"] = data.get("languages", languages)
@@ -66,7 +66,7 @@ def aleph_emit_document(context, data):
         return
 
     meta = clean_dict(_create_meta_object(context, data))
-    meta.update(_create_meta_languages(context, data))
+    meta.update(_create_document_metadata(context, data))
 
     label = meta.get("file_name", meta.get("source_url"))
     context.log.info("Upload: %s", label)
