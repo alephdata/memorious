@@ -82,7 +82,7 @@ def aleph_emit_document(context, data):
             try:
                 res = api.ingest_upload(collection_id, file_path, meta)
                 document_id = res.get("id")
-                context.log.info("Aleph document entity ID: %s", document_id)
+                context.log.info("Aleph document ID: %s", document_id)
                 # Save the document id in cache for future use
                 context.set_tag(
                     make_key(collection_id, foreign_id, content_hash), document_id
