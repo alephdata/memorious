@@ -31,6 +31,7 @@ def _create_meta_object(context, data) -> dict:
         "source_url": source_url,
         "title": data.get("title"),
         "author": data.get("author"),
+        "publisher": data.get("publisher"),
         "file_name": data.get("file_name"),
         "retrieved_at": data.get("retrieved_at"),
         "modified_at": data.get("modified_at"),

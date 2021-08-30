@@ -84,7 +84,7 @@ def run_crawler(
 def run(crawler, threads=None, continue_on_error=False, flush=False, flushall=False):
     """Run a specified crawler in synchronous mode."""
     crawler = get_crawler(crawler)
-    run_crawler(crawler)
+    run_crawler(crawler, threads, continue_on_error, flush, flushall)
 
 
 @cli.command()
@@ -137,7 +137,7 @@ def run_file(
     if src:
         src_path = crawler_config.parent / "src"
         sys.path.insert(0, str(src_path))
-    run_crawler(crawler)
+    run_crawler(crawler, threads, continue_on_error, flush, flushall)
 
 
 @cli.command()
