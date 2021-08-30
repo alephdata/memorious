@@ -21,8 +21,7 @@ services:
     environment:
       REDIS_HOSTS: local:redis:6379
     ports:
-      - "8081:8081"
-
+      - "0.0.0.0:8081:8081"
   shell:
     build: .
     command: sh /crawlers/scripts/worker.sh
@@ -42,3 +41,7 @@ services:
       ARCHIVE_PATH: /data/archive
       REDIS_URL: redis://redis:6379/0
       MEMORIOUS_DATASTORE_URI: postgresql://datastore:datastore@datastore/datastore
+      WORKER_THREADS: 20
+    ports:
+      - "0.0.0.0:5678:5678"
+

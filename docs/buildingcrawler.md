@@ -364,6 +364,7 @@ You can configure rules per stage to tell certain methods which inputs to proces
 * `mime_group`: See [mime.py](https://github.com/alephdata/memorious/blob/master/memorious/logic/mime.py) for handy MIME type groupings (`web`, `images`, `media`, `documents`, `archives` and `assets`).
 * `domain`: URL contains this domain.
 * `pattern`: URL matches this regex.
+* `xpath`: Document contains markup that matches this xpath
 
 ## Extending
 

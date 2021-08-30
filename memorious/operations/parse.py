@@ -91,11 +91,26 @@ def parse_for_metadata(context, data, html):
     return data
 
 
+def parse_ftm(context, data, html):
+    properties = context.params.get("properties")
+    properties_dict = {}
+    for key, value in properties.items():
+        properties_dict[key] = html.xpath(value)
+
+    data["schema"] = context.params.get("schema")
+    data["properties"] = properties_dict
+
+
 def parse(context, data):
     with context.http.rehash(data) as result:
+
         if result.html is not None:
             # Get extra metadata from the DOM
             parse_for_metadata(context, data, result.html)
+
+            if not context.params.get("schema") is None:
+                parse_ftm(context, data, result.html)
+
             parse_html(context, data, result)
 
         rules = context.params.get("store") or {"match_all": {}}
