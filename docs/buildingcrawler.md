@@ -319,9 +319,9 @@ Parameters:
 
 *Note: In case of large crawlers, it's better to use [the context datastore](#the-datastore) directly to store crawled data to make sure the task queue doesn't run out of memory.*
 
-#### Storing in Aleph
+#### Storing documents in Aleph
 
-The [alephclient](https://github.com/alephdata/alephclient) package provides a method named `aleph_emit` to push crawled documents from a Memorious crawler into an
+The [alephclient](https://github.com/alephdata/alephclient) package provides a method named `aleph_emit_document` to push crawled documents from a Memorious crawler into an
 Aleph dataset.
 
 The following data items can be passed into the `aleph_client` method inside the `data` dictionary:
@@ -344,11 +344,47 @@ And optionally:
 * `countries`: countries the document relates to
 * `mime_type`: document mime type
 
-The `data` `alpeh_emit` emits to the next stages includes the following new items:
+The `data` `alpeh_emit_document` emits to the next stages includes the following new items:
 
 * `aleph_id`: document id of the uploaded document in Alpeh
 * `aleph_document`: dictionary containing document metadata
 * `aleph_collection_id`: id of the Aleph dataset the document was uploaded into
+
+#### Storing entities in Aleph
+
+In addtion to storing documents the [alephclient](https://github.com/alephdata/alephclient) package also provides a method called `aleph_emit_entity` which will take content extracted via a memorious crawler directly into a [followthemoney](https://github.com/alephdata/followthemoney) entity within Aleph.
+
+In order to create entities you will need to map data from the document(s) being crawled and parse it into the appropriate properties for the entity that you are creating.
+
+We can map parts of a crawled page to a [followthemoney](https://github.com/alephdata/followthemoney) entity by supplying an appropriate schema and mathching properties as part of the parse section of our scraper:
+
+```yaml
+parse:
+  method: parse
+  params:
+    schema: Article
+    store:
+      and:
+        - mime_group: web
+    properties:
+      title: .//meta[@property="og:title"]/@content
+      author: .//meta[@name="author"]/@content
+      publishedAt: .//*[@class="date"]/text()
+      description: .//meta[@property="og:description"]/@content
+```
+
+The `data` `alpeh_emit_entity` emits to the next stages includes the following new items:
+
+* `aleph_id`: id of the uploaded entity in Alpeh
+* `aleph_collection_id`: id of the Aleph dataset the document was uploaded into
+
+In order to parse this in an ftm entity in Aleph you will also need to supply the appropriate call to the store part of your scraper:
+
+```yaml
+  store:
+    # Store the crawled document as an ftm entity
+    method: aleph_emit_entity
+```
 
 #### Cleaning up stored data
 
