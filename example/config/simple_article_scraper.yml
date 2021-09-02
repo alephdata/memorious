@@ -49,7 +49,5 @@ pipeline:
       store: store
       fetch: fetch
   store:
-    # Store the crawled documents to a directory
+    # Store the crawled document as an ftm entity
     method: aleph_emit_entity
-    params:
-      path: /data/results

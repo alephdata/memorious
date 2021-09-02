@@ -378,6 +378,14 @@ The `data` `alpeh_emit_entity` emits to the next stages includes the following n
 * `aleph_id`: id of the uploaded entity in Alpeh
 * `aleph_collection_id`: id of the Aleph dataset the document was uploaded into
 
+In order to parse this in an ftm entity in Aleph you will also need to supply the appropriate call to the store part of your scraper:
+
+```yaml
+  store:
+    # Store the crawled document as an ftm entity
+    method: aleph_emit_entity
+```
+
 #### Cleaning up stored data
 
 Sometimes we want to delete a stored file after processing it. `cleanup_archive` method can delete a stored blob by its content hash.
