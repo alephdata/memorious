@@ -40,7 +40,7 @@ setup(
         "python-dateutil == 2.8.2",
         "dataset >= 1.0.8",
         "servicelayer[google,amazon] == 1.18.2",
-        "pantomime == 0.4.2",
+        "pantomime == 0.5.1",
         "alephclient >= 2.3.5",
         "followthemoney >= 2.3.1",
         "followthemoney-store >= 3.0.1",
