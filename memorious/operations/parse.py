@@ -1,4 +1,5 @@
 import logging
+import hashlib
 from banal import ensure_list
 from urllib.parse import urljoin
 from normality import collapse_spaces
@@ -91,14 +92,51 @@ def parse_for_metadata(context, data, html):
     return data
 
 
+def get_entity_id_from_keys(keys, html):
+    key_string = ""
+    entity_id = ""
+    if isinstance(keys, list):
+        for item in keys:
+            temp_key = html.xpath(item["key"])
+            if len(temp_key) > 0:
+                key_string += "".join(temp_key)
+
+        if (
+            hashlib.md5(key_string.encode("utf-8")).hexdigest()
+            != hashlib.md5("".encode("utf-8")).hexdigest()
+        ):
+            entity_id = hashlib.md5(key_string.encode("utf-8")).hexdigest()
+            log.info("Entity id generated from keys: {}".format(entity_id))
+            return entity_id
+        else:
+            log.warn(
+                "Keys generated an empty string. There may be something wrong with the xpath"
+            )
+
+        return
+
+
 def parse_ftm(context, data, html):
     properties = context.params.get("properties")
     properties_dict = {}
+
     for key, value in properties.items():
         properties_dict[key] = html.xpath(value)
 
+    data["entity_id"] = hashlib.md5(data["url"].encode("utf-8")).hexdigest()
     data["schema"] = context.params.get("schema")
     data["properties"] = properties_dict
+
+    generated_entity_id = get_entity_id_from_keys(context.params.get("keys"), html)
+
+    if generated_entity_id:
+        data["entity_id"] = generated_entity_id
+    else:
+        log.warn(
+            "Unable to generate entity id from keys. Using hash from url instead: {}".format(
+                data["entity_id"]
+            )
+        )
 
 
 def parse(context, data):
