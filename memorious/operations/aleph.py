@@ -135,6 +135,8 @@ def aleph_folder(context, data):
 
 
 def aleph_emit_entity(context, data):
+    context.log.info("Emit to entity: {}".format(data.get("entity_id")))
+
     api = get_api(context)
     if api is None:
         return
@@ -143,10 +145,16 @@ def aleph_emit_entity(context, data):
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
     # Fetch id from cache
+
+    if entity_id is None:
+        context.log.warn("No entity_id found. Skipping store")
+        context.emit(data=data, optional=True)
+        return
+
     cached_key = context.get_tag(make_key(collection_id, foreign_id, entity_id))
 
     if cached_key:
-        context.log.info("Skip entity creation: {}".format(foreign_id))
+        context.log.info("Entity exists. Skip creation: {}".format(cached_key))
         data["aleph_id"] = cached_key
         context.emit(data=data, optional=True)
         return
@@ -166,7 +174,7 @@ def aleph_emit_entity(context, data):
             )
 
             aleph_id = res.get("id")
-            context.log.info("Aleph entity ID: %s", aleph_id)
+            context.log.info("Entity created. entity_id is: %s", aleph_id)
 
             # Save the entity id in cache for future use
             context.set_tag(make_key(collection_id, foreign_id, entity_id), aleph_id)
