@@ -22,13 +22,3 @@ class Meta(MetaBase, total=False):
     languages: any
     countries: any
     mime_type: any
-
-
-# class FolderMeta(MetaBase, total=False):
-#     parent: dict
-
-
-# class DocumentMeta(Meta, total=False):
-#     languages: list[str]
-#     countries: list[str]
-#     mime_type: str
