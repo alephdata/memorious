@@ -13,9 +13,9 @@ from memorious.core import get_rate_limit  # type: ignore
 def _create_document_metadata(context, data) -> dict:
     meta = {}
     languages = context.params.get("languages")
-    meta["languages"] = data.get("languages", languages)
+    meta["languages"] = ensure_list(data.get("languages", languages))
     countries = context.params.get("countries")
-    meta["countries"] = data.get("countries", countries)
+    meta["countries"] = ensure_list(data.get("countries", countries))
     mime_type = context.params.get("mime_type")
     meta["mime_type"] = data.get("mime_type", mime_type)
     return meta
