@@ -1,5 +1,6 @@
 import logging
-import hashlib
+from typing import Optional
+
 from banal import ensure_list
 from urllib.parse import urljoin
 from normality import collapse_spaces
@@ -8,7 +9,8 @@ from servicelayer.cache import make_key
 from memorious.helpers.key import make_id
 from memorious.helpers.rule import Rule
 from memorious.helpers.dates import iso_date
-
+from memorious.logic.context import Context
+from memorious.logic.data import Data
 
 log = logging.getLogger(__name__)
 URL_TAGS = [
@@ -19,7 +21,7 @@ URL_TAGS = [
 ]
 
 
-def parse_html(context, data, result):
+def parse_html(context: Context, data: Data, result: dict) -> None:
     context.log.info("Parse: %r", result.url)
 
     for title in result.html.xpath(".//title/text()"):
@@ -70,12 +72,12 @@ def parse_html(context, data, result):
                 context.emit(rule="fetch", data=data)
 
 
-def parse_for_metadata(context, data, html):
+def parse_for_metadata(context: Context, data: Data, html) -> dict:
     meta = context.params.get("meta", {})
     meta_date = context.params.get("meta_date", {})
 
     meta_paths = meta
-    meta_paths.update(meta_date)
+    meta_paths.update(data)
 
     for key, xpaths in meta_paths.items():
         for xpath in ensure_list(xpaths):
@@ -90,10 +92,11 @@ def parse_for_metadata(context, data, html):
                 if value is not None:
                     data[key] = value
                 break
+    meta_paths.update(data)
     return data
 
 
-def get_entity_id_from_keys(keys, properties, html) -> str:
+def get_entity_id_from_keys(keys: Optional[list], properties: dict, html) -> str:
     temp_key = ""
 
     if isinstance(keys, list):
@@ -122,7 +125,7 @@ def parse_ftm(context, data, html):
         data["entity_id"] = generated_entity_id
 
 
-def parse(context, data):
+def parse(context: Context, data: Data):
     with context.http.rehash(data) as result:
 
         if result.html is not None:
