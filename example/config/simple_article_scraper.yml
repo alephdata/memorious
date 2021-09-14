@@ -45,6 +45,10 @@ pipeline:
         author: .//meta[@name="author"]/@content
         publishedAt: .//*[@class="date"]/text()
         description: .//meta[@property="og:description"]/@content
+      keys:
+        - title
+        - author
+        - publishedAt
     handle:
       store: store
       fetch: fetch
