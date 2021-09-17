@@ -2,13 +2,14 @@ import os
 import json
 import shutil
 import pytest
-from unittest.mock import ANY
 
+from unittest.mock import ANY
 from memorious.core import tags, storage
 from memorious.operations.fetch import fetch, session
 from memorious.operations.parse import parse
 from memorious.operations.initializers import seed, sequence, dates, enumerate
 from memorious.operations.store import directory, cleanup_archive
+from memorious.logic.context import Context
 
 
 @pytest.mark.parametrize(
@@ -33,6 +34,7 @@ def test_session(context, mocker):
     context.params["user_agent"] = "Godzilla Firehose 0.1"
     context.params["url"] = "https://httpbin.org/get"
     data = {"hello": "world"}
+
     mocker.patch.object(context.http, "save")
     mocker.patch.object(context, "emit")
 
@@ -45,7 +47,7 @@ def test_session(context, mocker):
     assert context.http.session.auth == ("user", "password")
 
 
-def test_parse(context, mocker):
+def test_parse(context: Context, mocker):
     url = "http://example.org/"
     result = context.http.get(url)
     data = result.serialize()
@@ -54,8 +56,8 @@ def test_parse(context, mocker):
 
     rules = {"pattern": "https://httpbin.org/*"}
     context.params["store"] = rules
-    context.params["meta"] = {"title": ".//h1", "description": ".//p"}
     parse(context, data)
+
     assert context.emit.call_count == 1
     context.emit.assert_called_once_with(rule="fetch", data=ANY)
 
@@ -64,17 +66,21 @@ def test_parse(context, mocker):
 
     context.http.result = None
     context.params["store"] = None
+    context.params["meta"] = {"title": ".//h1", "description": ".//p"}
     parse(context, data)
+
     assert data["url"] == "https://www.iana.org/domains/example"
     assert data["title"] == "Example Domain"
     assert data["description"].startswith("This domain is for")
     assert context.emit.call_count == 3, data
 
 
-def test_parse_ftm(context, mocker):
+def test_parse_ftm(context: Context, mocker):
     url = "https://www.occrp.org/en/daily/14082-riviera-maya-gang-members-sentenced-in-romania"
     result = context.http.get(url)
     data = result.serialize()
+
+    context.params["meta"] = {}
     context.params["schema"] = "Article"
     context.params["properties"] = {
         "title": './/meta[@property="og:title"]/@content',
@@ -84,7 +90,6 @@ def test_parse_ftm(context, mocker):
     }
 
     parse(context, data)
-
     props = data["properties"]
 
     assert "Riviera Maya Gang Members Sentenced in Romania" in props["title"]
@@ -92,7 +97,7 @@ def test_parse_ftm(context, mocker):
     assert props["description"][0].startswith("A Bucharest court")
 
 
-def test_seed(context, mocker):
+def test_seed(context: Context, mocker):
     context.params["url"] = None
     context.params["urls"] = ["http://httpbin.org/status/%(status)s"]
     mocker.patch.object(context, "emit")
@@ -101,7 +106,7 @@ def test_seed(context, mocker):
     context.emit.assert_called_once_with(data={"url": "http://httpbin.org/status/404"})
 
 
-def test_sequence(context, mocker):
+def test_sequence(context: Context, mocker):
     mocker.patch.object(context, "emit")
 
     context.params["start"] = 2
@@ -117,7 +122,7 @@ def test_sequence(context, mocker):
     assert context.emit.call_count == 5
 
 
-def test_dates(context, mocker):
+def test_dates(context: Context, mocker):
     mocker.patch.object(context, "emit")
     mocker.patch.object(context, "recurse")
     context.params["format"] = "%d-%m-%Y"
@@ -133,7 +138,7 @@ def test_dates(context, mocker):
     context.recurse.assert_called_once_with(data={"current": "17-12-2012"})
 
 
-def test_enumerate(context, mocker):
+def test_enumerate(context: Context, mocker):
     mocker.patch.object(context, "emit")
     context.params["items"] = [1, 2, 3]
     enumerate(context, data={})
@@ -148,7 +153,7 @@ def test_enumerate(context, mocker):
     # the reference to data dict around and then mutate it.
 
 
-def test_directory(context):
+def test_directory(context: Context):
     file_path = os.path.realpath(__file__)
     store_dir = os.path.normpath(
         os.path.join(file_path, "../testdata/data/store/occrp_web_site")
@@ -174,7 +179,7 @@ def test_directory(context):
         assert b'"user-agent": "Memorious Test"' in fh.read()
 
 
-def test_cleanup_archive(context):
+def test_cleanup_archive(context: Context):
     url = "https://httpbin.org/user-agent"
     result = context.http.get(url, headers={"User-Agent": "Memorious Test"})
     data = result.serialize()
