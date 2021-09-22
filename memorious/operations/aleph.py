@@ -61,7 +61,7 @@ def aleph_emit_document(context, data):
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
     # Fetch document id from cache
     document = context.get_tag(make_key(collection_id, foreign_id, content_hash))
-    if document:
+    if isinstance(document, dict):
         context.log.info("Skip aleph upload: %s", foreign_id)
         data["aleph_id"] = document["id"]
         data["aleph_document"] = document
