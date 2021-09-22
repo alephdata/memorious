@@ -63,7 +63,6 @@ def aleph_emit_document(context, data):
     document = context.get_tag(make_key(collection_id, foreign_id, content_hash))
     if document:
         context.log.info("Skip aleph upload: %s", foreign_id)
-        context.log.info("Skip aleph upload: %s", foreign_id)
         data["aleph_id"] = document["id"]
         data["aleph_document"] = document
         data["aleph_collection_id"] = collection_id
