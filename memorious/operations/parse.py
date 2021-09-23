@@ -10,6 +10,7 @@ from memorious.helpers.dates import iso_date
 
 log = logging.getLogger(__name__)
 URL_TAGS = [
+    (".", "href"),
     (".//a", "href"),
     (".//img", "src"),
     (".//link", "href"),
