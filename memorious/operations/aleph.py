@@ -1,21 +1,22 @@
 from pathlib import Path
 from pprint import pprint  # noqa
-from banal import clean_dict  # type: ignore
 
-from servicelayer.cache import make_key  # type: ignore
 from alephclient import settings
 from alephclient.api import AlephAPI
-from alephclient.util import backoff
 from alephclient.errors import AlephException
+from alephclient.util import backoff
+from banal import clean_dict, ensure_dict, ensure_list  # type: ignore
+from servicelayer.cache import make_key  # type: ignore
+
 from memorious.core import get_rate_limit  # type: ignore
 
 
 def _create_document_metadata(context, data) -> dict:
     meta = {}
     languages = context.params.get("languages")
-    meta["languages"] = data.get("languages", languages)
+    meta["languages"] = ensure_list(data.get("languages", languages))
     countries = context.params.get("countries")
-    meta["countries"] = data.get("countries", countries)
+    meta["countries"] = ensure_list(data.get("countries", countries))
     mime_type = context.params.get("mime_type")
     meta["mime_type"] = data.get("mime_type", mime_type)
     return meta
@@ -36,8 +37,8 @@ def _create_meta_object(context, data) -> dict:
         "retrieved_at": data.get("retrieved_at"),
         "modified_at": data.get("modified_at"),
         "published_at": data.get("published_at"),
-        "headers": data.get("headers", {}),
-        "keywords": data.get("keywords", []),
+        "headers": ensure_dict(data.get("headers")),
+        "keywords": ensure_list(data.get("keywords")),
     }
 
     if data.get("aleph_folder_id"):
@@ -59,10 +60,12 @@ def aleph_emit_document(context, data):
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
     # Fetch document id from cache
-    document_id = context.get_tag(make_key(collection_id, foreign_id, content_hash))
-    if document_id:
+    document = context.get_tag(make_key(collection_id, foreign_id, content_hash))
+    if isinstance(document, dict):
         context.log.info("Skip aleph upload: %s", foreign_id)
-        data["aleph_id"] = document_id
+        data["aleph_id"] = document["id"]
+        data["aleph_document"] = document
+        data["aleph_collection_id"] = collection_id
         context.emit(data=data, optional=True)
         return
 
@@ -85,9 +88,8 @@ def aleph_emit_document(context, data):
                 document_id = res.get("id")
                 context.log.info("Aleph document ID: %s", document_id)
                 # Save the document id in cache for future use
-                context.set_tag(
-                    make_key(collection_id, foreign_id, content_hash), document_id
-                )
+                meta["id"] = document_id
+                context.set_tag(make_key(collection_id, foreign_id, content_hash), meta)
                 data["aleph_id"] = document_id
                 data["aleph_document"] = meta
                 data["aleph_collection_id"] = collection_id
