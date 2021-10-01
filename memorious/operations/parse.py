@@ -92,19 +92,14 @@ def parse_for_metadata(context: Context, data, html) -> dict:
                 if value is not None:
                     data[key] = value
                 break
-    meta_paths.update(data)
+
     return data
 
 
 def get_entity_id_from_keys(keys: Optional[list], properties: dict, html) -> str:
-    temp_key = ""
-
     if isinstance(keys, list):
-        for key in keys:
-            temp_key = "".join(properties[key])
-
-        if not temp_key == "":
-            return make_id(temp_key)
+        if keys is not None and len(keys) > 0:
+            return make_id(*keys)
 
 
 def parse_ftm(context: Context, data, html):
