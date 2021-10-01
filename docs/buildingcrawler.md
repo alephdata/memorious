@@ -377,7 +377,7 @@ parse:
       - publishedAt
 ```
 
-We can also supply a set of values to act as a unique key for this entity. If a key isn't supplied then memorious will default to using the url of the page to generate a key for you. Keys should be selected from the set of properties that you collect.
+We also need to supply a set of values to act as a unique key for this entity. Keys should be selected from the set of properties that you collect and should aim to be unique for the collection of items that you are scraping.
 
 The `data` `alpeh_emit_entity` emits to the next stages includes the following new items:
 
