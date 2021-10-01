@@ -13,18 +13,6 @@ from memorious.logic.context import Context
 from memorious.logic.meta import Meta
 
 
-# def _create_document_metadata(meta_base: Meta, context: Context, data: dict) -> Meta:
-#     languages: list[str] = list(context.params.get("languages", []))
-#     countries: list[str] = list(context.params.get("countries", []))
-#     mime_type: str = context.params.get("mime_type", "")
-
-#     meta_base["languages"] = data.get("languages", languages)
-#     meta_base["countries"] = data.get("countries", countries)
-#     meta_base["mime_type"] = data.get("mime_type", mime_type)
-
-#     return meta_base
-
-
 def _create_meta_object(context: Context, data: dict) -> Meta:
     languages_default: list[str] = list(context.params.get("languages", []))
     countries_default: list[str] = list(context.params.get("countries", []))
