@@ -372,11 +372,12 @@ parse:
       publishedAt: .//*[@class="date"]/text()
       description: .//meta[@property="og:description"]/@content
     keys:
-      - key: .//meta[@property="og:title"]/@content
-      - key: .//meta[@name="author"]/@content
+      - title
+      - author
+      - publishedAt
 ```
 
-We can also supply a set of values to act as a unique key for this entity. If a key isn't supplied then memorious will default to using the url of the page to generate a key for you.
+We can also supply a set of values to act as a unique key for this entity. If a key isn't supplied then memorious will default to using the url of the page to generate a key for you. Keys should be selected from the set of properties that you collect.
 
 The `data` `alpeh_emit_entity` emits to the next stages includes the following new items:
 
