@@ -10,7 +10,7 @@ from alephclient.util import backoff
 from alephclient.errors import AlephException
 from memorious.core import get_rate_limit  # type: ignore
 from memorious.logic.context import Context
-from memorious.logic.meta import Meta
+from meta import Meta
 
 
 def _create_meta_object(context: Context, data: dict) -> Meta:
