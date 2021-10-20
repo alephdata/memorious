@@ -10,7 +10,25 @@ from alephclient.util import backoff
 from alephclient.errors import AlephException
 from memorious.core import get_rate_limit  # type: ignore
 from memorious.logic.context import Context
-from meta import Meta
+
+
+class Meta(MetaBase, total=False):
+    crawler: Optional[str]
+    foreign_id: Optional[str]
+    source_url: Optional[str]
+    title: Optional[str]
+    author: Optional[str]
+    publisher: Optional[str]
+    file_name: Optional[str]
+    retrieved_at: Optional[str]
+    modified_at: Optional[str]
+    published_at: Optional[str]
+    headers: any
+    keywords: any
+    parent: any
+    languages: any
+    countries: any
+    mime_type: any
 
 
 def _create_meta_object(context: Context, data: dict) -> Meta:
