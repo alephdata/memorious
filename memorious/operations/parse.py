@@ -14,6 +14,7 @@ from memorious.logic.context import Context
 
 log = logging.getLogger(__name__)
 URL_TAGS = [
+    (".", "href"),
     (".//a", "href"),
     (".//img", "src"),
     (".//link", "href"),
