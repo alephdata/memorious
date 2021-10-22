@@ -11,6 +11,6 @@ setup(
     namespace_packages=[],
     include_package_data=True,
     zip_safe=False,
-    install_requires=["memorious", "datafreeze"],
+    install_requires=["memorious", "datafreeze", "newspaper3k"],
     entry_points={"memorious.plugins": ["example = example:init"]},
 )
