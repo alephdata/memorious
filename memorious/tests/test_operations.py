@@ -3,6 +3,7 @@ import json
 import shutil
 import pytest
 
+from banal import clean_dict
 from unittest.mock import ANY
 from memorious.core import tags, storage
 from memorious.operations.fetch import fetch, session
@@ -10,6 +11,12 @@ from memorious.operations.parse import parse
 from memorious.operations.initializers import seed, sequence, dates, enumerate
 from memorious.operations.store import directory, cleanup_archive
 from memorious.logic.context import Context
+from memorious.operations.aleph import (
+    _create_meta_object,
+    aleph_emit_document,
+    get_collection_id,
+)
+from alephclient.api import AlephAPI
 
 
 @pytest.mark.parametrize(
@@ -143,14 +150,6 @@ def test_enumerate(context: Context, mocker):
     context.params["items"] = [1, 2, 3]
     enumerate(context, data={})
     assert context.emit.call_count == 3
-    # expected_calls = [
-    #     mocker.call(data={"item": 1}),
-    #     mocker.call(data={"item": 2}),
-    #     mocker.call(data={"item": 3}),
-    # ]
-    # assert context.emit.mock_calls == expected_calls
-    # Ideally this should work, but currently it doesn't; because we pass
-    # the reference to data dict around and then mutate it.
 
 
 def test_directory(context: Context):
@@ -186,3 +185,93 @@ def test_cleanup_archive(context: Context):
     assert storage.load_file(data["content_hash"]) is not None
     cleanup_archive(context, data)
     assert storage.load_file(data["content_hash"]) is None
+
+
+def test_create_meta_object(context: Context, mocker):
+    data = {
+        "title": "test-title",
+        "author": "test-author",
+        "publisher": "test-publisher",
+        "file-name": "test-filename",
+        "retrieved_at": "test-retrieved-at",
+    }
+    meta = clean_dict(_create_meta_object(context, data))
+    assert meta.get("title") is "test-title"
+    assert isinstance(meta.get("languages"), list) is True
+    assert len(meta.get("languages")) is 0
+
+    context.params["languages"] = ["en", "es", "ru"]
+    meta = clean_dict(_create_meta_object(context, data))
+    assert meta.get("languages") == ["en", "es", "ru"]
+
+    data.update({"aleph_folder_id": "test_folder_id"})
+    meta = clean_dict(_create_meta_object(context, data))
+    assert meta.get("parent")["id"] is "test_folder_id"
+
+
+def test_emit_document_existing(context: Context, mocker):
+    mocker.patch.object(AlephAPI, "load_collection_by_foreign_id", mock_AlephApi)
+    mocker.patch.object(context, "get_tag", mock_get_tag)
+    mocker.patch.object(context, "emit")
+    tag_spy = mocker.spy(context, "get_tag")
+    emit_spy = mocker.spy(context, "emit")
+
+    context.stage.aleph_cid = "aleph_cid"
+    aleph_emit_document(context, {})
+
+    assert tag_spy.call_count == 1
+    assert emit_spy.call_count == 1
+
+
+def test_emit_document_new(context: Context, mocker):
+    file_path = os.path.realpath(__file__)
+    store_dir = os.path.normpath(
+        os.path.join(file_path, "../testdata/data/store/occrp_web_site")
+    )
+    shutil.rmtree(store_dir, ignore_errors=True)
+
+    # echo user-agent
+    url = "https://httpbin.org/user-agent"
+    result = context.http.get(url, headers={"User-Agent": "Memorious Test"})
+    data = result.serialize()
+    directory(context, data)
+
+    mocker.patch.object(AlephAPI, "load_collection_by_foreign_id", mock_AlephApi)
+    mocker.patch.object(AlephAPI, "ingest_upload", mock_ingest_upload)
+    mocker.patch.object(context, "emit")
+
+    ingest_spy = mocker.spy(AlephAPI, "ingest_upload")
+    load_spy = mocker.spy(context, "load_file")
+    emit_spy = mocker.spy(context, "emit")
+
+    context.stage.aleph_cid = "aleph_cid"
+    aleph_emit_document(context, data)
+
+    assert load_spy.call_count == 1
+    assert ingest_spy.call_count == 1
+    assert emit_spy.call_count == 1
+
+
+def test_get_collection_id(context: Context, mocker):
+    mocker.patch.object(AlephAPI, "load_collection_by_foreign_id", mock_AlephApi)
+
+    collection_id = get_collection_id(context, AlephAPI)
+    assert collection_id is "aleph_cid"
+
+    context.stage.aleph_cid = "alternate_aleph_cid"
+    collection_id = get_collection_id(context, AlephAPI)
+    assert collection_id is "alternate_aleph_cid"
+
+
+def mock_get_tag(key):
+    return {
+        "id": "12345",
+    }
+
+
+def mock_AlephApi(foreign_id=None, config=None):
+    return {"id": "aleph_cid"}
+
+
+def mock_ingest_upload(collection_id, file_path, meta, sync=False, index=True):
+    return {"id": "document_id"}

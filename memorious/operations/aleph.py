@@ -1,6 +1,6 @@
 from pathlib import Path
 from pprint import pprint
-from typing import Optional  # noqa
+from typing import Optional, TypedDict  # noqa
 from banal import clean_dict  # type: ignore
 
 from alephclient import settings
@@ -14,7 +14,7 @@ from memorious.core import get_rate_limit  # type: ignore
 from memorious.logic.context import Context
 
 
-class Meta(MetaBase, total=False):
+class Meta(TypedDict):
     crawler: Optional[str]
     foreign_id: Optional[str]
     source_url: Optional[str]
@@ -34,13 +34,10 @@ class Meta(MetaBase, total=False):
 
 
 def _create_meta_object(context: Context, data: dict) -> Meta:
-    languages_default: list[str] = list(context.params.get("languages", []))
-    countries_default: list[str] = list(context.params.get("countries", []))
-    mime_type_default: str = context.params.get("mime_type", "")
+    languages = context.params.get("languages")
+    countries = context.params.get("countries")
+    mime_type = context.params.get("mime_type")
 
-    languages = data.get("languages", languages_default)
-    countries = data.get("countries", countries_default)
-    mime_type = data.get("mime_type", mime_type_default)
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
 
@@ -53,6 +50,7 @@ def _create_meta_object(context: Context, data: dict) -> Meta:
         crawler=context.crawler.name,
         foreign_id=foreign_id,
         source_url=source_url,
+        parent=parent,
         title=data.get("title"),
         author=data.get("author"),
         publisher=data.get("publisher"),
@@ -60,12 +58,11 @@ def _create_meta_object(context: Context, data: dict) -> Meta:
         retrieved_at=data.get("retrieved_at"),
         modified_at=data.get("modified_at"),
         published_at=data.get("published_at"),
-        headers=data.get("headers", {}),
-        keywords=data.get("keywords", []),
-        parent=parent,
-        languages=languages,
-        countries=countries,
-        mime_type=mime_type,
+        headers=ensure_dict(data.get("headers")),
+        keywords=ensure_list(data.get("keywords")),
+        languages=ensure_list(data.get("languages", languages)),
+        countries=ensure_list(data.get("countries", countries)),
+        mime_type=ensure_list(data.get("mime_type", mime_type)),
     )
 
     return meta
@@ -84,11 +81,9 @@ def aleph_emit_document(context: Context, data: dict):
     content_hash: Optional[str] = data.get("content_hash")
     source_url: str = data.get("source_url", data.get("url"))
     foreign_id: str = data.get("foreign_id", data.get("request_id", source_url))
-    document_id: Optional[str] = context.get_tag(
-        make_key(collection_id, foreign_id, content_hash)
-    )
+    document = context.get_tag(make_key(collection_id, foreign_id, content_hash))
 
-    if document_id:
+    if isinstance(document, dict):
         context.log.info("Skip aleph upload: %s", foreign_id)
         data["aleph_id"] = document["id"]
         data["aleph_document"] = document
