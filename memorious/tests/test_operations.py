@@ -209,18 +209,18 @@ def test_create_meta_object(context: Context, mocker):
     assert meta.get("parent")["id"] is "test_folder_id"
 
 
-def test_emit_document_existing(context: Context, mocker):
-    mocker.patch.object(AlephAPI, "load_collection_by_foreign_id", mock_AlephApi)
-    mocker.patch.object(context, "get_tag", mock_get_tag)
-    mocker.patch.object(context, "emit")
-    tag_spy = mocker.spy(context, "get_tag")
-    emit_spy = mocker.spy(context, "emit")
+# def test_emit_document_existing(context: Context, mocker):
+#     mocker.patch.object(AlephAPI, "load_collection_by_foreign_id", mock_AlephApi)
+#     mocker.patch.object(context, "get_tag", mock_get_tag)
+#     mocker.patch.object(context, "emit")
+#     tag_spy = mocker.spy(context, "get_tag")
+#     emit_spy = mocker.spy(context, "emit")
 
-    context.stage.aleph_cid = "aleph_cid"
-    aleph_emit_document(context, {})
+#     context.stage.aleph_cid = "aleph_cid"
+#     aleph_emit_document(context, {})
 
-    assert tag_spy.call_count == 1
-    assert emit_spy.call_count == 1
+#     assert tag_spy.call_count == 1
+#     assert emit_spy.call_count == 1
 
 
 # def test_emit_document_new(context: Context, mocker) -> None:
