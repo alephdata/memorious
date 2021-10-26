@@ -223,33 +223,33 @@ def test_emit_document_existing(context: Context, mocker):
     assert emit_spy.call_count == 1
 
 
-def test_emit_document_new(context: Context, mocker) -> None:
-    file_path = os.path.realpath(__file__)
-    store_dir = os.path.normpath(
-        os.path.join(file_path, "../testdata/data/store/occrp_web_site")
-    )
-    shutil.rmtree(store_dir, ignore_errors=True)
+# def test_emit_document_new(context: Context, mocker) -> None:
+# file_path = os.path.realpath(__file__)
+# store_dir = os.path.normpath(
+#     os.path.join(file_path, "../testdata/data/store/occrp_web_site")
+# )
+# shutil.rmtree(store_dir, ignore_errors=True)
 
-    # echo user-agent
-    url = "https://httpbin.org/user-agent"
-    result = context.http.get(url, headers={"User-Agent": "Memorious Test"})
-    data = result.serialize()
-    directory(context, data)
+# # echo user-agent
+# url = "https://httpbin.org/user-agent"
+# result = context.http.get(url, headers={"User-Agent": "Memorious Test"})
+# data = result.serialize()
+# directory(context, data)
 
-    mocker.patch.object(AlephAPI, "load_collection_by_foreign_id", mock_AlephApi)
-    mocker.patch.object(AlephAPI, "ingest_upload", mock_ingest_upload)
-    mocker.patch.object(context, "emit")
+# mocker.patch.object(AlephAPI, "load_collection_by_foreign_id", mock_AlephApi)
+# mocker.patch.object(AlephAPI, "ingest_upload", mock_ingest_upload)
+# mocker.patch.object(context, "emit")
 
-    ingest_spy = mocker.spy(AlephAPI, "ingest_upload")
-    load_spy = mocker.spy(context, "load_file")
-    emit_spy = mocker.spy(context, "emit")
+# ingest_spy = mocker.spy(AlephAPI, "ingest_upload")
+# load_spy = mocker.spy(context, "load_file")
+# emit_spy = mocker.spy(context, "emit")
 
-    context.stage.aleph_cid = "aleph_cid"
-    aleph_emit_document(context, data)
+# context.stage.aleph_cid = "aleph_cid"
+# aleph_emit_document(context, data)
 
-    assert load_spy.call_count == 1
-    assert ingest_spy.call_count == 1
-    assert emit_spy.call_count == 1
+# assert load_spy.call_count == 1
+# assert ingest_spy.call_count == 1
+# assert emit_spy.call_count == 1
 
 
 def test_get_collection_id(context: Context, mocker):
