@@ -223,7 +223,7 @@ def test_emit_document_existing(context: Context, mocker):
     assert emit_spy.call_count == 1
 
 
-def test_emit_document_new(context: Context, mocker):
+def test_emit_document_new(context: Context, mocker) -> None:
     file_path = os.path.realpath(__file__)
     store_dir = os.path.normpath(
         os.path.join(file_path, "../testdata/data/store/occrp_web_site")
