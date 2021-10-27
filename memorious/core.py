@@ -1,4 +1,5 @@
 import logging
+import os
 import dataset
 from servicelayer.archive import init_archive
 from servicelayer.rate_limit import RateLimit
@@ -69,6 +70,10 @@ def init_memorious():
         configure_logging(level=logging.DEBUG)
     else:
         configure_logging(level=logging.INFO)
+    try:
+        os.makedirs(settings.BASE_PATH)
+    except Exception:
+        pass
     for func in get_extensions("memorious.plugins"):
         func()
 
