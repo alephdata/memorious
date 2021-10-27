@@ -141,15 +141,20 @@ def aleph_emit_entity(context, data):
     if api is None:
         return
     collection_id = get_collection_id(context, api)
-    entity_id = data.get("entity_id")
+    entity_id = data.get("entity_id", data.get("id"))
+    if not entity_id:
+        context.emit_warning("Error: Can not create entity. `id` is not definied")
+        return
     source_url = data.get("source_url", data.get("url"))
     foreign_id = data.get("foreign_id", data.get("request_id", source_url))
-    # Fetch id from cache
-    cached_key = context.get_tag(make_key(collection_id, foreign_id, entity_id))
+    # Fetch entity from cache
+    cached_entity = context.get_tag(make_key(collection_id, foreign_id, entity_id))
 
-    if cached_key:
+    if cached_entity and isinstance(cached_entity, dict):
         context.log.info("Skip entity creation: {}".format(foreign_id))
-        data["aleph_id"] = cached_key
+        data["aleph_id"] = cached_entity["id"]
+        data["aleph_collection_id"] = collection_id
+        data["aleph_entity"] = cached_entity
         context.emit(data=data, optional=True)
         return
 
@@ -167,14 +172,19 @@ def aleph_emit_entity(context, data):
                 entity_id,
             )
 
-            aleph_id = res.get("id")
-            context.log.info("Aleph entity ID: %s", aleph_id)
+            entity = {
+                "id": res.get("id"),
+                "schema": res.get("schema"),
+                "properties": res.get("properties"),
+            }
+            context.log.info("Aleph entity ID: %s", entity["id"])
 
-            # Save the entity id in cache for future use
-            context.set_tag(make_key(collection_id, foreign_id, entity_id), aleph_id)
+            # Save the entity in cache for future use
+            context.set_tag(make_key(collection_id, foreign_id, entity_id), entity)
 
-            data["aleph_id"] = aleph_id
+            data["aleph_id"] = entity["id"]
             data["aleph_collection_id"] = collection_id
+            data["aleph_entity"] = entity
             context.emit(data=data, optional=True)
             return
         except AlephException as exc:
