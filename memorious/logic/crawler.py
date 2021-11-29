@@ -36,16 +36,21 @@ class Crawler(object):
             self.config = yaml.safe_load(self.config_yaml)
 
         self.name = os.path.basename(source_file)
-        self.name = self.config.get("name", self.name)
+        # YAML keys with undefined values will be parsed as `None`.
+        # eg: with the yaml definition `name: `, `config.get("name", "default_value")`
+        # will evaluate to `None` instead of `default_value`.
+        # So in order to avoid setting `self.name` to `None`, we use `or` to
+        # set the default instead of passing it to `config.get()`
+        self.name = self.config.get("name") or self.name
         self.validate_name()
-        self.description = self.config.get("description", self.name)
-        self.category = self.config.get("category", "scrape")
-        self.init_stage = self.config.get("init", "init")
-        self.delay = int(self.config.get("delay", 0))
-        self.expire = int(self.config.get("expire", settings.EXPIRE)) * 84600
-        self.stealthy = self.config.get("stealthy", False)
+        self.description = self.config.get("description") or self.name
+        self.category = self.config.get("category") or "scrape"
+        self.init_stage = self.config.get("init") or "init"
+        self.delay = int(self.config.get("delay") or 0)
+        self.expire = int(self.config.get("expire") or settings.EXPIRE) * 84600
+        self.stealthy = self.config.get("stealthy") or False
         self.queue = Dataset(conn, self.name)
-        self.aggregator_config = self.config.get("aggregator", {})
+        self.aggregator_config = self.config.get("aggregator") or {}
 
         self.stages = {}
         for name, stage in self.config.get("pipeline", {}).items():
