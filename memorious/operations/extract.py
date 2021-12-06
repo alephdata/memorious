@@ -87,9 +87,9 @@ def extract(context, data):
         else:
             context.log.warning("Unsupported archive content type: %s", content_type)
             return
-        wildcards = ensure_list(context.params.get("wildcards", ["*"]))
+        wildcards = ensure_list(context.params.get("wildcards")) or None
         for path in extracted_files:
-            if _test_fname(wildcards, path):
+            if wildcards is None or _test_fname(wildcards, path):
                 relative_path = os.path.relpath(path, extract_dir)
                 content_hash = context.store_file(path)
                 data["content_hash"] = content_hash
