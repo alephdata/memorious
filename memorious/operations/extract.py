@@ -1,7 +1,10 @@
-import zipfile
 import os
-import tarfile
 import subprocess
+import tarfile
+import zipfile
+
+from banal import ensure_list
+from fnmatch import fnmatch
 
 from memorious.util import random_filename
 
@@ -64,7 +67,13 @@ def extract_7zip(file_path, extract_dir, context):
 
 
 def extract(context, data):
-    """Extract a compressed file"""
+    """
+    Extract a compressed file
+
+    optional params in context:
+
+        wildcards: only store extracted files matching these shell-style wildcards
+    """
     with context.http.rehash(data) as result:
         file_path = result.file_path
         content_type = result.content_type
@@ -78,11 +87,17 @@ def extract(context, data):
         else:
             context.log.warning("Unsupported archive content type: %s", content_type)
             return
-        extracted_content_hashes = {}
+        wildcards = ensure_list(context.params.get("wildcards")) or None
         for path in extracted_files:
-            relative_path = os.path.relpath(path, extract_dir)
-            content_hash = context.store_file(path)
-            extracted_content_hashes[relative_path] = content_hash
-            data["content_hash"] = content_hash
-            data["file_name"] = relative_path
-            context.emit(data=data.copy())
+            if wildcards is None or _test_fname(wildcards, path):
+                relative_path = os.path.relpath(path, extract_dir)
+                content_hash = context.store_file(path)
+                data["content_hash"] = content_hash
+                data["file_name"] = relative_path
+                context.emit(data=data.copy())
+
+
+def _test_fname(wildcards, path):
+    for pattern in wildcards:
+        if fnmatch(path, pattern):
+            return True
