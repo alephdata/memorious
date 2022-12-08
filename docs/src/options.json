@@ -1,0 +1,26 @@
+{
+  "title": "Memorious",
+  "git": {
+    "branch": "main",
+    "githubRepoUrl": "https://github.com/alephdata/memorious"
+  },
+  "nav": {
+    "header": {
+      "items": []
+    },
+    "sidebar": {
+      "sections": [
+        {
+          "title": "Memorious",
+          "items": [
+            { "slug": "/" },
+            { "slug": "/installation" },
+            { "slug": "/cli" },
+            { "slug": "/reference" },
+            { "slug": "/development" }
+          ]
+        }
+      ]
+    }
+  }
+}
