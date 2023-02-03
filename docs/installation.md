@@ -78,5 +78,13 @@ When you're working on your crawlers, it's not convenient to rebuild your Docker
 * Run `pip install memorious`. If your crawlers use Python extensions, you'll need to run `pip install` in your crawlers directory as well
 * Run `memorious list` to list your crawlers and `memorious run your-crawler` to run a crawler.
 
+For multi-threaded mode:
+
+* Add `export MEMORIOUS_DATASTORE_URI=postgresql://user:pass@localhost/database` and `export REDIS_URL=redis://localhost:6379` in env.sh
+* Create database in PostgreSQL and create table: `CREATE TABLE memorious_tags ( key CHARACTER VARYING, value JSONB, timestamp TIMESTAMP)`
+* Run `memorious run book_scraper --threads 10`
+
+You can also run `cd memorious;python3 cli.py run bookscraper --threads 10` 
+
 *Note: In development mode Memorious uses a single threaded worker (because FakeRedis is single threaded). So task execution concurrency is limited and the worker executes stages in a crawler's pipeline linearly one after another.*
 

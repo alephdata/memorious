@@ -47,6 +47,7 @@ setup(
         "stringcase",
         "flask",
         "babel",
+        "sqlalchemy == 1.4.46",
     ],
     entry_points={
         "console_scripts": ["memorious = memorious.cli:main"],
