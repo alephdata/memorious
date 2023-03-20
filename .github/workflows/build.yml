@@ -53,12 +53,12 @@ jobs:
           GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         if: env.GITHUB_PASSWORD != null
         run: |
-          docker login -u $GITHUB_ACTOR -p ${{ secrets.GITHUB_TOKEN }}
+          docker login ghcr.io -u $GITHUB_ACTOR -p ${{ secrets.GITHUB_TOKEN }}
           docker push alephdata/memorious:${GITHUB_SHA}
       - name: Push docker image for tags
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         run: |
-          docker login -u $GITHUB_ACTOR -p ${{ secrets.GITHUB_TOKEN }}
+          docker login ghcr.io -u $GITHUB_ACTOR -p ${{ secrets.GITHUB_TOKEN }}
           docker tag alephdata/memorious:${GITHUB_SHA} alephdata/memorious:${GITHUB_REF/refs\/tags\//}
           docker push alephdata/memorious:${GITHUB_REF/refs\/tags\//}
           docker tag alephdata/memorious:${GITHUB_SHA} alephdata/memorious:latest
