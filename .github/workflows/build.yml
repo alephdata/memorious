@@ -47,7 +47,7 @@ jobs:
           echo "$GITHUB_REF"
       - name: Build docker image
         run: |
-          docker build -t alephdata/memorious:${GITHUB_SHA} .
+          docker build -t ghcr.io/alephdata/memorious:${GITHUB_SHA} .
       - name: Push docker image for hash
         env:
           GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
