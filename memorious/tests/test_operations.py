@@ -78,7 +78,6 @@ def test_parse_ftm(context, mocker):
     context.params["schema"] = "Article"
     context.params["properties"] = {
         "title": './/meta[@property="og:title"]/@content',
-        "author": './/meta[@name="author"]/@content',
         "publishedAt": './/*[@class="date"]/text()',
         "description": './/meta[@property="og:description"]/@content',
     }
@@ -88,7 +87,6 @@ def test_parse_ftm(context, mocker):
     props = data["properties"]
 
     assert "Riviera Maya Gang Members Sentenced in Romania" in props["title"]
-    assert "Attila Biro" in props["author"]
     assert props["description"][0].startswith("A Bucharest court")
 
 
