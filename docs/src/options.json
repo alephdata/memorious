@@ -1,0 +1,31 @@
+{
+  "title": "Memorious",
+  "git": {
+    "branch": "main",
+    "githubRepoUrl": "https://github.com/alephdata/memorious"
+  },
+  "search": {
+    "appId": "M3CPDKJ1IQ",
+    "apiKey": "26e3a75aeeb2c5df8093eb004b568b1f",
+    "indexName": "memorious"
+  },
+  "nav": {
+    "header": {
+      "items": []
+    },
+    "sidebar": {
+      "sections": [
+        {
+          "title": "Memorious",
+          "items": [
+            { "slug": "/" },
+            { "slug": "/installation" },
+            { "slug": "/cli" },
+            { "slug": "/reference" },
+            { "slug": "/development" }
+          ]
+        }
+      ]
+    }
+  }
+}

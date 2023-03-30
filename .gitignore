@@ -22,3 +22,5 @@ memorious/tests/testdata/data/*
 .pytest_cache/*
 .idea/
 balkhashdb
+
+!docs/**/*
