@@ -39,7 +39,7 @@ Documentation
 -------------
 
 The documentation for Memorious is available at
-`memorious.readthedocs.io <https://memorious.readthedocs.io/>`_.
+`alephdata.github.io/memorious <https://alephdata.github.io/memorious/>`_.
 Feel free to edit the source files in the ``docs`` folder and send pull requests for improvements.
 
 To build the documentation, inside the ``docs`` folder run ``make html``
