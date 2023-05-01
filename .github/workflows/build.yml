@@ -2,6 +2,9 @@ name: memorious
 
 on: [push, pull_request]
 
+permissions:
+  packages: write
+
 jobs:
   python:
     runs-on: ubuntu-latest
