@@ -253,6 +253,9 @@ class ContextHttpResponse(object):
         if last_modified_header is not None:
             # Tue, 15 Nov 1994 12:45:26 GMT
             last_modified = parse_date(last_modified_header)
+            if last_modified is None:
+                return None
+
             if last_modified < now + timedelta(seconds=30):
                 return last_modified.strftime("%Y-%m-%dT%H:%M:%S%z")
         return None
