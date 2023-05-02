@@ -25,6 +25,9 @@ test:
 	memorious list
 	pytest --cov=memorious --cov-report term-missing
 
+services:
+	$(COMPOSE) up -d httpbin proxy
+
 shell:
 	$(COMPOSE) run shell
 
