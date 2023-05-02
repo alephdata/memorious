@@ -25,7 +25,11 @@ jobs:
           python -m pip install -U pip setuptools pyicu twine wheel
           pip install pytest pytest-env pytest-cov pytest-mock
           pip install -e .
+      - name: Bring up services for test
+        run: make services
       - name: Run the tests
+        env:
+          HTTPBIN: https://localhost:443
         run: |
           pytest --cov=memorious --cov-report term-missing
       - name: Test run memorious
