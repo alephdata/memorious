@@ -43,7 +43,7 @@ setup(
         "tabulate",
         "python-dateutil >= 2.8.2, < 3.0.0",
         "dataset >= 1.0.8",
-        "servicelayer[google,amazon] == 1.20.7",
+        "servicelayer[google,amazon] == 1.21.0",
         "pantomime == 0.5.1",
         "alephclient >= 2.3.5",
         "followthemoney >= 2.3.1",
