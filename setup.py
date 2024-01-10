@@ -46,7 +46,7 @@ setup(
         "servicelayer[google,amazon] >= 1.21.2",
         "pantomime == 0.5.1",
         "alephclient >= 2.3.5",
-        "followthemoney >= 3.5.2",
+        "followthemoney >= 3.5.8",
         "followthemoney-store >= 3.0.6",
         "dateparser",
         "stringcase",
