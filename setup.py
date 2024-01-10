@@ -6,7 +6,7 @@ long_description = (this_directory / "README.rst").read_text()
 
 setup(
     name="memorious",
-    version="2.6.4",
+    version="2.6.5",
     description="A minimalistic, recursive web crawling library for Python.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
