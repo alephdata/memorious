@@ -2,6 +2,12 @@
 Memorious
 =========
 
+.. warning:: Notice: The project is no longer maintained.
+
+We recommend using memorious4 (`https://github.com/dataresearchcenter/memorious <https://github.com/dataresearchcenter/memorious/>`_) fork that DARC (`https://github.com/dataresearchcenter <https://github.com/dataresearchcenter/>`_) has been actively maintaining further on.
+
+* * *
+
     The solitary and lucid spectator of a multiform, instantaneous and almost intolerably precise world.
 
     -- `Funes the Memorious <http://users.clas.ufl.edu/burt/spaceshotsairheads/borges-funes.pdf>`_,
