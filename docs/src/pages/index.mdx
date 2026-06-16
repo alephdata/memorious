@@ -15,7 +15,7 @@ layout: '@layouts/DocsLayout.astro'
 ## Design
 
 
-When writing a scraper, you often need to paginate through through an index page, then download an HTML page for each result and finally parse that page and insert or update a record in a database.
+When writing a scraper, you often need to paginate through an index page, then download an HTML page for each result and finally parse that page and insert or update a record in a database.
 
 Memorious handles this by managing a set of ``crawlers``, each of which  can be composed of multiple ``stages``. Each ``stage`` is implemented using a Python function, which can be re-used across different ``crawlers``.
 
